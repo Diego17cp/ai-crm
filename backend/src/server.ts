@@ -1,15 +1,9 @@
-import http from 'http';
-import { app } from '@/app';
-import { /*DatabaseConnection,*/ env } from '@/config';
-
-const server = http.createServer(app);
-
+import { setupShutdown, startDatabase, startHttpServer } from './bootstrap';
 const start = async () => {
     try {
-        // await DatabaseConnection.getInstance().connect();
-        server.listen(env.PORT, () => {
-            console.log(`Server running on port http://localhost:${env.PORT} in ${env.NODE_ENV} mode.`);
-        })
+        await startDatabase();
+        const server = startHttpServer();
+        setupShutdown(server);
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
