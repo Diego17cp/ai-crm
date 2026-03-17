@@ -1,11 +1,10 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-// import cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { env } from '@/config'
-// import { DatabaseConnection } from '@/config';
-// import router from './routes';
-// import { errorHandler, staticMiddleware } from './middlewares';
+import { errorHandler } from './middlewares';
+import router from './routes';
 
 
 export const app: Application = express();
@@ -18,17 +17,16 @@ app.use(cors({
 }))
 app.use(helmet());
 app.use(express.json());
-// app.use(cookieParser());
+app.use(cookieParser());
 
 app.get('/', (_, res) => {
     res.json({
         message: "API",
         status: "running",
-        // database: DatabaseConnection.getInstance().getStatus(),
         timestamp: new Date().toISOString()
     });
 })
 
-// app.use("/api", router);
+app.use("/api", router);
 // app.use(staticMiddleware);
-// app.use(errorHandler);
+app.use(errorHandler);
