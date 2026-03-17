@@ -1,0 +1,1 @@
+export { authRoutes } from "./infrastructure/routes/authRoutes";
