@@ -1,0 +1,381 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoGeneral {
+  ACTIVO
+  INACTIVO
+}
+
+enum EstadoLote {
+  Disponible
+  Reservado
+  Vendido
+}
+
+enum SexoPersona {
+  M
+  F
+}
+
+enum EstadoCivil {
+  SOLTERO
+  CASADO
+  CONVIVIENTE
+  DIVORCIADO
+}
+
+enum TipoTelefono {
+  PERSONAL
+  TRABAJO
+  WHATSAPP
+}
+
+enum CanalContacto {
+  WHATSAPP
+  WEB
+}
+
+enum TipoRemitente {
+  BOT
+  HUMANO
+}
+
+enum EstadoCita {
+  PROGRAMADA
+  ATENDIDA
+  CANCELADA
+}
+
+enum TipoPago {
+  CONTADO
+  CREDITO
+}
+
+enum EstadoVenta {
+  FINALIZADA
+  PENDIENTE
+  ANULADO
+}
+
+enum SolvenciaEconomica {
+  DESCARTADO
+  MOROSO
+  PAGA_ATRASADO @map("PAGA ATRASADO")
+  BUEN_PAGADOR
+  EXCELENTE
+}
+
+enum ActitudCliente {
+  QUEJOSO
+  ENOJADO
+  DESCONFIADO
+  AMABLE
+}
+
+enum EstadoCuota {
+  PENDIENTE
+  PAGADO
+}
+
+enum EstadoContrato {
+  ADENDA
+  POR_RESOLVER       @map("POR RESOLVER")
+  ESCRITURA_PUBLICA  @map("ESCRITURA PUBLICA")
+  CESION_CONTRACTUAL @map("CESION CONTRACTUAL")
+  FIRMADO
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TRANSFERENCIA
+  DEPOSITO
+}
+
+enum TipoPersona {
+  LEAD
+  CLIENTE
+}
+
+enum EstadoChat {
+  BOT
+  ESPERANDO_ASESOR @map("ESPERANDO_ASESOR")
+  ATENDIDO_HUMANO  @map("ATENDIDO_HUMANO")
+  FINALIZADO
+}
+
+model Ubigeos {
+  id        String      @id @db.Char(6)
+  nombre    String      @db.VarChar(100)
+  proyectos Proyectos[]
+  clientes  Clientes[]
+
+  @@map("ubigeos")
+}
+
+model Roles {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(50)
+  descripcion String?       @db.Text
+  estado      EstadoGeneral @default(ACTIVO)
+  created_at  DateTime      @default(now())
+  usuarios    Usuarios[]
+
+  @@map("roles")
+}
+
+model Usuarios {
+  id                  String           @id @default(uuid()) @db.Uuid
+  id_rol              Int
+  rol                 Roles            @relation(fields: [id_rol], references: [id])
+  dni                 String           @db.Char(8)
+  nombres             String           @db.VarChar(100)
+  apellidos           String           @db.VarChar(100)
+  email               String           @unique @db.VarChar(100)
+  password_hash       String           @db.VarChar(150)
+  telefono            String?          @db.VarChar(20)
+  ultimo_login        DateTime?
+  estado              EstadoGeneral    @default(ACTIVO)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  conversaciones_asig Conversaciones[] @relation("AsignacionAsesor")
+  mensajes            Mensajes[]
+  citas_responsable   Citas[]
+
+  @@index([id_rol])
+  @@map("usuarios")
+}
+
+model Proyectos {
+  id          Int            @id @default(autoincrement())
+  id_ubigeo   String         @db.Char(6)
+  ubigeo      Ubigeos        @relation(fields: [id_ubigeo], references: [id])
+  nombre      String         @db.VarChar(100)
+  abreviatura String?        @db.VarChar(20)
+  ubicacion   String?        @db.Text
+  descripcion String?        @db.Text
+  estado      EstadoGeneral?
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  etapas      Etapas[]
+  citas       Citas[]
+
+  @@index([id_ubigeo])
+  @@map("proyectos")
+}
+
+model Etapas {
+  id          Int            @id @default(autoincrement())
+  id_proyecto Int
+  proyecto    Proyectos      @relation(fields: [id_proyecto], references: [id])
+  nombre      String         @db.VarChar(50)
+  estado      EstadoGeneral?
+  created_at  DateTime       @default(now())
+  manzanas    Manzanas[]
+
+  @@index([id_proyecto])
+  @@map("etapas")
+}
+
+model Manzanas {
+  id         Int            @id @default(autoincrement())
+  id_etapa   Int
+  etapa      Etapas         @relation(fields: [id_etapa], references: [id])
+  codigo     String         @db.VarChar(10)
+  estado     EstadoGeneral?
+  created_at DateTime       @default(now())
+  lotes      Lotes[]
+
+  @@index([id_etapa])
+  @@map("manzanas")
+}
+
+model Lotes {
+  id             Int             @id @default(autoincrement())
+  id_manzana     Int
+  manzana        Manzanas        @relation(fields: [id_manzana], references: [id])
+  numero_lote    String          @db.VarChar(10)
+  numero_partida String?         @db.VarChar(20)
+  area_m2        Decimal         @db.Decimal(10, 2)
+  precio_m2      Decimal         @db.Decimal(10, 2)
+  // Nota: precio_total es calculado en BD. Prisma lo lee pero no lo inserta directamente si es STORED.
+  precio_total   Decimal         @default(dbgenerated()) @db.Decimal(12, 2)
+  estado         EstadoLote?
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  imagenes       LotesImagenes[]
+  citas          Citas[]
+  ventas         Ventas[]
+
+  @@index([id_manzana])
+  @@map("lotes")
+}
+
+model LotesImagenes {
+  id           Int     @id @default(autoincrement())
+  id_lote      Int
+  lote         Lotes   @relation(fields: [id_lote], references: [id], onDelete: Cascade)
+  url_imagen   String  @db.VarChar(255)
+  descripcion  String? @db.VarChar(100)
+  es_principal Boolean @default(false)
+
+  @@index([id_lote])
+  @@map("lotes_imagenes")
+}
+
+model TipoDocIdentidad {
+  id       Int            @id @default(autoincrement())
+  codigo   String         @db.VarChar(2)
+  nombre   String         @db.VarChar(100)
+  estado   EstadoGeneral?
+  clientes Clientes[]
+
+  @@map("tipo_doc_identidad")
+}
+
+model Clientes {
+  id                    Int                 @id @default(autoincrement())
+  id_tipo_doc_identidad Int
+  tipo_doc              TipoDocIdentidad    @relation(fields: [id_tipo_doc_identidad], references: [id])
+  id_ubigeo             String?             @db.Char(6)
+  ubigeo                Ubigeos?            @relation(fields: [id_ubigeo], references: [id])
+  tipo_persona          TipoPersona?
+  numero                String              @db.VarChar(12)
+  nombres               String?             @db.VarChar(50)
+  apellidos             String?             @db.VarChar(50)
+  fecha_nacimiento      DateTime?           @db.Date
+  sexo                  SexoPersona?
+  estado_civil          EstadoCivil?
+  es_peruano            Boolean             @default(true)
+  nacionalidad          String?             @db.VarChar(30)
+  direccion             String?             @db.VarChar(250)
+  email                 String?             @db.VarChar(100)
+  ocupacion             String?             @db.VarChar(150)
+  solvencia             SolvenciaEconomica?
+  actitud               ActitudCliente?
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @updatedAt
+  telefonos             TelefonosCliente[]
+  conversaciones        Conversaciones[]
+  citas                 Citas[]
+  ventas                Ventas[]
+
+  @@index([id_tipo_doc_identidad])
+  @@index([id_ubigeo])
+  @@map("clientes")
+}
+
+model TelefonosCliente {
+  id         Int           @id @default(autoincrement())
+  id_cliente Int
+  cliente    Clientes      @relation(fields: [id_cliente], references: [id])
+  numero     String?       @unique @db.VarChar(20)
+  tipo       TipoTelefono?
+
+  @@index([id_cliente])
+  @@map("telefonos_cliente")
+}
+
+model Conversaciones {
+  id                  String         @id @default(uuid()) @db.Uuid
+  id_cliente          Int
+  cliente             Clientes       @relation(fields: [id_cliente], references: [id])
+  canal               CanalContacto?
+  estado              EstadoChat     @default(BOT)
+  id_usuario_asignado String?        @db.Uuid
+  asesor              Usuarios?      @relation("AsignacionAsesor", fields: [id_usuario_asignado], references: [id])
+  fecha_asignacion    DateTime?
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+  mensajes            Mensajes[]
+
+  @@index([id_cliente])
+  @@map("conversaciones")
+}
+
+model Mensajes {
+  id              Int            @id @default(autoincrement())
+  id_usuario      String?        @db.Uuid
+  usuario         Usuarios?      @relation(fields: [id_usuario], references: [id])
+  id_conversacion String         @db.Uuid
+  conversacion    Conversaciones @relation(fields: [id_conversacion], references: [id])
+  remitente       TipoRemitente?
+  contenido       String?        @db.Text
+  created_at      DateTime       @default(now())
+
+  @@index([id_usuario])
+  @@map("mensajes")
+}
+
+model Citas {
+  id                     Int         @id @default(autoincrement())
+  id_cliente             Int
+  cliente                Clientes    @relation(fields: [id_cliente], references: [id])
+  id_proyecto            Int
+  proyecto               Proyectos   @relation(fields: [id_proyecto], references: [id])
+  id_lote                Int?
+  lote                   Lotes?      @relation(fields: [id_lote], references: [id])
+  id_usuario_responsable String      @db.Uuid
+  asesor                 Usuarios    @relation(fields: [id_usuario_responsable], references: [id])
+  fecha_cita             DateTime    @db.Date
+  hora_cita              DateTime?   @db.Time
+  observaciones_visita   String?     @db.Text
+  puntuacion_cliente     Int?
+  estado_cita            EstadoCita?
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @updatedAt
+
+  @@index([id_cliente])
+  @@index([id_proyecto])
+  @@index([id_lote])
+  @@map("citas")
+}
+
+model Ventas {
+  id              Int             @id @default(autoincrement())
+  id_lote         Int
+  lote            Lotes           @relation(fields: [id_lote], references: [id])
+  id_cliente      Int
+  cliente         Clientes        @relation(fields: [id_cliente], references: [id])
+  fecha_venta     DateTime?       @default(now()) @db.Date
+  monto_total     Decimal         @db.Decimal(12, 2)
+  cuota_inicial   Decimal?        @default(0) @db.Decimal(12, 2)
+  tipo_pago       TipoPago?
+  num_cuotas      Int?
+  monto_cuota     Decimal?        @db.Decimal(12, 2)
+  tasa_interes    Decimal?        @db.Decimal(5, 2)
+  dia_pago        Int?
+  meses_gracia    Int?            @default(0)
+  estado          EstadoVenta?
+  estado_contrato EstadoContrato?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  cuotas          Cuotas[]
+
+  @@index([id_lote])
+  @@index([id_cliente])
+  @@map("ventas")
+}
+
+model Cuotas {
+  id                Int          @id @default(autoincrement())
+  id_venta          Int
+  venta             Ventas       @relation(fields: [id_venta], references: [id])
+  numero_cuota      Int
+  monto_cuota       Decimal      @db.Decimal(12, 2)
+  fecha_vencimiento DateTime     @db.Date
+  fecha_pago        DateTime?
+  estado            EstadoCuota? @default(PENDIENTE)
+  metodo_pago       MetodoPago?
+  comprobante_url   String?      @db.VarChar(150)
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+
+  @@index([id_venta])
+  @@map("cuotas")
+}
