@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@plugin 'tailwind-scrollbar';
+@plugin '@tailwindcss/typography';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.main-scrollbar {
+    @apply scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-family: "Onest Variable", sans-serif;
+}
