@@ -8,4 +8,6 @@ export const env = {
     DATABASE_URL: process.env.DATABASE_URL || "",
     JWT_SECRET: process.env.JWT_SECRET || "default_jwt_secret",
     JWT_SECRET_REFRESH: process.env.JWT_SECRET_REFRESH || "default_jwt_refresh_secret",
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
 }
