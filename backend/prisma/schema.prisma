@@ -283,8 +283,9 @@ model TelefonosCliente {
 
 model Conversaciones {
   id                  String         @id @default(uuid()) @db.Uuid
-  id_cliente          Int
-  cliente             Clientes       @relation(fields: [id_cliente], references: [id])
+  id_cliente          Int?
+  cliente             Clientes?      @relation(fields: [id_cliente], references: [id])
+  session_id          String?        @unique @db.VarChar(100)
   canal               CanalContacto?
   estado              EstadoChat     @default(BOT)
   id_usuario_asignado String?        @db.Uuid
