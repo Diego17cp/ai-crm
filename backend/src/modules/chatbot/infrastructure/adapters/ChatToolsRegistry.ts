@@ -52,7 +52,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 							meses: {
 								type: "number",
 								description:
-									"Plazo en meses requeridos (usualmente 12 a 60)",
+									"Plazo en meses requeridos (usualmente 12, 18, 24, 36 o 48) (48 meses máximo)",
 							},
 						},
 						required: ["precio_total", "meses"],
@@ -146,13 +146,16 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		precio_total: number;
 		meses: number;
 	}) {
-		const cuotaInicialPorcentaje = 0.20;
+		const cuotaInicialPorcentaje = 0.10;
 		const inicial = args.precio_total * cuotaInicialPorcentaje;
 		const saldo = args.precio_total - inicial;
 
-		const tasa = 0.015;
+		const tasa = 0; // no se aplica interes por ahora
 
-		const cuotaMensual = (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
+		const cuotaMensual = tasa === 0 
+            ? saldo / args.meses 
+            : (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
+
 
 		return {
 			precio_total: args.precio_total,
