@@ -1,0 +1,1 @@
+export { createChatbotRouter as chatbotRoutes } from './infrastructure/routes/chatbotRoutes';
