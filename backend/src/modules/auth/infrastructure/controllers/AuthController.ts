@@ -100,6 +100,6 @@ export class AuthController {
 
 	me = async (req: AuthRequest, res: Response) => {
 		if (!req.user) throw new AppError("Unauthorized", 401);
-		return res.status(200).json({ success: true, data: { user: req.user } });
+		return res.status(200).json({ success: true, data: req.user });
 	}
 }
