@@ -5,8 +5,13 @@ export interface AuthTokenPair {
 
 export interface AccessTokenPayload {
   id: string; 
-  email: string; 
-  id_rol: number;
+  email: string;
+  nombres: string;
+  apellidos: string;
+  telefono: string | null;
+  rol: string;
+  estado: string;
+  isActive: boolean;
 }
 
 export interface ITokenService {

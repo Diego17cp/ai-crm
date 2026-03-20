@@ -11,7 +11,12 @@ export class JwtTokenService implements ITokenService {
 	generateTokens(payload: {
 		id: string;
 		email: string;
-		id_rol: number;
+		nombres: string;
+		apellidos: string;
+		telefono: string | null;
+		rol: string;
+		estado: string;
+		isActive: boolean;
 	}): AuthTokenPair {
 		const accessToken = jwt.sign(payload, env.JWT_SECRET, {
 			expiresIn: "15m",

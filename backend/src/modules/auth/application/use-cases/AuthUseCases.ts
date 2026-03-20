@@ -23,7 +23,8 @@ export class AuthUseCases {
 		const user = await this.authUserRepo.findByEmail(dto.email);
 		if (!user) throw new InvalidCredentialsError();
 
-		if (!user.isActive) throw new UnauthorizedUserError("El usuario está inactivo");
+		if (!user.isActive)
+			throw new UnauthorizedUserError("El usuario está inactivo");
 
 		const isValid = await this.passwordHasher.verify(
 			user.passwordHash,
@@ -34,7 +35,12 @@ export class AuthUseCases {
 		const payload = {
 			id: user.id,
 			email: user.email,
-			id_rol: user.props.id_rol,
+			nombres: user.nombres,
+			apellidos: user.apellidos,
+			telefono: user.telefono,
+			rol: user.rolNombre,
+			estado: user.estado,
+			isActive: user.isActive,
 		};
 		const tokens = this.tokenService.generateTokens(payload);
 
@@ -42,9 +48,7 @@ export class AuthUseCases {
 		return { user: userResponse, tokens };
 	}
 
-	async refresh(
-		refreshToken: string,
-	): Promise<{
+	async refresh(refreshToken: string): Promise<{
 		user: Omit<AuthUser["props"], "password_hash">;
 		tokens: AuthTokenPair;
 	}> {
@@ -57,7 +61,12 @@ export class AuthUseCases {
 		const payload = {
 			id: user.id,
 			email: user.email,
-			id_rol: user.props.id_rol,
+			nombres: user.nombres,
+			apellidos: user.apellidos,
+			telefono: user.telefono,
+			rol: user.rolNombre,
+			estado: user.estado,
+			isActive: user.isActive,
 		};
 		const tokens = this.tokenService.generateTokens(payload);
 
