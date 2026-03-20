@@ -5,6 +5,7 @@ import { PrismaAuthUserRepository } from "../adapters/PrismaAuthUserRepository";
 import { JwtTokenService } from "../adapters/JwtTokenService";
 import { Argon2PasswordHasher } from "../adapters/Argon2PasswordHasher";
 import { prisma } from "@/infrastructure/database/prismaClient";
+import { authGuard } from "@/app/middlewares/authGuard";
 
 export function authRoutes(): Router {
 	const router = Router();
@@ -23,7 +24,7 @@ export function authRoutes(): Router {
 	router.post("/login", authController.login);
 	router.post("/refresh", authController.refresh);
 	router.post("/logout", authController.logout);
-	router.get("/me", authController.me);
+	router.get("/me", authGuard, authController.me);
 
 	return router;
 }
