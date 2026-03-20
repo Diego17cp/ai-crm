@@ -21,7 +21,10 @@ export const useAuth = () => {
         toast.error(errorMessage);
     }
     const login = async (credentials: { email: string; password: string }): Promise<User> => {
-        const res = await apiClient.post("/auth/login", credentials);
+        const res = await apiClient.post("/auth/login", {
+            email: credentials.email,
+            password_plain: credentials.password,
+        });
         if (!res.data.success || !res.data.data?.user) showError("Login failed", res);
         return res.data.data.user;
     }
@@ -34,10 +37,9 @@ export const useAuth = () => {
         mutationFn: login,
         onSuccess: (user) => {
             useAuthStore.getState().setUser(user);
-            localStorage.removeItem("isAnonymous");
             queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-            navigate("/", { replace: true });
-            toast.success("Welcome back!");
+            navigate("/admin/dashboard", { replace: true });
+            toast.success("Bienvenido de nuevo!");
         },
         onError: (error: ApiError) => showApiError(error, "Login failed")
     });
@@ -47,12 +49,12 @@ export const useAuth = () => {
             useAuthStore.getState().clearAuth();
             queryClient.clear();
             navigate("/auth/login", { replace: true });
-            toast.success("Logged out successfully");
+            toast.success("Cerraste sesión exitosamente");
         },
         onError: () => {
             useAuthStore.getState().clearAuth();
             queryClient.clear();
-            toast.error("Logout failed, but local session cleared");
+            toast.error("Cerraste sesión localmente, pero hubo un error al comunicarse con el servidor");
         },
     });
 
