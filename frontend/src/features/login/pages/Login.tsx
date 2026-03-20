@@ -19,7 +19,7 @@ export const Login = () => {
     } = useLogin();
 
     const { isAuthenticated } = useAuthStore();
-    if (isAuthenticated) return <Navigate to="/" replace />
+    if (isAuthenticated) return <Navigate to="/admin/dashboard" replace />
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 relative overflow-hidden">

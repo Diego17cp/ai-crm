@@ -19,6 +19,7 @@ const processQueue = (error: Error | null) => {
 };
 
 const handleLogout = () => {
+    if (!window.location.pathname.startsWith("/admin")) return;
     if (hasRedirected) return;
     
     hasRedirected = true;
