@@ -22,7 +22,7 @@ export const Login = () => {
     if (isAuthenticated) return <Navigate to="/" replace />
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 font-sans relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 relative overflow-hidden">
             <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-teal-600/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -136,7 +136,7 @@ export const Login = () => {
                             whileTap={{ scale: isLoading ? 1 : 0.98 }}
                             type="submit"
                             disabled={isLoading}
-                            className="w-full mt-6 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-teal-600/25 flex justify-center items-center transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full mt-6 bg-teal-600 cursor-pointer hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-teal-600/25 flex justify-center items-center transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <>
