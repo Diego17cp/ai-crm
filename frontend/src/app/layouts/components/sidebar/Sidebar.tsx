@@ -7,7 +7,13 @@ import { SidebarItem, SidebarSubmenu } from "./components";
 import { isSuperAdmin } from "@/core/utils/users";
 import { useAuthStore } from "@/features/auth";
 
-export const Sidebar = () => {
+interface Props {
+    onLogoutClick: () => void;
+}
+
+export const Sidebar = ({
+    onLogoutClick
+}: Props) => {
     const { user } = useAuthStore();
     const { isOpen, toggleSidebar, closeSidebar } = useSidebar();
 
@@ -82,13 +88,17 @@ export const Sidebar = () => {
                             <div className="flex-1 min-w-0 flex items-center justify-between">
                                 <div className="flex flex-col truncate">
                                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                        {user?.nombres || "Administrador"}
+                                        {user?.nombres}
                                     </span>
                                     <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                        {user?.email || "admin@aicrm.com"}
+                                        {user?.email}
                                     </span>
                                 </div>
-                                <button className="p-2 text-gray-400 hover:text-red-500 transition-colors" title="Cerrar sesión">
+                                <button 
+                                    className="p-2 text-gray-400 hover:text-red-500 transition-colors" 
+                                    title="Cerrar sesión"
+                                    onClick={onLogoutClick}
+                                >
                                     <FiLogOut className="text-lg" />
                                 </button>
                             </div>
