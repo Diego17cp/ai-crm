@@ -17,7 +17,7 @@ export const Chat = () => {
 	} = useChatbot();
 
 	return (
-		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950 font-sans">
+		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950">
 			<header className="shrink-0 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 bg-opacity-80 backdrop-blur-md p-4 sticky top-0 z-10">
 				<div className="max-w-4xl mx-auto flex items-center justify-between">
 					<div>
