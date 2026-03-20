@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthUseCases } from "../../application/use-cases/AuthUseCases";
 import { env } from "@/config/env";
+import { AuthRequest } from "@/app/middlewares/authGuard";
+import { AppError } from "@/core/errors/AppError";
 
 export class AuthController {
 	private readonly isProd = env.NODE_ENV === "production";
@@ -95,4 +97,9 @@ export class AuthController {
 		});
 		res.status(200).json({ success: true, message: "Sesión cerrada" });
 	};
+
+	me = async (req: AuthRequest, res: Response) => {
+		if (!req.user) throw new AppError("Unauthorized", 401);
+		return res.status(200).json({ success: true, data: { user: req.user } });
+	}
 }
