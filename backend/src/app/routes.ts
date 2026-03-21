@@ -3,6 +3,7 @@ import { userRoutes } from "@/modules/users";
 import { authRoutes } from "@/modules/auth";
 import { chatbotRoutes } from "@/modules/chatbot";
 import { dashboardRoutes } from "@/modules/dashboard";
+import { proyectosRoutes } from "@/modules/projects";
 
 const router: Router = Router();
 
@@ -10,6 +11,7 @@ router.use("/users", userRoutes());
 router.use("/auth", authRoutes());
 router.use("/chatbot", chatbotRoutes());
 router.use("/dashboard", dashboardRoutes());
+router.use("/projects", proyectosRoutes());
 
 router.use("/", (_, res) => {
     res.json({

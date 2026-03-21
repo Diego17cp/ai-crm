@@ -1,0 +1,1 @@
+export { proyectosRoutes } from "./infrastructure/routes/proyectosRoutes";

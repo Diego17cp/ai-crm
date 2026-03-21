@@ -1,0 +1,36 @@
+import { Proyectos, Etapas, Manzanas } from "generated/prisma/client";
+import {
+	CreateProyectoDTO,
+	UpdateProyectoDTO,
+	CreateEtapaDTO,
+	UpdateEtapaDTO,
+	CreateManzanaDTO,
+	UpdateManzanaDTO,
+	GetProyectosQueryDTO,
+	PaginatedResult,
+} from "../../domain/dtos";
+
+export type ProyectoWithDetails = Proyectos & {
+	etapas: (Etapas & { manzanas: Manzanas[] })[];
+} & {
+    ubigeo: {
+        nombre: string;
+    };
+};
+
+export interface IProyectosRepository {
+	findPaginated(query: GetProyectosQueryDTO): Promise<PaginatedResult<ProyectoWithDetails>>;
+
+	findById(id: number): Promise<ProyectoWithDetails | null>;
+	create(data: CreateProyectoDTO): Promise<Proyectos>;
+	update(id: number, data: UpdateProyectoDTO): Promise<Proyectos>;
+	softDelete(id: number): Promise<Proyectos>;
+
+	createEtapa(data: CreateEtapaDTO): Promise<Etapas>;
+	updateEtapa(id: number, data: UpdateEtapaDTO): Promise<Etapas>;
+	softDeleteEtapa(id: number): Promise<Etapas>;
+
+	createManzana(data: CreateManzanaDTO): Promise<Manzanas>;
+	updateManzana(id: number, data: UpdateManzanaDTO): Promise<Manzanas>;
+	softDeleteManzana(id: number): Promise<Manzanas>;
+}
