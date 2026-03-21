@@ -1,0 +1,1 @@
+export { ubigeosRoutes } from "./infrastructure/routes/ubigeosRoutes";
