@@ -8,6 +8,7 @@ import {
 	UpdateManzanaDTO,
 	GetProyectosQueryDTO,
 	PaginatedResult,
+	CreateManzanasBatchDTO,
 } from "../../domain/dtos";
 
 export type ProyectoWithDetails = Proyectos & {
@@ -31,6 +32,7 @@ export interface IProyectosRepository {
 	softDeleteEtapa(id: number): Promise<Etapas>;
 
 	createManzana(data: CreateManzanaDTO): Promise<Manzanas>;
+	createManzanasBatch(data: CreateManzanasBatchDTO): Promise<number>;
 	updateManzana(id: number, data: UpdateManzanaDTO): Promise<Manzanas>;
 	softDeleteManzana(id: number): Promise<Manzanas>;
 }

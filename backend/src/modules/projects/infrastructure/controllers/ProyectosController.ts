@@ -94,6 +94,17 @@ export class ProyectosController {
         }
     };
 
+    createManzanasBatch = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id_etapa = Number(req.params.id_etapa);
+            const { codigos } = req.body;
+            const count = await this.proyectosUseCases.createManzanasBatch({ id_etapa, codigos });
+            res.status(201).json({ success: true, count, message: `${count} manzanas creadas` });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     updateManzana = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = Number(req.params.id);

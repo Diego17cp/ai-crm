@@ -26,6 +26,10 @@ export interface CreateManzanaDTO {
 	id_etapa: number;
 	codigo: string;
 }
+export interface CreateManzanasBatchDTO {
+	id_etapa: number;
+	codigos: string[];
+}
 
 export interface UpdateManzanaDTO {
 	codigo?: string;

@@ -22,6 +22,7 @@ export function proyectosRoutes(): Router {
     router.delete("/etapas/:id", authGuard, controller.deleteEtapa);
 
     router.post("/etapas/:id_etapa/manzanas", authGuard, controller.createManzana);
+    router.post("/etapas/:id_etapa/manzanas/batch", authGuard, controller.createManzanasBatch);
     router.put("/manzanas/:id", authGuard, controller.updateManzana);
     router.delete("/manzanas/:id", authGuard, controller.deleteManzana);
 
