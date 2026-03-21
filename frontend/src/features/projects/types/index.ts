@@ -41,4 +41,5 @@ export interface Proyecto {
     created_at: string;
     updated_at: string;
     etapas: Etapa[];
+    ubigeo: { nombre: string };
 }
