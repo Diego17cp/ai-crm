@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
-import { ChatbotPage, DashboardPage, LoginPage } from "./routes";
+import { AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
@@ -13,7 +13,7 @@ function App() {
         <AuthProvider>
           <SidebarProvider>
             <Routes>
-              <Route path="/" element={<div>Home Page</div>} />
+              <Route index element={<Navigate replace to="chat" />} />
               <Route path="/chat" element={<ChatbotPage />} />
               <Route path="auth/login" element={<LoginPage />} />
               <Route path="admin" element={<AuthLayout />}>
@@ -25,6 +25,11 @@ function App() {
                   path="dashboard"
                   element={<DashboardPage />}
                 />
+                <Route path="inventory">
+                  <Route index element={<Navigate replace to="projects" />} />
+                  <Route path="projects" element={<AllProjectsPage />} />
+                  <Route path="lots" element={<div>Lots</div>} />
+                </Route>
               </Route>
             </Routes>
           </SidebarProvider>
