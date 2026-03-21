@@ -7,6 +7,17 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { FiPlus, FiBox, FiSearch, FiX, FiRefreshCw } from "react-icons/fi";
 import { motion } from "motion/react";
 import type { ApiError } from "@/core/types";
+import { useProjectModals } from "../hooks/useProjectModal";
+import { ProjectDetailsModal } from "../components/ProjectDetailsModal";
+import { CreateEtapaModal } from "../components/CreateEtapaModal";
+import { EditEtapaModal } from "../components/EditEtapaModal";
+import { ToggleEtapaStatusModal } from "../components/ToggleEtapaStatusModal";
+import { CreateManzanaModal } from "../components/CreateManzanasModal";
+import { EditManzanaModal } from "../components/EditManzanaModal";
+import { ToggleManzanaStatusModal } from "../components/ToggleManzanaStatusModal";
+import { CreateProjectModal } from "../components/CreateProjectModal";
+import { ToggleProjectStatusModal } from "../components/ToggleProjectStatusModal";
+import { EditProjectModal } from "../components/EditProjectModal";
 
 export const AllProjects = () => {
     const {
@@ -23,6 +34,15 @@ export const AllProjects = () => {
         clearSearch,
         isFetching
     } = useProjects();
+
+    const {
+        activeModal,
+        selectedProject,
+        selectedEtapa,
+        selectedManzana,
+        openModal,
+        closeModal
+    } = useProjectModals();
 
     const noResultsForSearch = searchTerm && projects.length === 0;
 
@@ -42,7 +62,8 @@ export const AllProjects = () => {
                 </motion.div>
                 <motion.button
                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-teal-500/30 transition-all focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    className="flex items-center cursor-pointer gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-teal-500/30 transition-all focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    onClick={() => openModal("create_project")}
                 >
                     <FiPlus size={18} />
                     <span>Nuevo Proyecto</span>
@@ -108,7 +129,14 @@ export const AllProjects = () => {
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
                         >
                             {projects.map((project) => (
-                                <ProjectCard key={project.id} project={project} />
+                                <ProjectCard 
+                                    key={project.id} 
+                                    project={project} 
+                                    onViewDetails={() => openModal("details", project)}
+                                    onAddEtapa={() => openModal("create_etapa", project)}
+                                    onEdit={() => openModal("edit_project", project)}
+                                    onToggle={() => openModal("toggle_project_status", project)}
+                                />
                             ))}
                         </motion.div>
                         
@@ -129,6 +157,68 @@ export const AllProjects = () => {
                     </>
                 )}
             </div>
+            <ProjectDetailsModal
+                isOpen={activeModal === "details"}
+                onClose={closeModal}
+                project={selectedProject}
+                onAddEtapa={(p) => openModal("create_etapa", p)}
+                onEditEtapa={(p, e) => openModal("edit_etapa", p, e)}
+                onToggleEtapaStatus={(p, e) => openModal("toggle_etapa_status", p, e)}
+                onCreateManzana={(p, e) => openModal("create_manzana", p, e)}
+                onEditManzana={(p, e, m) => openModal("edit_manzana", p, e, m)}
+                onToggleManzanaStatus={(p, e, m) => openModal("toggle_manzana_status", p, e, m)}
+            />
+            <CreateEtapaModal
+                isOpen={activeModal === "create_etapa"}
+                onClose={closeModal}
+                project={selectedProject}
+            />
+            <EditEtapaModal
+                isOpen={activeModal === "edit_etapa"}
+                onClose={closeModal}
+                project={selectedProject}
+                etapa={selectedEtapa}
+            />
+            <ToggleEtapaStatusModal
+                isOpen={activeModal === "toggle_etapa_status"}
+                onClose={closeModal}
+                project={selectedProject}
+                etapa={selectedEtapa}
+            />
+            <CreateManzanaModal
+                isOpen={activeModal === "create_manzana"}
+                onClose={closeModal}
+                project={selectedProject}
+                etapa={selectedEtapa}
+            />
+            <EditManzanaModal
+                isOpen={activeModal === "edit_manzana"}
+                onClose={closeModal}
+                project={selectedProject}
+                etapa={selectedEtapa}
+                manzana={selectedManzana}
+            />
+            <ToggleManzanaStatusModal
+                isOpen={activeModal === "toggle_manzana_status"}
+                onClose={closeModal}
+                project={selectedProject}
+                etapa={selectedEtapa}
+                manzana={selectedManzana}
+            />
+            <CreateProjectModal
+                isOpen={activeModal === "create_project"}
+                onClose={closeModal}
+            />
+            <EditProjectModal
+                isOpen={activeModal === "edit_project"}
+                onClose={closeModal}
+                project={selectedProject}
+            />
+            <ToggleProjectStatusModal
+                isOpen={activeModal === "toggle_project_status"}
+                onClose={closeModal}
+                project={selectedProject}
+            />
         </div>
     );
 };
