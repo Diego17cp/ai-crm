@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
-import { AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
+import { AllLotsPage, AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
@@ -28,7 +28,7 @@ function App() {
                 <Route path="inventory">
                   <Route index element={<Navigate replace to="projects" />} />
                   <Route path="projects" element={<AllProjectsPage />} />
-                  <Route path="lots" element={<div>Lots</div>} />
+                  <Route path="lots" element={<AllLotsPage />} />
                 </Route>
               </Route>
             </Routes>
