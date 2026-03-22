@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
-import { AllLotsPage, AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
+import { AllLeadsPage, AllLotsPage, AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
@@ -29,6 +29,10 @@ function App() {
                   <Route index element={<Navigate replace to="projects" />} />
                   <Route path="projects" element={<AllProjectsPage />} />
                   <Route path="lots" element={<AllLotsPage />} />
+                </Route>
+                <Route path="clients">
+                  <Route index element={<Navigate replace to="leads" />} />
+                  <Route path="leads" element={<AllLeadsPage />} />
                 </Route>
               </Route>
             </Routes>
