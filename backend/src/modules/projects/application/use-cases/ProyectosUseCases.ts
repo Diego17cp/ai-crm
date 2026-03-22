@@ -17,7 +17,9 @@ export class ProyectosUseCases {
 	async getAllProyectos(query: GetProyectosQueryDTO) {
 		return this.repo.findPaginated(query);
 	}
-
+	async getAllProyectosSimple() {
+		return this.repo.findAll();
+	}
 	async createProyecto(data: CreateProyectoDTO) {
 		if (!data.id_ubigeo || data.id_ubigeo.trim() === "") throw new AppError("El ubigeo es requerido", 400);
 		if (!data.nombre || data.nombre.trim() === "") throw new AppError("El nombre del proyecto es requerido", 400);
@@ -94,6 +96,23 @@ export class ProyectosUseCases {
 			throw new AppError("ID de etapa inválido", 400);
 		return this.repo.softDeleteEtapa(id);
 	}
+	async findAllEtapas() {
+		return this.repo.findAllEtapas();
+	}
+	async findEtapasByProyectoId(id_proyecto: number) {
+		if (isNaN(id_proyecto) || id_proyecto <= 0)
+			throw new AppError("ID de proyecto inválido", 400);
+		return this.repo.findEtapasByProyectoId(id_proyecto);
+	}
+	async findAllManzanas() {
+		return this.repo.findAllManzanas();
+	}
+	async findManzanasByEtapaId(id_etapa: number) {
+		if (isNaN(id_etapa) || id_etapa <= 0)
+			throw new AppError("ID de etapa inválido", 400);
+		return this.repo.findManzanasByEtapaId(id_etapa);
+	}
+
 
 	async createManzana(data: CreateManzanaDTO) {
 		if (isNaN(data.id_etapa) || data.id_etapa <= 0) throw new AppError("ID de etapa inválido", 400);

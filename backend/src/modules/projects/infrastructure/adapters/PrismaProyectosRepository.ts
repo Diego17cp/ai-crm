@@ -1,4 +1,4 @@
-import { PrismaClient, EstadoGeneral, Prisma, Manzanas } from "generated/prisma/client";
+import { PrismaClient, EstadoGeneral, Prisma, Manzanas, Proyectos, Etapas } from "generated/prisma/client";
 import { IProyectosRepository, ProyectoWithDetails } from "../../application/ports/IProyectosRepository";
 import { CreateManzanaDTO, CreateManzanasBatchDTO, GetProyectosQueryDTO, PaginatedResult } from "../../domain/dtos";
 
@@ -79,6 +79,12 @@ export class PrismaProyectosRepository implements IProyectosRepository {
             }
         };
     }
+    async findAll(): Promise<Proyectos[]> {
+        return this.prisma.proyectos.findMany({
+            where: { estado: EstadoGeneral.ACTIVO },
+            orderBy: { created_at: 'desc' }
+        });
+    }
 
     async findById(id: number): Promise<ProyectoWithDetails | null> {
         return this.prisma.proyectos.findUnique({
@@ -132,6 +138,18 @@ export class PrismaProyectosRepository implements IProyectosRepository {
             data: { estado: EstadoGeneral.INACTIVO }
         });
     }
+    async findAllEtapas(): Promise<Etapas[]> {
+        return this.prisma.etapas.findMany({
+            where: { estado: EstadoGeneral.ACTIVO },
+            orderBy: { created_at: 'desc' }
+        });
+    }
+    async findEtapasByProyectoId(id_proyecto: number): Promise<Etapas[]> {
+        return this.prisma.etapas.findMany({
+            where: { id_proyecto, estado: EstadoGeneral.ACTIVO },
+            orderBy: { created_at: 'desc' }
+        });
+    }
 
     async createManzana(data: CreateManzanaDTO): Promise<Manzanas> {
         return this.prisma.manzanas.create({
@@ -159,6 +177,18 @@ export class PrismaProyectosRepository implements IProyectosRepository {
         return this.prisma.manzanas.update({
             where: { id },
             data: { estado: EstadoGeneral.INACTIVO }
+        });
+    }
+    async findAllManzanas(): Promise<Manzanas[]> {
+        return this.prisma.manzanas.findMany({
+            where: { estado: EstadoGeneral.ACTIVO },
+            orderBy: { created_at: 'desc' }
+        });
+    }
+    async findManzanasByEtapaId(id_etapa: number): Promise<Manzanas[]> {
+        return this.prisma.manzanas.findMany({
+            where: { id_etapa, estado: EstadoGeneral.ACTIVO },
+            orderBy: { created_at: 'desc' }
         });
     }
 }

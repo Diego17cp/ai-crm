@@ -13,14 +13,19 @@ export function proyectosRoutes(): Router {
     const controller = new ProyectosController(proyectosUseCases);
 
     router.get("/", authGuard, controller.getAll);
+    router.get("/all", authGuard, controller.getAllSimple);
     router.post("/", authGuard, controller.create);
     router.put("/:id", authGuard, controller.update);
     router.delete("/:id", authGuard, controller.delete);
 
+    router.get("/etapas", authGuard, controller.getAllEtapas);
+    router.get("/etapas/:id_proyecto", authGuard, controller.getEtapasByProyectoId);
     router.post("/:id_proyecto/etapas", authGuard, controller.createEtapa);
     router.put("/etapas/:id", authGuard, controller.updateEtapa);
     router.delete("/etapas/:id", authGuard, controller.deleteEtapa);
 
+    router.get("/manzanas", authGuard, controller.getAllManzanas);
+    router.get("/etapas/:id_etapa/manzanas", authGuard, controller.getManzanasByEtapaId);
     router.post("/etapas/:id_etapa/manzanas", authGuard, controller.createManzana);
     router.post("/etapas/:id_etapa/manzanas/batch", authGuard, controller.createManzanasBatch);
     router.put("/manzanas/:id", authGuard, controller.updateManzana);
