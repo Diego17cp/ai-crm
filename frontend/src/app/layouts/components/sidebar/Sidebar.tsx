@@ -52,7 +52,7 @@ export const Sidebar = ({
                         {isOpen ? <FiChevronLeft className="text-xl" /> : <FiMenu className="text-xl" />}
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar py-4 px-3 flex flex-col gap-1.5">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden main-scrollbar py-4 px-3 flex flex-col gap-1.5">
                     {SIDEBAR_ITEMS.map((item) => {
                         const showItem = !item.restricted || isSuperAdmin(user?.rol || "");
                         if (!showItem) return null;
