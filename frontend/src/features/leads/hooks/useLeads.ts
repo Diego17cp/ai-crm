@@ -77,6 +77,7 @@ export const useLeads = () => {
             filtersPayload.actitud
         ],
         queryFn: () => leadsService.findAll(filtersPayload),
+        placeholderData: (previousData) => previousData
     });
     const useCreateLeadMutation = (data: CreateLeadPayload) => useMutation({
         mutationFn: () => leadsService.create(data),
