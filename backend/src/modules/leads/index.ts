@@ -1,0 +1,1 @@
+export { leadsRoutes } from "./infrastructure/routes/leadsRoutes";
