@@ -7,6 +7,7 @@ import { proyectosRoutes } from "@/modules/projects";
 import { ubigeosRoutes } from "@/modules/ubigeos";
 import { lotesRoutes } from "@/modules/lot";
 import { leadsRoutes } from "@/modules/leads";
+import { appointmentsRoutes } from "@/modules/appointments";
 
 const router: Router = Router();
 
@@ -18,6 +19,7 @@ router.use("/projects", proyectosRoutes());
 router.use("/ubigeos", ubigeosRoutes());
 router.use("/lotes", lotesRoutes());
 router.use("/leads", leadsRoutes());
+router.use("/citas", appointmentsRoutes());
 
 router.use("/", (_, res) => {
     res.json({

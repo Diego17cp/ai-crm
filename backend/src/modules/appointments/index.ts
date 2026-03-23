@@ -1,0 +1,1 @@
+export { appointmentsRoutes } from "./infrastructure/routes/appointmentsRoutes";
