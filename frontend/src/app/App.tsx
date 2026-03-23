@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
-import { AllLeadsPage, AllLotsPage, AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
+import { AllAppointmentsPage, AllLeadsPage, AllLotsPage, AllProjectsPage, ChatbotPage, DashboardPage, LoginPage } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
@@ -34,6 +34,7 @@ function App() {
                   <Route index element={<Navigate replace to="leads" />} />
                   <Route path="leads" element={<AllLeadsPage />} />
                 </Route>
+                <Route path="appointments" element={<AllAppointmentsPage />} />
               </Route>
             </Routes>
           </SidebarProvider>

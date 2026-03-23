@@ -6,3 +6,4 @@ export const DashboardPage = lazyPage(() => import("@/features/dashboard/pages/D
 export const AllProjectsPage = lazyPage(() => import("@/features/projects/pages/AllProjects"), "AllProjects");
 export const AllLotsPage = lazyPage(() => import("@/features/lots/pages/AllLots"), "AllLots");
 export const AllLeadsPage = lazyPage(() => import("@/features/leads/pages/AllLeads"), "AllLeads");
+export const AllAppointmentsPage = lazyPage(() => import("@/features/appointments/pages/AllAppointments"), "AllAppointments");
