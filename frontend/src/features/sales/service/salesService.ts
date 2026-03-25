@@ -1,5 +1,5 @@
 import { apiClient } from "@/core/api";
-import type { AllSalesFilters, AllSalesResponse, CreateSalePayload } from "../types";
+import type { AllSalesFilters, AllSalesResponse, CreateSalePayload, MetodoPago, VentaByIdResponse } from "../types";
 
 export const salesService = {
     findAll: async (filters: AllSalesFilters) => {
@@ -17,6 +17,16 @@ export const salesService = {
     },
     create: async (payload: CreateSalePayload) => {
         const response = await apiClient.post(`/ventas`, payload);
+        return response.data;
+    },
+    findById: async (id: number) => {
+        const response = await apiClient.get<VentaByIdResponse>(`/ventas/${id}`);
+        return response.data;
+    },
+    payQuota: async (id: number, metodoPago: MetodoPago, /* Aqui la imagen de comprobante a futuro */ ) => {
+        const response = await apiClient.patch(`/ventas/cuotas/${id}/pay`, { 
+            metodo_pago: metodoPago,
+        });
         return response.data;
     }
 }

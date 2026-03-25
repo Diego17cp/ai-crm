@@ -1,7 +1,7 @@
 import { usePagination } from "@/shared/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react";
-import type { AllSalesFilters, CreateSalePayload, EstadoContrato, EstadoVenta, TipoPago } from "../types";
+import type { AllSalesFilters, CreateSalePayload, EstadoContrato, EstadoVenta, MetodoPago, TipoPago } from "../types";
 import { salesService } from "../service/salesService";
 import { toast } from "sonner";
 import type { ApiError } from "@/core/types";
@@ -90,6 +90,23 @@ export const useSales = () => {
             const message = error.response?.data?.message || "Error al crear la venta";
             toast.error(message);
         }
+    });
+
+    const useQueryById = (id: number) => useQuery({
+        queryKey: ["venta", id],
+        queryFn: () => salesService.findById(id),
+        enabled: Boolean(id),
+    });
+    const usePayQuotaMutation = (id: number, metodoPago: MetodoPago) => useMutation({
+        mutationFn: () => salesService.payQuota(id, metodoPago),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["venta"] });
+            toast.success("Cuota pagada exitosamente");
+        },
+        onError: (error: ApiError) => {
+            const message = error.response?.data?.message || "Error al pagar la cuota";
+            toast.error(message);
+        }
     })
 
     return {
@@ -107,6 +124,8 @@ export const useSales = () => {
         clearAllFilters,
         hasActiveFilters, 
         filters,
-        useCreateSaleMutation
+        useCreateSaleMutation,
+        useQueryById,
+        usePayQuotaMutation
     }
 }

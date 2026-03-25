@@ -9,6 +9,7 @@ export type EstadoContrato =
 	| "FIRMADO"
 	| "CESION CONTRACTUAL";
 export type EstadoCuota = "PENDIENTE" | "PAGADO";
+export type MetodoPago = "EFECTIVO" | "TRANSFERENCIA" | "DEPOSITO";
 export interface LoteVenta {
 	numero_lote: string;
 	numero_partida: string | null;
