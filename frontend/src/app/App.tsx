@@ -37,8 +37,8 @@ function App() {
                 <Route path="appointments" element={<AllAppointmentsPage />} />
                 <Route path="sales">
                   <Route index element={<Navigate replace to="contracts" />} />
-                  <Route path="contracts" element={<AllSalesPage />} />
                   <Route path="contract/:id" element={<SaleDetailPage />} />
+                  <Route path="contracts" element={<AllSalesPage />} />
                 </Route>
               </Route>
             </Routes>
