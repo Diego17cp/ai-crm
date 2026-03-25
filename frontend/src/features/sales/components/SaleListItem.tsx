@@ -15,7 +15,7 @@ export const SaleListItem = ({ venta }: Props) => {
 			animate={{ opacity: 1, y: 0 }}
 		>
             <Link
-                to={`/sales/contract/${venta.id}`}
+                to={`/admin/sales/contract/${venta.id}`}
                 className="group flex flex-col md:flex-row items-start md:items-center justify-between p-5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-md hover:border-teal-200 dark:hover:border-teal-800/50 transition-all gap-4 sm:gap-6 cursor-pointer"
             >         
                 <div className="flex items-center gap-4 w-full md:w-3/12 shrink-0">
