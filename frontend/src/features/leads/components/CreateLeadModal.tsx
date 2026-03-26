@@ -19,6 +19,7 @@ import type {
 	Sexo,
 	Solvencia,
 	CreateLeadPayload,
+	TipoTelefono,
 } from "../types";
 
 interface Props {
@@ -29,7 +30,7 @@ interface Props {
 interface PhoneUI {
 	uiId: string;
 	numero: string;
-	tipo: string;
+	tipo: TipoTelefono;
 }
 
 const selectClasses = {

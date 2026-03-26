@@ -1,7 +1,8 @@
+export type TipoTelefono = "PERSONAL" | "TRABAJO" | "WHATSAPP";
 export interface Telefono { 
     id: number;
     numero: string;
-    tipo: string;
+    tipo: TipoTelefono;
 }
 export interface TipoDoc {
     id: number;
@@ -80,20 +81,20 @@ export interface CreateLeadPayload {
     actitud?: Actitud;
     telefonos?: {
         numero: string;
-        tipo: string;
+        tipo: TipoTelefono;
     }[];
 }
 export interface UpdateLeadPayload extends Partial<Omit<CreateLeadPayload, "telefonos">> {
     telefonos?: {
         add?: {
             numero: string;
-            tipo: string;
+            tipo: TipoTelefono;
         }[];
         remove?: number[];
         update?: {
             id: number;
             numero?: string;
-            tipo?: string;
+            tipo?: TipoTelefono;
         }[];
     }
 }
