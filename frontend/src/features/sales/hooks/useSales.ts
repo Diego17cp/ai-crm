@@ -101,6 +101,7 @@ export const useSales = () => {
         mutationFn: () => salesService.payQuota(id, metodoPago),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["venta"] });
+            queryClient.invalidateQueries({ queryKey: ["cobranzas"] });
             toast.success("Cuota pagada exitosamente");
         },
         onError: (error: ApiError) => {

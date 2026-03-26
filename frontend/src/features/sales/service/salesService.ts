@@ -1,5 +1,5 @@
 import { apiClient } from "@/core/api";
-import type { AllSalesFilters, AllSalesResponse, CreateSalePayload, MetodoPago, VentaByIdResponse } from "../types";
+import type { AllSalesFilters, AllSalesResponse, CobrosResponse, CollectionsBoardFilters, CreateSalePayload, MetodoPago, VentaByIdResponse } from "../types";
 
 export const salesService = {
     findAll: async (filters: AllSalesFilters) => {
@@ -27,6 +27,15 @@ export const salesService = {
         const response = await apiClient.patch(`/ventas/cuotas/${id}/pay`, { 
             metodo_pago: metodoPago,
         });
+        return response.data;
+    },
+    getCollectionsBoard: async (filters: CollectionsBoardFilters) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("page", filters.page.toString());
+        queryParams.append("limit", filters.limit.toString());
+        if (filters.filtro) queryParams.append("filtro", filters.filtro);
+        if (filters.dias_proximas) queryParams.append("dias", filters.dias_proximas.toString());
+        const response = await apiClient.get<CobrosResponse>(`/ventas/cobranzas?${queryParams.toString()}`);
         return response.data;
     }
 }

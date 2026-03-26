@@ -1,3 +1,4 @@
+import type { Telefono } from "@/features/leads/types";
 import type { EstadoLote } from "@/features/lots/types";
 
 export type TipoPago = "CONTADO" | "CREDITO";
@@ -47,6 +48,7 @@ export interface Venta {
 		nombres: string;
 		apellidos: string;
 		numero: string; // Es el documento de identidad
+		email: string;
 	};
 	lote: LoteVenta;
 	cuotas_pendientes: number;
@@ -126,4 +128,37 @@ export interface VentaById {
 export interface VentaByIdResponse {
     success: boolean;
     data: VentaById;
+}
+interface VentaWithClienteWithTelefonos extends Omit<Venta, 'cliente'> {
+	cliente: Venta['cliente'] & { telefonos: Telefono[] };
+}
+export interface Cobro {
+	id: number;
+	id_venta: number;
+	numero_cuota: number;
+	monto_cuota: string;
+	fecha_vencimiento: string;
+	fecha_pago: string | null;
+	estado: EstadoCuota;
+	metodo_pago: MetodoPago | null;
+	venta: VentaWithClienteWithTelefonos;
+	dias_mora: number | null;
+}
+export interface CobrosResponse {
+	success: boolean;
+	data: Cobro[];
+	meta: {
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	}
+}
+export interface CollectionsBoardFilters {
+	page: number;
+	limit: number;
+	filtro?: "vencidas" | "proximas" | "todas";
+	dias_proximas?: number;
 }
