@@ -9,3 +9,4 @@ export const AllLeadsPage = lazyPage(() => import("@/features/leads/pages/AllLea
 export const AllAppointmentsPage = lazyPage(() => import("@/features/appointments/pages/AllAppointments"), "AllAppointments");
 export const AllSalesPage = lazyPage(() => import("@/features/sales/pages/AllSales"), "AllSales");
 export const SaleDetailPage = lazyPage(() => import("@/features/sales/pages/Sale"), "SaleDetail");
+export const CollectionsPage = lazyPage(() => import("@/features/sales/pages/Collections"), "Collections");
