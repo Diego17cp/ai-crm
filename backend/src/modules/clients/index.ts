@@ -1,0 +1,1 @@
+export { clientsRoutes } from "./infrastructure/routes/clientsRoutes";

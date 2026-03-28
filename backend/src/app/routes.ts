@@ -9,6 +9,7 @@ import { lotesRoutes } from "@/modules/lot";
 import { leadsRoutes } from "@/modules/leads";
 import { appointmentsRoutes } from "@/modules/appointments";
 import { salesRoutes } from "@/modules/sales";
+import { clientsRoutes } from "@/modules/clients";
 
 const router: Router = Router();
 
@@ -20,6 +21,7 @@ router.use("/projects", proyectosRoutes());
 router.use("/ubigeos", ubigeosRoutes());
 router.use("/lotes", lotesRoutes());
 router.use("/leads", leadsRoutes());
+router.use("/clientes", clientsRoutes());
 router.use("/citas", appointmentsRoutes());
 router.use("/ventas", salesRoutes());
 
