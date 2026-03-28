@@ -1,7 +1,7 @@
 import { useSidebar } from "./hooks/useSidebar";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { FiMenu, FiChevronLeft, FiUser, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiChevronLeft, FiLogOut } from "react-icons/fi";
 import { SIDEBAR_ITEMS } from "./constants/sidebarItems";
 import { SidebarItem, SidebarSubmenu } from "./components";
 import { isSuperAdmin } from "@/core/utils/users";
@@ -81,8 +81,8 @@ export const Sidebar = ({
                 </div>
                 <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 p-3">
                     <div className={`flex items-center gap-3 ${isOpen ? "px-2 py-2" : "justify-center align-middle py-2"} rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group relative`}>                        
-                        <div className="shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-700">
-                            <FiUser className="text-gray-600 dark:text-gray-400" />
+                        <div className="shrink-0 w-10 h-10 overflow-hidden bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-700">
+                            <img src="/profile-pic.webp" alt="Profile Picture" className="object-cover" />
                         </div>
                         {isOpen && (
                             <div className="flex-1 min-w-0 flex items-center justify-between">
