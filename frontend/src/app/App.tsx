@@ -4,6 +4,7 @@ import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
 import {
 	AllAppointmentsPage,
+	AllCustomersPage,
 	AllLeadsPage,
 	AllLotsPage,
 	AllProjectsPage,
@@ -69,6 +70,10 @@ function App() {
 										path="leads"
 										element={<AllLeadsPage />}
 									/>
+                  <Route
+                    path="active"
+                    element={<AllCustomersPage />}
+                  />
 								</Route>
 								<Route
 									path="appointments"
