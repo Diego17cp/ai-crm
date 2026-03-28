@@ -13,8 +13,9 @@ export function userRoutes(): Router {
 	const userUseCases = new UserUseCases(userRepository, passwordHasher);
 	const userController = new UserController(userUseCases);
 
-	router.post("/", userController.create);
 	router.get("/:id", userController.getById);
+	router.get("/", userController.getAll);
+	router.post("/", userController.create);
 	router.patch("/:id", userController.update);
 	router.delete("/:id", userController.delete);
 

@@ -13,6 +13,23 @@ export class UserController {
 			next(error);
 		}
 	};
+	
+	getAll = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const query = {
+				page: Number(req.query.page) || 1,
+				limit: Number(req.query.limit) || 10,
+				estado: req.query.estado as "ACTIVO" | "INACTIVO" | undefined,
+				id_rol: req.query.id_rol ? Number(req.query.id_rol) : undefined,
+				q: req.query.q as string | undefined,
+			};
+			const result = await this.userUseCases.getUsers(query);
+			res.status(200).json({ success: true, ...result });
+		}
+		catch (error) {
+			next(error);
+		}
+	}
 
 	getById = async (req: Request, res: Response, next: NextFunction) => {
 		try {

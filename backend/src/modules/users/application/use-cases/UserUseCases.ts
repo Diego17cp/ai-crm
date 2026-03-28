@@ -2,7 +2,7 @@ import { IUserRepository } from "../ports/IUserRepository";
 import { IPasswordHasher } from "../ports/IPasswordHasher";
 import { User } from "../../domain/User";
 import { UserAlreadyExistsError, UserNotFoundError } from "../../domain/errors";
-import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTOs";
+import { CreateUserDTO, GetUsersQueryDTO, PaginatedUsersResult, UpdateUserDTO, UserDTO } from "../dtos/UserDTOs";
 
 export class UserUseCases {
 	constructor(
@@ -31,6 +31,10 @@ export class UserUseCases {
 		});
 
 		return await this.userRepository.create(user);
+	}
+
+	async getUsers(query: GetUsersQueryDTO): Promise<PaginatedUsersResult<UserDTO>> {
+		return await this.userRepository.findAll(query);
 	}
 
 	async getUserById(id: string): Promise<User> {
