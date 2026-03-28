@@ -19,6 +19,7 @@ import type {
 	Lead,
 	Sexo,
 	Solvencia,
+	TipoTelefono,
 	UpdateLeadPayload,
 } from "../types";
 
@@ -32,7 +33,7 @@ interface PhoneUI {
 	uiId: string;
 	id?: number;
 	numero: string;
-	tipo: string;
+	tipo: TipoTelefono;
 }
 
 const selectClasses = {
