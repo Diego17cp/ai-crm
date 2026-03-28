@@ -9,6 +9,7 @@ import {
 	AllLotsPage,
 	AllProjectsPage,
 	AllSalesPage,
+	AllUsersPage,
 	ChatbotPage,
 	CollectionsPage,
 	DashboardPage,
@@ -97,6 +98,18 @@ function App() {
 									<Route
 										path="installments"
 										element={<CollectionsPage />}
+									/>
+								</Route>
+								<Route path="settings">
+									<Route
+										index
+										element={
+											<Navigate replace to="users" />
+										}
+									/>
+									<Route
+										path="users"
+										element={<AllUsersPage />}
 									/>
 								</Route>
 							</Route>
