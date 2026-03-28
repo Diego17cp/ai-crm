@@ -15,6 +15,7 @@ import type {
 } from "../types";
 import type { Etapa, Manzana } from "@/features/projects/types";
 import type { Lote } from "@/features/lots/types";
+import type { User } from "@/features/users/types";
 
 interface Props {
 	isOpen: boolean;
@@ -91,6 +92,14 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 		enabled: Boolean(idManzana),
 	});
 
+	const usersQuery = useQuery({
+		queryKey: ["users"],
+		queryFn: async () => {
+			const response = await apiClient.get("/users?id_rol=2"); // Solo vendedores
+			return response.data.data;
+		},
+	})
+
 	useEffect(() => {
 		if (isOpen && cita) {
 			setFechaCita(cita.fecha_cita ? cita.fecha_cita.split("T")[0] : "");
@@ -129,14 +138,11 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 			label: `Lote ${l.numero_lote}`,
 		})) || [];
 
-	const responsableOptions = [
-		{
-			value: idResponsable,
-			label: cita?.asesor
-				? `${cita.asesor.nombres} ${cita.asesor.apellidos}`
-				: "Asesor Asignado",
-		},
-	];
+	const responsableOptions =
+		usersQuery.data?.map((u: User) => ({
+			value: String(u.id),
+			label: `${u.nombres} ${u.apellidos}`,
+		})) || [];
 
 	const updatePayload = useMemo((): EditAppointmentPayload => {
 		return {
@@ -330,15 +336,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													onChange={setIdResponsable}
 													placeholder="Seleccionar asesor"
 													classes={selectClasses}
-													disabled={true}
 												/>
-												<p className="text-[10px] text-gray-400 ml-1">
-													Para transferir responsable
-													se debe reasignar la cita en
-													el calendario de leads (API
-													no disponible
-													temporalmente).
-												</p>
 											</div>
 										</div>
 									</div>
