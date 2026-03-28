@@ -117,7 +117,7 @@ export class PrismaLeadsRepository implements ILeadsRepository {
 		const foundPhones = await this.prisma.telefonosCliente.findMany({
 			where: {
 				numero: { in: numeros },
-				...(excludeLeadId ? { cliente_id: { not: excludeLeadId } } : {})
+				...(excludeLeadId ? { id_cliente: { not: excludeLeadId } } : {})
 			},
 			select: { numero: true }
 		});
