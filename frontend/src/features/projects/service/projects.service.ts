@@ -15,7 +15,6 @@ export const projectsService = {
         return response.data;
     },
     toggleProjectStatus: async (id: number) => {
-        // TODO: Cambiar endpoint cuando esté listo en backend
         const response = await apiClient.delete(`/projects/${id}`);
         return response.data;
     },
@@ -28,7 +27,6 @@ export const projectsService = {
         return response.data;
     },
     toggleEtapaStatus: async (id_etapa: number) => {
-        // TODO: Cambiar endpoint cuando esté listo en backend
         const response = await apiClient.delete(`/projects/etapas/${id_etapa}`);
         return response.data;
     },
@@ -41,7 +39,6 @@ export const projectsService = {
         return response.data;
     },
     toggleManzanaStatus: async (id_manzana: number) => {
-        // TODO: Cambiar endpoint cuando esté listo en backend
         const response = await apiClient.delete(`/projects/manzanas/${id_manzana}`);
         return response.data;
     }

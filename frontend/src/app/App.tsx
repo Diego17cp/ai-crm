@@ -70,10 +70,10 @@ function App() {
 										path="leads"
 										element={<AllLeadsPage />}
 									/>
-                  <Route
-                    path="active"
-                    element={<AllCustomersPage />}
-                  />
+									<Route
+										path="active"
+										element={<AllCustomersPage />}
+									/>
 								</Route>
 								<Route
 									path="appointments"
