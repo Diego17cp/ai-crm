@@ -10,6 +10,7 @@ import { leadsRoutes } from "@/modules/leads";
 import { appointmentsRoutes } from "@/modules/appointments";
 import { salesRoutes } from "@/modules/sales";
 import { clientsRoutes } from "@/modules/clients";
+import { rolesRoutes } from "@/modules/roles";
 
 const router: Router = Router();
 
@@ -24,6 +25,7 @@ router.use("/leads", leadsRoutes());
 router.use("/clientes", clientsRoutes());
 router.use("/citas", appointmentsRoutes());
 router.use("/ventas", salesRoutes());
+router.use("/roles", rolesRoutes());
 
 router.use("/", (_, res) => {
     res.json({

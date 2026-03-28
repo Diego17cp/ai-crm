@@ -1,0 +1,1 @@
+export { rolesRoutes } from "./infrastructure/routes/rolesRoutes";
