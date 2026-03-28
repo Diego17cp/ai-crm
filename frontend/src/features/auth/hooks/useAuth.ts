@@ -15,9 +15,9 @@ export const useAuth = () => {
     const showApiError = (error: ApiError, defaultMessage: string) => {
         console.error("[API Error]", error);
         let errorMessage = defaultMessage;
-        if (error.response?.data?.error) errorMessage = error.response.data.error;
-        else if (error.response?.data?.message) errorMessage = error.response.data.message;
+        if (error.response?.data?.message) errorMessage = error.response.data.message;
         else if (error.message) errorMessage = error.message;
+        else if (error.response?.data?.error) errorMessage = error.response.data.error;
         toast.error(errorMessage);
     }
     const login = async (credentials: { email: string; password: string }): Promise<User> => {
