@@ -11,6 +11,7 @@ import {
 	AllSalesPage,
 	AllUsersPage,
 	ChatbotPage,
+	ChatsHistoryPage,
 	CollectionsPage,
 	DashboardPage,
 	LoginPage,
@@ -110,6 +111,18 @@ function App() {
 									<Route
 										path="users"
 										element={<AllUsersPage />}
+									/>
+								</Route>
+								<Route path="chats">
+									<Route
+										index
+										element={
+											<Navigate replace to="history" />
+										}
+									/>
+									<Route
+										path="history"
+										element={<ChatsHistoryPage />}
 									/>
 								</Route>
 							</Route>
