@@ -1,0 +1,1 @@
+export { chatRoutes } from "./infrastructure/routes/chatsRoutes";
