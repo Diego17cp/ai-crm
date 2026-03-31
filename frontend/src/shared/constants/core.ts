@@ -1,0 +1,1 @@
+export const NOMBRE_EMPRESA = "Ayllu Kaypi";
