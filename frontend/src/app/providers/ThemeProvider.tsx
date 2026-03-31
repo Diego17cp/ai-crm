@@ -1,3 +1,4 @@
+import { THEME_KEY } from "@/shared/constants";
 import React, { createContext, useEffect, useState } from "react";
 
 interface Type {
@@ -9,19 +10,19 @@ export const ThemeContext = createContext<Type | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [theme, setTheme] = useState<"light" | "dark">(() => {
-        const savedTheme = localStorage.getItem("ai-crm:theme");
+        const savedTheme = localStorage.getItem(THEME_KEY);
         return (savedTheme === "dark" ? "dark" : "light");
     });
 
     useEffect(() => {
         if (theme === "dark") document.documentElement.classList.add("dark");
         else document.documentElement.classList.remove("dark");
-        localStorage.setItem("ai-crm:theme", theme);
+        localStorage.setItem(THEME_KEY, theme);
     }, [theme]);
 
     useEffect(() => {
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "ai-crm:theme" && e.newValue !== null) {
+            if (e.key === THEME_KEY && e.newValue !== null) {
                 const newTheme = e.newValue as "light" | "dark";
                 if (newTheme !== theme && (newTheme === "light" || newTheme === "dark")) {
                     setTheme(newTheme);

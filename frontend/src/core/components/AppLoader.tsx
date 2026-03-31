@@ -1,3 +1,4 @@
+import { NOMBRE_EMPRESA } from "@/shared/constants";
 import { motion } from "motion/react";
 import { FiPieChart } from "react-icons/fi";
 
@@ -35,8 +36,7 @@ export const AppLoader = () => {
                     className="text-center"
                 >
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                        {/* TODO: Cambiar por el nombre de la aplicación */}
-                        Cargando AI-CRM
+                        Cargando CRM de {NOMBRE_EMPRESA}...
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Preparando tu experiencia...

@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { chatbotService } from "../service/chatbot.service";
-import { STORAGE_KEY } from "../costants/storage";
+import { STORAGE_KEY } from "@/shared/constants";
 import { chatsService } from "../service/chatsService";
 import { NOMBRE_EMPRESA } from "@/shared/constants";
 import type { ApiError } from "@/core/types";
