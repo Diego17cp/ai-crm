@@ -15,5 +15,9 @@ export const chatsService = {
     getChatById: async (chatId: string) => {
         const response = await apiClient.get<ChatDetailsResponse>(`/chats/${chatId}`);
         return response.data;
+    },
+    getChatsBySessionId: async (sessionId: string) => {
+        const response = await apiClient.get<ChatDetailsResponse>(`/chats/session/${sessionId}`);
+        return response.data;
     }
 }

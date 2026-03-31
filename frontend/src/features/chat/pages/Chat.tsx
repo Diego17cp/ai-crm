@@ -4,6 +4,7 @@ import { UserMessage } from "../components/UserMessage";
 import { FiSend } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { motion } from "motion/react";
+import { NOMBRE_EMPRESA } from "@/shared/constants";
 
 export const Chat = () => {
 	const {
@@ -14,7 +15,22 @@ export const Chat = () => {
 		messagesEndRef,
 		handleInputChange,
 		handleSubmit,
+		isFatalError,
+		isInitialLoading
 	} = useChatbot();
+
+	if (isFatalError) return (
+		<div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+			<div className="text-center bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
+				<h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+					Servicio no disponible
+				</h2>
+				<p className="text-gray-500 dark:text-gray-400">
+					No pudimos conectar con los sistemas de asistencia. Por favor, intenta más tarde.
+				</p>
+			</div>
+		</div>
+	);
 
 	return (
 		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950">
@@ -22,7 +38,7 @@ export const Chat = () => {
 				<div className="max-w-4xl mx-auto flex items-center justify-between">
 					<div>
 						<h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-							Asistente Comercial IA
+							Asistente Comercial {NOMBRE_EMPRESA}
 						</h1>
 						<p className="text-sm text-gray-500 dark:text-gray-400">
 							Siempre en línea para ayudarte
@@ -32,12 +48,23 @@ export const Chat = () => {
 			</header>
 			<main className="flex-1 overflow-y-auto p-4 md:p-8 w-full main-scrollbar">
 				<div className="max-w-4xl mx-auto">
-					{messages.map((msg) =>
-						msg.role === "bot" ? (
-							<BotMessage key={msg.id} content={msg.content} />
-						) : (
-							<UserMessage key={msg.id} content={msg.content} />
-						),
+					{isInitialLoading ? (
+						<div className="flex w-full mb-6">
+                            <div className="shrink-0 mr-4 mt-1">
+                                <div className="size-10 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+                            </div>
+                            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-none w-3/4 h-20 animate-pulse" />
+                        </div>
+					): (
+						<>
+							{messages.map((msg) =>
+								msg.role === "bot" ? (
+									<BotMessage key={msg.id} content={msg.content} />
+								) : (
+									<UserMessage key={msg.id} content={msg.content} />
+								),
+							)}
+						</>
 					)}
 					{isLoading && (
 						<motion.div

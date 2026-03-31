@@ -1,6 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState, useRef, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { chatbotService } from "../service/chatbot.service";
+import { STORAGE_KEY } from "../costants/storage";
+import { chatsService } from "../service/chatsService";
+import { NOMBRE_EMPRESA } from "@/shared/constants";
+import type { ApiError } from "@/core/types";
 
 export type UserRole = "user" | "bot";
 
@@ -11,27 +15,42 @@ export interface Message {
 }
 
 export const useChatbot = () => {
-	const [messages, setMessages] = useState<Message[]>([
-		{
-			id: "1",
-			role: "bot",
-			content: "¡Hola! Soy tu asistente virtual para proyectos inmobiliarios. ¿En qué te puedo ayudar hoy?",
-		},
-	]);
+	const sessionId = localStorage.getItem(STORAGE_KEY) || "";
+	const { data: chatHistory, ...chatQuery } = useQuery({
+		queryKey: ["chatSession", sessionId],
+		queryFn: () => chatsService.getChatsBySessionId(sessionId),
+		enabled: !!sessionId,
+		staleTime: Infinity,
+	});
+	const [localMessages, setLocalMessages] = useState<Message[]>([]);
+	const welcomeMessage: Message = {
+		id: "welcome",
+		role: "bot",
+		content: `¡Hola! Soy el asistente virtual de ${NOMBRE_EMPRESA}. ¿En qué te puedo ayudar hoy?`,
+	};
+	const messages = useMemo(() => {
+		const history: Message[] = chatHistory?.data.mensajes?.map(msg => ({
+			id: msg.id.toString(),
+			role: msg.remitente === "BOT" ? "bot" : "user",
+			content: msg.contenido,
+		})) || [];
+		return [welcomeMessage, ...history, ...localMessages];
+	}, [chatHistory, localMessages]);
 	const [inputValue, setInputValue] = useState("");
 	const messageMutation = useMutation({
 		mutationFn: (msg: string) => chatbotService.sendMessage(msg),
 		onSuccess: (data) => {
 			const newBotMsg: Message = {
-				id: Date.now().toString(),
+				id: `bot-${Date.now().toString()}`,
 				role: "bot",
 				content: data,
 			};
-			setMessages((prev) => [...prev, newBotMsg]);
+			setLocalMessages((prev) => [...prev, newBotMsg]);
 		}
 	});
 	const isLoading = messageMutation.isPending;
 	const isError = messageMutation.isError;
+	const isFatalError = chatQuery.isError && (chatQuery.error as ApiError)?.response?.status !== 404; // Si es 404, es porque no hay chat previo, no es un error fatal
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -44,11 +63,11 @@ export const useChatbot = () => {
 		const messageToSend = inputValue.trim();
 		if (!messageToSend) return;
 		const newUserMsg: Message = {
-			id: Date.now().toString(),
+			id: `user-${Date.now().toString()}`,
 			role: "user",
 			content: inputValue,
 		};
-		setMessages((prev) => [...prev, newUserMsg]);
+		setLocalMessages((prev) => [...prev, newUserMsg]);
 		setInputValue("");
 		messageMutation.mutate(messageToSend);
 	};
@@ -61,5 +80,8 @@ export const useChatbot = () => {
 		messagesEndRef,
 		handleInputChange,
 		handleSubmit,
+		isInitialLoading: chatQuery.isLoading,
+		isFatalError,
+		chatQuery
 	};
 };
