@@ -8,11 +8,16 @@ import { prisma } from "@/infrastructure/database/prismaClient";
 import { env } from "@/config";
 import { ResolveChatSessionUseCase } from "../../application/use-cases/ResolveChatSessionUseCase";
 import { GeminiLLMService } from "../adapters/GeminiLLMService";
+import { SocketEventNotifier } from "../adapters/SocketEventNotifier";
 
 export function createChatbotRouter(): Router {
 	const router = Router();
 
-	const toolsRegistry = new ChatToolsRegistry(prisma);
+	const chatbotRepo = new PrismaChatbotRepository(prisma);
+
+	const eventNotifier = new SocketEventNotifier();
+
+	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier);
 	// const llmService = new OpenAILLMService(
 	// 	env.OPENAI_API_KEY,
 	// 	toolsRegistry,
@@ -21,7 +26,6 @@ export function createChatbotRouter(): Router {
         env.GEMINI_API_KEY,
         toolsRegistry,
     )
-	const chatbotRepo = new PrismaChatbotRepository(prisma);
 	const processChatMessage = new ProcessChatMessageUseCase(
 		llmService,
 		toolsRegistry,

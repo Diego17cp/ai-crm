@@ -1,9 +1,13 @@
 import { PrismaClient } from "generated/prisma/client";
 import { IToolsRegistry } from "../../application/ports/IToolsRegistry";
 import { LotesWhereInput } from "generated/prisma/models";
+import { IEventNotifier } from "../../application/ports/IEventNotifier";
 
 export class ChatToolsRegistry implements IToolsRegistry {
-	constructor(private readonly prisma: PrismaClient) {}
+	constructor(
+		private readonly prisma: PrismaClient,
+		private readonly notifier: IEventNotifier
+	) {}
 
 	getToolsDefinition() {
 		return [
@@ -80,7 +84,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 							fecha_esperada: {
 								type: "string",
 								description:
-									"Fecha en formato DD/MM/AAAA o similar, es decir, día, mes y año. Ejemplo: 25/12/2024",
+                                    "¡IMPORTANTE! Fecha calculada estrictamente en formato YYYY-MM-DD. Ejemplo: 2026-03-31",
 							},
 							hora_esperada: {
 								type: "string",
@@ -135,7 +139,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				estado: "ESPERANDO_ASESOR"
 			}
 		});
-		// TODO: Emitir websocket para notificar a los asesores en tiempo real que hay una conversación que requiere atención.
+		this.notifier.notifyHumanAssistanceRequired(conversacionId);
 		return {
 			prompt_result: "Transfiriendo a un asesor humano. Dile al cliente que un ejecutivo leerá la conversación y le responderá en breve. Despídete amablemente, tu labor ha terminado aquí."
 		}
@@ -205,17 +209,24 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		nombre_proyecto?: string;
 	}, conversacionId?: string) {
 		try {
-			const inputDateStr = `${args.fecha_esperada}T${args.hora_esperada}:00.000-05:00`;
+			let safeDate = args.fecha_esperada.trim();
+			if (safeDate.includes("/")) {
+				const parts = safeDate.split("/");
+				if (parts[2]?.length === 4 && parts[1] && parts[0]) safeDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+			}
+			let safeTime = args.hora_esperada.trim();
+			if (safeTime.length > 5) safeTime = safeTime.substring(0, 5);
+			const inputDateStr = `${safeDate}T${safeTime}:00.000-05:00`;
 			const targetDate = new Date(inputDateStr);
-			if (targetDate < new Date()) return {
+			if (isNaN(targetDate.getTime()) || targetDate < new Date()) return {
 				error_humano: "Has intentado agendar en una fecha u hora que ya pasó. Por favor, pide al cliente que te indique una fecha y hora futuras para agendar la cita."
 			};
 			const asesor = await this.prisma.usuarios.findFirst({
 				where: { estado: "ACTIVO", rol: { is: { nombre: "VENDEDOR" } } },
 			})
 			if (!asesor) throw new Error("No hay asesores disponibles para asignar la cita.");
-			const parsedCitaFecha = new Date(args.fecha_esperada + "T00:00:00.000Z");
-			const parsedCitaHora = new Date("1970-01-01T" + args.hora_esperada + ":00.000Z");
+			const parsedCitaFecha = new Date(safeDate + "T00:00:00.000Z");
+			const parsedCitaHora = new Date("1970-01-01T" + safeTime + ":00.000Z");
 			const colision = await this.prisma.citas.findFirst({
 				where: {
 					id_usuario_responsable: asesor.id,
