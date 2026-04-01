@@ -133,13 +133,40 @@ export class ChatToolsRegistry implements IToolsRegistry {
 
 	private async derivarHumano(conversacionId?: string) {
 		if (!conversacionId) return { message: "No se pudo marcar la conversación para asistencia humana porque no se proporcionó un ID de conversación válido." };
-		await this.prisma.conversaciones.update({
+		const conversacion = await this.prisma.conversaciones.update({
 			where: { id: conversacionId },
 			data: {
 				estado: "ESPERANDO_ASESOR"
+			},
+			include: {
+				cliente: {
+					select: {
+						nombres: true,
+						apellidos: true,
+						telefonos: true
+					}
+				},
+				mensajes: {
+					orderBy: { created_at: "desc" },
+					take: 1,
+					select: {
+						contenido: true,
+						created_at: true,
+					}
+				}
 			}
 		});
-		this.notifier.notifyHumanAssistanceRequired(conversacionId);
+		const info = {
+			canal: conversacion.canal,
+			ultimo_mensaje: conversacion.mensajes[0]?.contenido || "",
+			hora_ultimo_mensaje: conversacion.mensajes[0]?.created_at || new Date(),
+			cliente: conversacion.cliente ? {
+				nombres: conversacion.cliente.nombres,
+				apellidos: conversacion.cliente.apellidos,
+				telefonos: conversacion.cliente.telefonos.map(t => t.numero)
+			} : null
+		}
+		this.notifier.notifyHumanAssistanceRequired(conversacionId, info);
 		return {
 			prompt_result: "Transfiriendo a un asesor humano. Dile al cliente que un ejecutivo leerá la conversación y le responderá en breve. Despídete amablemente, tu labor ha terminado aquí."
 		}

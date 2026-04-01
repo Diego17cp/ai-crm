@@ -1,6 +1,6 @@
 import { PrismaClient } from "generated/prisma/client";
 import { IChatsRepository } from "../../application/ports/IChatsRepository";
-import { GetChatsQueryDTO, PaginatedChatResults, ChatDTO } from "../../domain/dtos";
+import { GetChatsQueryDTO, PaginatedChatResults, ChatDTO, LiveChatQueueItemDTO } from "../../domain/dtos";
 import { ConversacionesWhereInput } from "generated/prisma/models";
 
 export class PrismaChatsRepository implements IChatsRepository {
@@ -170,5 +170,66 @@ export class PrismaChatsRepository implements IChatsRepository {
             }
         })
         return chat;
+    }
+    async findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]> {
+        const chats = await this.prisma.conversaciones.findMany({
+            where: { estado: "ESPERANDO_ASESOR" },
+            orderBy: { created_at: "asc" },
+            include: {
+                cliente: {
+                    select: {
+                        nombres: true,
+                        apellidos: true,
+                    }
+                },
+                mensajes: {
+                    take: 1,
+                    orderBy: { created_at: "desc" },
+                    select: {
+                        contenido: true,
+                        created_at: true,
+                    }
+                }
+            }
+        });
+        return chats.map(chat => ({
+            id: chat.id,
+            nombre: chat.cliente?.nombres 
+                ? `${chat.cliente.nombres} ${chat.cliente.apellidos ?? ""}`.trim()
+                : "Cliente anónimo",
+            canal: chat.canal,
+            lastMessage: chat.mensajes[0]?.contenido ?? "",
+            createdAt: chat.mensajes[0]?.created_at ?? chat.created_at,
+        }))
+    }
+    async findLiveActiveChats(idUsuario: string): Promise<LiveChatQueueItemDTO[]> {
+        const chats = await this.prisma.conversaciones.findMany({
+            where: { id_usuario_asignado: idUsuario, estado: "ATENDIDO_HUMANO" },
+            include: {
+                cliente: {
+                    select: {
+                        nombres: true,
+                        apellidos: true,
+                    }
+                },
+                mensajes: {
+                    take: 1,
+                    orderBy: { created_at: "desc" },
+                    select: {
+                        contenido: true,
+                        created_at: true,
+                    }
+                }
+            }
+        });
+        return chats.map(chat => ({
+            id: chat.id,
+            nombre: chat.cliente?.nombres 
+                ? `${chat.cliente.nombres} ${chat.cliente.apellidos ?? ""}`.trim()
+                : "Cliente anónimo",
+            canal: chat.canal,
+            lastMessage: chat.mensajes[0]?.contenido ?? "",
+            createdAt: chat.mensajes[0]?.created_at ?? chat.created_at,
+        }))
     }
 }

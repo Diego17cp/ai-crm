@@ -21,4 +21,11 @@ export class ChatUseCases {
         if (!chat)  throw new AppError("Chat no encontrado para la sesión proporcionada", 404);
         return chat;
     }
+    async getLiveChatQueue() {
+        return this.chatsRepository.findLiveChatQueue();
+    }
+    async getLiveActiveChats(idUsuario: string) {
+        if (!idUsuario || idUsuario.trim() === "") throw new AppError("ID de usuario es requerido", 400);
+        return this.chatsRepository.findLiveActiveChats(idUsuario);
+    }
 }

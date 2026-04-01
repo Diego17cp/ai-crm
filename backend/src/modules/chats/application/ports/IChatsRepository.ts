@@ -1,7 +1,16 @@
-import { ChatDTO, GetChatsQueryDTO, PaginatedChatResults } from "../../domain/dtos";
+import {
+	ChatDTO,
+	GetChatsQueryDTO,
+	LiveChatQueueItemDTO,
+	PaginatedChatResults,
+} from "../../domain/dtos";
 
 export interface IChatsRepository {
-    findChats(query: GetChatsQueryDTO): Promise<PaginatedChatResults<Omit<ChatDTO, "mensajes">>>;
-    findChatById(chatId: string): Promise<ChatDTO | null>;
-    findChatBySessionId(sessionId: string): Promise<ChatDTO | null>;
+	findChats(
+		query: GetChatsQueryDTO,
+	): Promise<PaginatedChatResults<Omit<ChatDTO, "mensajes">>>;
+	findChatById(chatId: string): Promise<ChatDTO | null>;
+	findChatBySessionId(sessionId: string): Promise<ChatDTO | null>;
+	findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]>;
+	findLiveActiveChats(idUsuario: string): Promise<LiveChatQueueItemDTO[]>;
 }

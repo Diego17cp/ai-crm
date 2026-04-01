@@ -13,5 +13,7 @@ export function chatRoutes(): Router {
     router.get("/", authGuard, controller.getChats);
     router.get("/session/:sessionId", controller.getChatBySessionId);
     router.get("/:chatId", authGuard, controller.getChatById);
+    router.get("/live/queue", authGuard, controller.getLiveChatQueue);
+    router.get("/live/active", authGuard, controller.getLiveActiveChats);
     return router;
 }

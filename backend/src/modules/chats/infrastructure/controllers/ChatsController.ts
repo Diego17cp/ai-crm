@@ -53,4 +53,28 @@ export class ChatsController {
             next(error);
         }
     }
+    getLiveChatQueue = async (_: Request, res: Response, next: NextFunction) => {
+        try {
+            const queue = await this.chatUseCases.getLiveChatQueue();
+            res.json({
+                success: true,
+                data: queue,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+    getLiveActiveChats = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id_usuario } = req.query;
+            const activeChats = await this.chatUseCases.getLiveActiveChats(String(id_usuario));
+            res.json({
+                success: true,
+                data: activeChats,
+            });
+        } catch (error) {
+            next(error);
+
+        }
+    }
 }

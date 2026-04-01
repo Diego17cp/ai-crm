@@ -54,3 +54,10 @@ export interface PaginatedChatResults<T> {
         hasPreviousPage: boolean;
     }
 }
+export interface LiveChatQueueItemDTO {
+    id: string;
+    nombre: string;
+    canal: CanalContacto | null;
+    lastMessage: string | null;
+    createdAt: Date;
+}
