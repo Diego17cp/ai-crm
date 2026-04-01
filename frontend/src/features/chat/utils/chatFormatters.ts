@@ -31,3 +31,13 @@ export const formatChatDate = (dateString: string) => {
         minute: "2-digit"
     }).format(date);
 };
+
+export const getRelativeWaitTime = (isoString: string) => {
+    const min = Math.round((new Date().getTime() - new Date(isoString).getTime()) / 60000);
+    if (min < 1) return "Justo ahora";
+    if (min < 60) return `Hace ${min} min`;
+    const hr = Math.round(min / 60);
+    if (hr < 24) return `Hace ${hr} hr${hr > 1 ? "s" : ""}`;
+    const day = Math.round(hr / 24);
+    return `Hace ${day} día${day > 1 ? "s" : ""}`;
+}
