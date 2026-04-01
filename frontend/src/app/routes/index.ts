@@ -13,3 +13,4 @@ export const CollectionsPage = lazyPage(() => import("@/features/sales/pages/Col
 export const AllCustomersPage = lazyPage(() => import("@/features/clients/pages/AllCustomers"), "AllCustomers");
 export const AllUsersPage = lazyPage(() => import("@/features/users/pages/AllUsers"), "AllUsers");
 export const ChatsHistoryPage = lazyPage(() => import("@/features/chat/pages/ChatsHistory"), "ChatsHistory");
+export const LiveChatPage = lazyPage(() => import("@/features/chat/pages/LiveChat"), "LiveChat");

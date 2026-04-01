@@ -14,6 +14,7 @@ import {
 	ChatsHistoryPage,
 	CollectionsPage,
 	DashboardPage,
+	LiveChatPage,
 	LoginPage,
 	SaleDetailPage,
 } from "./routes";
@@ -123,6 +124,10 @@ function App() {
 									<Route
 										path="history"
 										element={<ChatsHistoryPage />}
+									/>
+									<Route
+										path="live"
+										element={<LiveChatPage />}
 									/>
 								</Route>
 							</Route>
