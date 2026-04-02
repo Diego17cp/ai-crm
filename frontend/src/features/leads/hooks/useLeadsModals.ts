@@ -1,17 +1,17 @@
 import { useState } from "react";
 import type { Lead } from "../types";
 
-export type ProjectModalType =
+export type LeadModalType =
 	| "none"
 	| "create_lead"
 	| "edit_lead"
 	| "delete_lead";
 
 export const useLeadModals = () => {
-	const [activeModal, setActiveModal] = useState<ProjectModalType>("none");
+	const [activeModal, setActiveModal] = useState<LeadModalType>("none");
 	const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
-	const openModal = (type: ProjectModalType, lead?: Lead) => {
+	const openModal = (type: LeadModalType, lead?: Lead) => {
 		if (lead) setSelectedLead(lead);
 		setActiveModal(type);
 	};

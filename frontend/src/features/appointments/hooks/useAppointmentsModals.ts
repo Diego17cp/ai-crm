@@ -1,20 +1,19 @@
 import { useState } from "react";
 import type { Cita } from "../types";
 
-export type ProjectModalType =
+export type AppointmentModalType =
 	| "none"
 	| "create_appointment"
-    // dependiendo tu criterio | "view_appointment"
     | "mark_attended"
     | "mark_canceled"
 	| "edit_appointment"
 	| "delete_appointment";
 
 export const useAppointmentsModals = () => {
-	const [activeModal, setActiveModal] = useState<ProjectModalType>("none");
+	const [activeModal, setActiveModal] = useState<AppointmentModalType>("none");
 	const [selectedCita, setSelectedCita] = useState<Cita | null>(null);
 
-	const openModal = (type: ProjectModalType, cita?: Cita) => {
+	const openModal = (type: AppointmentModalType, cita?: Cita) => {
 		if (cita) setSelectedCita(cita);
 		setActiveModal(type);
 	};

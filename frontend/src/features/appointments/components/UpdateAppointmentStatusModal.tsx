@@ -4,14 +4,14 @@ import { FiCheckCircle, FiXCircle, FiX, FiAlertCircle } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { useAppointments } from "../hooks/useAppointments";
 import type { Cita, EditAppointmentPayload } from "../types";
-import type { ProjectModalType } from "../hooks/useAppointmentsModals";
+import type { AppointmentModalType } from "../hooks/useAppointmentsModals";
 import type { ApiError } from "@/core/types";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
 	cita: Cita | null;
-	type: ProjectModalType;
+	type: AppointmentModalType;
 }
 
 export const UpdateAppointmentStatusModal = ({
