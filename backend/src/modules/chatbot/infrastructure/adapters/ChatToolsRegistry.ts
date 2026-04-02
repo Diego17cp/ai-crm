@@ -109,8 +109,25 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						"Usa esta herramienta para marcar la conversación como que requiere asistencia humana. Solo debes usarla si el cliente exige reiteradamente o pide explícitamente 'hablar con un humano' o un 'asesor de verdad', y sientes que su frustración va en aumento. No la uses solo porque el cliente hizo una pregunta difícil o pidió algo que no entiendes, solo úsala si el cliente claramente quiere ser atendido por una persona real.",
 					parameters: { type: "object", properties: {} },
 				}
+			},
+			{
+				type: "function",
+				function: {
+					name: "consultar_cuenta_cliente",
+					description:
+						"Permite consultar el estado de cuenta y cronograma de pagos de un cliente. Para usar esta herramienta EXIGE amable y naturalmente que primero te brinde su número de documento de identidad (DNI, CE, RUC). Sin esto no puedes consultar. Úsalo si te preguntan '¿Cuántas cuotas me faltan?', '¿Cuándo me toca pagar?', '¿Tengo deudas atrasadas?'",
+					parameters: {
+						type: "object",
+						properties: {
+							documento_identidad: {
+								type: "string",
+								description: "Número de documento de identidad del cliente (DNI, CE, RUC). Sin esto no puedes consultar.",
+							}
+						},
+						required: ["documento_identidad"]
+					}
+				}
 			}
-			// Podrías añadir "consultar_deuda_cliente(dni)" o "agendar_cita(fecha)"
 		];
 	}
 
@@ -125,9 +142,76 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			case "agendar_cita_y_registrar_prospecto":
 				return await this.agendarCita(args, conversacionId);
 			case "solicitar_asistencia_humana":
-				return await this.derivarHumano(conversacionId)
+				return await this.derivarHumano(conversacionId);
+			case "consultar_cuenta_cliente":
+				return await this.consultarCuentaCliente(args);
 			default:
 				throw new Error(`Tool ${name} no existe`);
+		}
+	}
+
+	private async consultarCuentaCliente(args: { documento_identidad: string }) {
+		try {
+			const cliente = await this.prisma.clientes.findFirst({
+				where: { numero: args.documento_identidad },
+				include: {
+					ventas: {
+						include: {
+							lote: {
+								include: {
+									manzana: {
+										include: { etapa: { include: { proyecto: true } } }
+									}
+								}
+							},
+							cuotas: {
+								orderBy: { numero_cuota: "asc" },
+							}
+						}
+					}
+				}
+			});
+            if (!cliente) return { message: `No se encontró ningún cliente registrado con el documento ${args.documento_identidad}. Pídele que verifique y te indique si lo digitó correctamente.` };
+            if (!cliente.ventas || cliente.ventas.length === 0) return { message: `El cliente ${cliente.nombres || ''} ${cliente.apellidos || ''} no cuenta con ventas de lotes o créditos activos en el sistema.` };
+			const today = new Date();
+			const resumenCuentas = cliente.ventas.map(venta => {
+				const proyecto = venta.lote?.manzana?.etapa?.proyecto?.nombre || "N/A";
+				const numeroLote = venta.lote?.numero_lote || "N/A";
+				const cuotasPagadas = venta.cuotas.filter(c => c.estado === "PAGADO");
+				const cuotasPendientes = venta.cuotas.filter(c => c.estado === "PENDIENTE");
+				const cuotasAtrasadas = cuotasPendientes.filter(c => new Date(c.fecha_vencimiento) < today);
+				const proximaCuota = cuotasPendientes.find(c => new Date(c.fecha_vencimiento) >= today) || cuotasPendientes[0];
+				return {
+					proyecto_y_lote: `${proyecto} - Lote ${numeroLote}`,
+					estado_general_credito: venta.estado,
+					tipo_pago: venta.tipo_pago,
+					resumen_cuotas: {
+						total_cuotas: venta.cuotas.length,
+						pagadas: cuotasPagadas.length,
+						pendientes: cuotasPendientes.length,
+					},
+					tiene_cuotas_atrasadas: cuotasAtrasadas.length > 0,
+					cuotas_atrasadas_detalle: cuotasAtrasadas.map(c => ({
+						numero_cuota: c.numero_cuota,
+						monto: Number(c.monto_cuota).toFixed(2),
+						vencio_el: new Date(c.fecha_vencimiento).toISOString().split("T")[0],
+					})),
+					proxima_cuota_a_pagar: proximaCuota ? {
+						numero_cuota: proximaCuota.numero_cuota,
+						monto: Number(proximaCuota.monto_cuota).toFixed(2),
+						fecha_vencimiento: new Date(proximaCuota.fecha_vencimiento).toISOString().split("T")[0],
+					} : "Crédito totalmente pagado",
+				};
+			});
+			return {
+				cliente: `${cliente.nombres} ${cliente.apellidos}`,
+				documento: cliente.numero,
+				cuentas_activas: resumenCuentas,
+                instruccion_para_respuesta: "Explícale de manera muy amable y comprensible cómo va su cuenta en base a este JSON. Dile cuánto lleva pagado, cuánto le falta y cuál es su próxima cuota a pagar junto con la fecha. Si tiene cuotas atrasadas, indícaselo muy sutil y amablemente."
+			};
+		} catch (error) {
+			console.error("Error al consultar cuenta cliente:", error);
+            return { message: "Ocurrió un error interno al intentar consultar la cuenta. Dile al usuario que lo intente nuevamente más tarde." };
 		}
 	}
 
