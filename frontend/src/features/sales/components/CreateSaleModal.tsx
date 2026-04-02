@@ -634,22 +634,6 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 												</motion.div>
 											)}
 										</AnimatePresence>
-										{tipoPago === "CONTADO" && (
-											<div className="flex flex-col gap-1.5 focus-within:z-10 mt-1 max-w-62.5">
-												<label className="text-xs font-semibold text-gray-500">
-													Meses de Gracia (Si aplica)
-												</label>
-												<input
-													type="number"
-													min="0"
-													max="12"
-													placeholder="0 por def."
-													value={mesesGracia}
-													onChange={(e) => setMesesGracia(Number(e.target.value))}
-													className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-												/>
-											</div>
-										)}
 									</div>
 								</div>
 								<div className="p-6 pt-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 shrink-0">
