@@ -4,7 +4,7 @@ import { LiveChatPanel } from "../components/live/LiveChatPanel";
 import { useLiveChat } from "../hooks/useLiveChat";
 
 export const LiveChat = () => {
-    const { isLoadingItems } = useLiveChat();
+    const { isLoadingItems, handleTakeChat, handleSendMessage } = useLiveChat();
     const [activeTab, setActiveTab] = useState<"queue" | "active">("queue");
     const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
@@ -20,6 +20,8 @@ export const LiveChat = () => {
             <LiveChatPanel 
                 chatId={selectedChatId} 
                 isQueue={activeTab === "queue"} 
+                onTakeChat={handleTakeChat}
+                onSendMessage={handleSendMessage}
             />
         </div>
     );

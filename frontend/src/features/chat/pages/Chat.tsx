@@ -5,6 +5,7 @@ import { FiSend } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { motion } from "motion/react";
 import { NOMBRE_EMPRESA } from "@/shared/constants";
+import { AsesorMessage } from "../components/AsesorMessage";
 
 export const Chat = () => {
 	const {
@@ -16,7 +17,8 @@ export const Chat = () => {
 		handleInputChange,
 		handleSubmit,
 		isFatalError,
-		isInitialLoading
+		isInitialLoading,
+		isLiveMode
 	} = useChatbot();
 
 	if (isFatalError) return (
@@ -38,11 +40,15 @@ export const Chat = () => {
 				<div className="max-w-4xl mx-auto flex items-center justify-between">
 					<div>
 						<h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-							Asistente Comercial {NOMBRE_EMPRESA}
+                            {isLiveMode ? "Asesor en línea" : `Asistente Comercial ${NOMBRE_EMPRESA}`}
 						</h1>
-						<p className="text-sm text-gray-500 dark:text-gray-400">
-							Siempre en línea para ayudarte
-						</p>
+						<p className={`text-sm font-medium flex items-center gap-1.5 ${isLiveMode ? 'text-blue-500 dark:text-blue-400' : 'text-teal-500 dark:text-teal-400'}`}>
+                            <span className="relative flex h-2 w-2">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? 'bg-blue-400' : 'bg-teal-400'}`}></span>
+                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? 'bg-blue-500' : 'bg-teal-500'}`}></span>
+                            </span>
+                            {isLiveMode ? "Atendiendo tu consulta" : "Siempre en línea para ayudarte"}
+                        </p>
 					</div>
 				</div>
 			</header>
@@ -57,13 +63,15 @@ export const Chat = () => {
                         </div>
 					): (
 						<>
-							{messages.map((msg) =>
-								msg.role === "bot" ? (
-									<BotMessage key={msg.id} content={msg.content} />
-								) : (
-									<UserMessage key={msg.id} content={msg.content} />
-								),
-							)}
+							{messages.map((msg) => {
+                                if (msg.role === "asesor") {
+                                    return <AsesorMessage key={msg.id} content={msg.content} />;
+                                }
+                                if (msg.role === "bot") {
+                                    return <BotMessage key={msg.id} content={msg.content} />;
+                                }
+                                return <UserMessage key={msg.id} content={msg.content} />;
+                            })}
 						</>
 					)}
 					{isLoading && (
@@ -147,8 +155,7 @@ export const Chat = () => {
 						</button>
 					</form>
 					<div className="text-center mt-2 text-xs text-gray-400 dark:text-gray-500">
-						La IA puede cometer errores. Verifica la información
-						importante.
+						{isLiveMode ? "Estás hablando con un representante de soporte." : "La IA puede cometer errores. Verifica la información importante."}
 					</div>
 				</div>
 			</footer>
