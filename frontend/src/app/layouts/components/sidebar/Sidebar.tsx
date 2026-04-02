@@ -32,7 +32,7 @@ export const Sidebar = ({
                 )}
             </AnimatePresence>
             <aside
-                className={`fixed md:relative top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col z-50 transition-all duration-300 ease-out shadow-xl md:shadow-none
+                className={`fixed md:relative top-0 left-0 h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col z-50 transition-all duration-300 ease-out shadow-xl md:shadow-none overflow-hidden
                     ${isOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 md:w-20"}`
                 }
             >
