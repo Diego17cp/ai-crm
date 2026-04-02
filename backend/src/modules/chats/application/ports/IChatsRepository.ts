@@ -1,3 +1,4 @@
+import { EstadoChat } from "generated/prisma/enums";
 import {
 	ChatDTO,
 	GetChatsQueryDTO,
@@ -13,4 +14,7 @@ export interface IChatsRepository {
 	findChatBySessionId(sessionId: string): Promise<ChatDTO | null>;
 	findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]>;
 	findLiveActiveChats(idUsuario: string): Promise<LiveChatQueueItemDTO[]>;
+	takeChatFromQueue(chatId: string, asesorId: string): Promise<any>;
+	saveMessage(chatId: string, content: string, senderRole: "CLIENTE" | "ASESOR" | "BOT"): Promise<any>;
+	updateChatStatus(chatId: string, newStatus: EstadoChat): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { PrismaClient } from "generated/prisma/client";
+import { EstadoChat, PrismaClient } from "generated/prisma/client";
 import { IChatsRepository } from "../../application/ports/IChatsRepository";
 import { GetChatsQueryDTO, PaginatedChatResults, ChatDTO, LiveChatQueueItemDTO } from "../../domain/dtos";
 import { ConversacionesWhereInput } from "generated/prisma/models";
@@ -231,5 +231,38 @@ export class PrismaChatsRepository implements IChatsRepository {
             lastMessage: chat.mensajes[0]?.contenido ?? "",
             createdAt: chat.mensajes[0]?.created_at ?? chat.created_at,
         }))
+    }
+    async takeChatFromQueue(chatId: string, asesorId: string): Promise<any> {
+        const res = await this.prisma.conversaciones.updateMany({
+            where: { id: chatId, estado: "ESPERANDO_ASESOR" },
+            data: { estado: "ATENDIDO_HUMANO", id_usuario_asignado: asesorId, fecha_asignacion: new Date() },
+        });
+        if (res.count === 0) throw new Error("[RACE_CONDITION]: 12No se pudo tomar el chat. Es posible que ya haya sido tomado por otro asesor.");
+        return this.prisma.conversaciones.findUnique({ where: { id: chatId }, select: { cliente: { select: { nombres: true, apellidos: true } } } });
+    }
+    async saveMessage(chatId: string, content: string, senderRole: "CLIENTE" | "ASESOR" | "BOT"): Promise<any> {
+        const chat = await this.prisma.conversaciones.findUnique({
+            where: { id: chatId },
+            select: {
+                session_id: true,
+                id_usuario_asignado: true,
+            }
+        });
+        if (!chat) throw new Error("Chat no encontrado");
+        const newMessage = await this.prisma.mensajes.create({
+            data: {
+                id_conversacion: chatId,
+                contenido: content,
+                remitente: "HUMANO",
+                ...(senderRole === "ASESOR" && chat.id_usuario_asignado ? { id_usuario: chat.id_usuario_asignado } : {}),
+            }
+        });
+        return newMessage;
+    }
+    async updateChatStatus(chatId: string, newStatus: EstadoChat): Promise<void> {
+        await this.prisma.conversaciones.update({
+            where: { id: chatId },
+            data: { estado: newStatus },
+        });
     }
 }
