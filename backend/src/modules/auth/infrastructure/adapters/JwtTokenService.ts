@@ -20,9 +20,8 @@ export class JwtTokenService implements ITokenService {
 	}): AuthTokenPair {
 		const accessToken = jwt.sign(payload, env.JWT_SECRET, {
 			expiresIn: "15m",
-			// TODO: Ajustar issuer y audience según nombre del proyecto y cliente
-			issuer: "backend",
-			audience: "client",
+			issuer: "ayllu_kaypi-backend",
+			audience: "ayllu_kaypi-client",
 		});
 
 		const refreshToken = jwt.sign(
