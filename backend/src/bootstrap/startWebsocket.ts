@@ -1,4 +1,8 @@
 import { env } from "@/config";
+import { prisma } from "@/infrastructure/database/prismaClient";
+import { ChatUseCases } from "@/modules/chats/application/use-cases/ChatsUseCases";
+import { PrismaChatsRepository } from "@/modules/chats/infrastructure/adapters/PrismaChatsRepository";
+import { SocketChatController } from "@/modules/chats/infrastructure/controllers/SocketChatController";
 import { Server } from "node:http";
 import { Server as IOServer } from "socket.io";
 
@@ -17,12 +21,16 @@ export const startWebsocket = (server: Server) => {
         allowEIO3: true,
         transports: ["websocket", "polling"],
     });
+    const chatsRepo = new PrismaChatsRepository(prisma);
+    const chatsUseCase = new ChatUseCases(chatsRepo);
+    const socketController = new SocketChatController(ioInstance, chatsUseCase);
+
     ioInstance.on("connection", (socket) => {
         console.log("[Websocket] Cliente conectado:", socket.id);
+        socketController.registerListeners(socket);
         socket.on("disconnect", () => {
             console.log("[Websocket] Cliente desconectado:", socket.id);
         });
-        // TODO: Aqui va el registro de listeners entrantes si es necesario
     })
 }
 export const getIO = (): IOServer => {
