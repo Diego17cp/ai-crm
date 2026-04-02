@@ -15,5 +15,6 @@ export function chatRoutes(): Router {
     router.get("/:chatId", authGuard, controller.getChatById);
     router.get("/live/queue", authGuard, controller.getLiveChatQueue);
     router.get("/live/active", authGuard, controller.getLiveActiveChats);
+    router.patch("/:chatId/status", authGuard, controller.updateChatStatus);
     return router;
 }

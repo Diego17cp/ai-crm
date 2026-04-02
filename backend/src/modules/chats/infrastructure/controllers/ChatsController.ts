@@ -77,4 +77,17 @@ export class ChatsController {
 
         }
     }
+    updateChatStatus = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { chatId } = req.params;
+            const { newStatus } = req.body;
+            await this.chatUseCases.updateChatStatus(String(chatId), String(newStatus) as EstadoChat);
+            res.json({
+                success: true,
+                message: "Estado del chat actualizado correctamente",
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
