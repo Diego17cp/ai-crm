@@ -31,11 +31,21 @@ export class LotesUseCases {
 
     async updateLote(id: number, data: UpdateLoteDTO) {
         if (isNaN(id) || id <= 0) throw new AppError("ID de lote inválido", 400);
+        const lote = await this.repo.findById(id);
+        if (!lote) throw new AppError("Lote no encontrado", 404);
+        const currentState = lote.estado?.toUpperCase();
+        if (currentState === "VENDIDO" || currentState === "RESERVADO") {
+            throw new AppError("No se puede actualizar un lote que ya ha sido vendido o reservado", 400);
+        }
         return this.repo.update(id, data);
     }
 
     async deleteLote(id: number) {
         if (isNaN(id) || id <= 0) throw new AppError("ID de lote inválido", 400);
+        const existing = await this.repo.findById(id);
+        if (!existing) throw new AppError("Lote no encontrado", 404);
+        const hasSales = await this.repo.hasSales(id);
+        if (hasSales) throw new AppError("No se puede eliminar el lote porque tiene ventas asociadas.", 409);
         return this.repo.delete(id);
     }
 }

@@ -130,4 +130,11 @@ export class PrismaLotesRepository implements ILotesRepository {
             where: { id }
         });
     }
+
+    async hasSales(id: number): Promise<boolean> {
+        const salesCount = await this.prisma.ventas.count({
+            where: { id_lote: id }
+        });
+        return salesCount > 0;
+    }
 }

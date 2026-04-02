@@ -100,8 +100,6 @@ export class PrismaProyectosRepository implements IProyectosRepository {
         });
     }
 
-    // Ya no requeriremos findAll() ni query() porque han sido unificados en findPaginated()
-    
     async create(data: any) {
         return this.prisma.proyectos.create({
             data: { ...data, estado: EstadoGeneral.ACTIVO }
@@ -190,5 +188,41 @@ export class PrismaProyectosRepository implements IProyectosRepository {
             where: { id_etapa, estado: EstadoGeneral.ACTIVO },
             orderBy: { created_at: 'desc' }
         });
+    }
+    async hasAssociatedSales(id_proyecto: number): Promise<boolean> {
+        const salesCount = await this.prisma.ventas.count({
+            where: {
+                lote: {
+                    manzana: {
+                        etapa: {
+                            id_proyecto
+                        }
+                    }
+                }
+            }
+        })
+        return salesCount > 0;
+    }
+    async hasAssociatedSalesForEtapa(id_etapa: number): Promise<boolean> {
+        const salesCount = await this.prisma.ventas.count({
+            where: {
+                lote: {
+                    manzana: {
+                        id_etapa
+                    }
+                }
+            }
+        });
+        return salesCount > 0;
+    }
+    async hasAssociatedSalesForManzana(id_manzana: number): Promise<boolean> {
+        const salesCount = await this.prisma.ventas.count({
+            where: {
+                lote: {
+                    id_manzana
+                }
+            }
+        });
+        return salesCount > 0;
     }
 }

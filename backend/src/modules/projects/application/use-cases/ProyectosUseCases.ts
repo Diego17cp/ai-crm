@@ -46,7 +46,8 @@ export class ProyectosUseCases {
 		if (isNaN(id) || id <= 0) throw new AppError("ID de proyecto inválido", 400);
 		const existing = await this.repo.findById(id);
 		if (!existing) throw new AppError("Proyecto no encontrado", 404);
-
+		const hasSales = await this.repo.hasAssociatedSales(id);
+		if (hasSales) throw new AppError("No se puede eliminar el proyecto porque tiene ventas asociadas.", 409);
 		return this.repo.softDelete(id);
 	}
 
@@ -94,6 +95,8 @@ export class ProyectosUseCases {
 	async deleteEtapa(id: number) {
 		if (isNaN(id) || id <= 0)
 			throw new AppError("ID de etapa inválido", 400);
+		const hasSales = await this.repo.hasAssociatedSalesForEtapa(id);
+		if (hasSales) throw new AppError("No se puede eliminar la etapa porque tiene ventas asociadas.", 409);
 		return this.repo.softDeleteEtapa(id);
 	}
 	async findAllEtapas() {
@@ -173,6 +176,8 @@ export class ProyectosUseCases {
 
 	async deleteManzana(id: number) {
 		if (isNaN(id) || id <= 0) throw new AppError("ID de manzana inválido", 400);
+		const hasSales = await this.repo.hasAssociatedSalesForManzana(id);
+		if (hasSales) throw new AppError("No se puede eliminar la manzana porque tiene ventas asociadas.", 409);
 		return this.repo.softDeleteManzana(id);
 	}
 }

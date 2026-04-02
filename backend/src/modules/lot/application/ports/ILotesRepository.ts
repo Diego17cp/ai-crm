@@ -20,5 +20,5 @@ export interface ILotesRepository {
     create(data: CreateLoteDTO): Promise<Lotes>;
     update(id: number, data: UpdateLoteDTO): Promise<Lotes>;
     delete(id: number): Promise<any>;
-
+    hasSales(id: number): Promise<boolean>;
 }

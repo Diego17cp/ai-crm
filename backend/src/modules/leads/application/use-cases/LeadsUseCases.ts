@@ -151,6 +151,8 @@ export class LeadsUseCases {
         if (isNaN(id) || id <= 0) throw new AppError("ID de Lead inválido", 400);
         const existing = await this.repo.findById(id);
         if (!existing) throw new AppError("Lead no encontrado", 404);
+        const hasSales = await this.repo.hasSalesOrDebts(id);
+        if (hasSales) throw new AppError("No se puede eliminar el lead porque tiene ventas o deudas asociadas.", 409);
         return this.repo.delete(id);
     }
 }

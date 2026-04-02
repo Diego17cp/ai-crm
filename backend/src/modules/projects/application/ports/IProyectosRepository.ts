@@ -39,4 +39,8 @@ export interface IProyectosRepository {
 	softDeleteManzana(id: number): Promise<Manzanas>;
 	findAllManzanas(): Promise<Manzanas[]>;
 	findManzanasByEtapaId(id_etapa: number): Promise<Manzanas[]>;
+
+	hasAssociatedSales(id_proyecto: number): Promise<boolean>;
+	hasAssociatedSalesForEtapa(id_etapa: number): Promise<boolean>;
+	hasAssociatedSalesForManzana(id_manzana: number): Promise<boolean>;
 }

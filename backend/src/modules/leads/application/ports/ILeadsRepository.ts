@@ -27,4 +27,5 @@ export interface ILeadsRepository {
 	delete(id: number): Promise<Clientes>;
 	findByDocument(idTipoDoc: number, numero: string): Promise<LeadWithRelationsDTO | null>;
 	findPhonesInUse(numeros: string[], excludeLeadId?: number): Promise<string[]>;
+	hasSalesOrDebts(id: number): Promise<boolean>;
 }

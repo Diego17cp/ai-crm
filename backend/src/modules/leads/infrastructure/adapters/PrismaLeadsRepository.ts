@@ -186,9 +186,19 @@ export class PrismaLeadsRepository implements ILeadsRepository {
             await tx.telefonosCliente.deleteMany({
                 where: { id_cliente: id }
             });
+			await tx.citas.deleteMany({
+				where: { id_cliente: id }
+			})
             return tx.clientes.delete({
                 where: { id },
             });
         });
+	}
+
+	async hasSalesOrDebts(id: number): Promise<boolean> {
+		const salesCount = await this.prisma.ventas.count({
+			where: { id_cliente: id }
+		});
+		return salesCount > 0;
 	}
 }
