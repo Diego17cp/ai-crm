@@ -1,5 +1,5 @@
 import { apiClient } from "@/core/api";
-import type { AllChatsResponse, ChatDetailsResponse, ChatFilters } from "../types";
+import type { AllChatsResponse, ChatDetailsResponse, ChatFilters, ChatStatus } from "../types";
 
 export const chatsService = {
     getChats: async (query: ChatFilters) => {
@@ -18,6 +18,10 @@ export const chatsService = {
     },
     getChatsBySessionId: async (sessionId: string) => {
         const response = await apiClient.get<ChatDetailsResponse>(`/chats/session/${sessionId}`);
+        return response.data;
+    },
+    updateStatusChat: async (chatId: string, newStatus: ChatStatus) => {
+        const response = await apiClient.patch(`/chats/${chatId}/status`, { newStatus });
         return response.data;
     }
 }

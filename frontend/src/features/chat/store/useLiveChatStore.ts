@@ -8,6 +8,8 @@ interface LiveChatState {
     setInitialActiveChats: (chats: LiveChatQueueItem[]) => void;
     addChatToQueue: (chat: LiveChatQueueItem) => void;
     removeChatFromQueue: (chatId: string) => void;
+    moveChatToActive: (chatId: string) => void;
+    updateChatLastMessage: (chatId: string, message: string) => void;
 }
 export const useLiveChatStore = create<LiveChatState>((set) => ({
     queueQueue: [],
@@ -22,5 +24,17 @@ export const useLiveChatStore = create<LiveChatState>((set) => ({
     }),
     removeChatFromQueue: (chatId) => set((state) => ({
         queueQueue: state.queueQueue.filter(chat => chat.id !== chatId)
-    }))
+    })),
+    moveChatToActive: (chatId) => set((state) => {
+        const chatToMove = state.queueQueue.find(chat => chat.id === chatId);
+        if (!chatToMove) return state;
+        const isAlreadyActive = state.activeChats.some(chat => chat.id === chatId);
+        return {
+            queueQueue: state.queueQueue.filter(chat => chat.id !== chatId),
+            activeChats: isAlreadyActive ? state.activeChats : [chatToMove, ...state.activeChats],
+        };
+    }),
+    updateChatLastMessage: (chatId, message) => set((state) => ({
+        activeChats: state.activeChats.map(chat => chat.id === chatId ? { ...chat, lastMessage: message } : chat),
+    })),
 }));

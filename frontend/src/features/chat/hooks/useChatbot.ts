@@ -1,12 +1,14 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { chatbotService } from "../service/chatbot.service";
-import { STORAGE_KEY } from "@/shared/constants";
+import { BACKEND_BASE_URL, STORAGE_KEY } from "@/shared/constants";
 import { chatsService } from "../service/chatsService";
 import { NOMBRE_EMPRESA } from "@/shared/constants";
 import type { ApiError } from "@/core/types";
+import { io, type Socket } from "socket.io-client";
+import { toast } from "sonner";
 
-export type UserRole = "user" | "bot";
+export type UserRole = "user" | "bot" | "asesor";
 
 export interface Message {
 	id: string;
@@ -15,7 +17,9 @@ export interface Message {
 }
 
 export const useChatbot = () => {
+	const queryClient = useQueryClient();
 	const sessionId = localStorage.getItem(STORAGE_KEY) || "";
+	const socket = useRef<Socket | null>(null);
 	const { data: chatHistory, ...chatQuery } = useQuery({
 		queryKey: ["chatSession", sessionId],
 		queryFn: () => chatsService.getChatsBySessionId(sessionId),
@@ -23,6 +27,44 @@ export const useChatbot = () => {
 		staleTime: Infinity,
 	});
 	const [localMessages, setLocalMessages] = useState<Message[]>([]);
+	const isLiveMode = useMemo(() =>  chatHistory?.data?.estado === "ATENDIDO_HUMANO", [chatHistory]);
+	useEffect(() => {
+		const socketOrigin = new URL(BACKEND_BASE_URL).origin;
+		socket.current = io(socketOrigin, {
+			path: "/api/socket.io",
+			transports: ["websocket", "polling"],
+		});
+		socket.current.on("connect", () => {
+			if (chatHistory?.data.id) socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: chatHistory.data.id });
+		})
+		socket.current.on("server:CHAT_ASSIGNED", (payload: { chatId: string, asesorId: string }) => {
+			queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
+			if (payload.chatId === chatHistory?.data.id) {
+				toast.info("¡Un asesor se acaba de unir al chat para asistirte!");
+				setLocalMessages(prev => [...prev, {
+					id: `sys-${Date.now()}`,
+					role: "bot",
+					content: "¡Un asesor se acaba de unir al chat para asistirte!"
+				}])
+			}
+		});
+		socket.current.on("server:NEW_MESSAGE", (payload: { chatId: string, content: string, role: string }) => {
+            if (payload.chatId === chatHistory?.data?.id && payload.role !== "cliente") {
+                setLocalMessages(prev => [...prev, {
+                    id: `asesor-${Date.now()}`,
+                    role: "asesor",
+                    content: payload.content,
+                }]);
+            }
+        });
+		return () => {
+			if (socket.current) {
+				socket.current.disconnect();
+				socket.current = null;
+				console.log("Socket desconectado");
+			}
+		}
+	}, [chatHistory]);
 	const welcomeMessage: Message = {
 		id: "welcome",
 		role: "bot",
@@ -31,7 +73,9 @@ export const useChatbot = () => {
 	const messages = useMemo(() => {
 		const history: Message[] = chatHistory?.data.mensajes?.map(msg => ({
 			id: msg.id.toString(),
-			role: msg.remitente === "BOT" ? "bot" : "user",
+			role: msg.remitente === "BOT" 
+                ? "bot" 
+                : (msg.usuario ? "asesor" : "user"),
 			content: msg.contenido,
 		})) || [];
 		return [welcomeMessage, ...history, ...localMessages];
@@ -69,7 +113,13 @@ export const useChatbot = () => {
 		};
 		setLocalMessages((prev) => [...prev, newUserMsg]);
 		setInputValue("");
-		messageMutation.mutate(messageToSend);
+		if (isLiveMode) {
+			socket.current?.emit("client:SEND_MESSAGE", {
+				chatId: chatHistory?.data.id,
+				content: messageToSend,
+				senderRole: "CLIENTE"
+			})
+		} else messageMutation.mutate(messageToSend);
 	};
 
 	return {
@@ -82,6 +132,7 @@ export const useChatbot = () => {
 		handleSubmit,
 		isInitialLoading: chatQuery.isLoading,
 		isFatalError,
-		chatQuery
+		chatQuery,
+		isLiveMode
 	};
 };

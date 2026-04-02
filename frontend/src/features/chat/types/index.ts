@@ -55,3 +55,4 @@ export interface ChatDetailsResponse {
     success: boolean;
     data: ChatDetails;
 }
+export type ChatStatus = "BOT" | "ESPERANDO_ASESOR" | "ATENDIDO_HUMANO" | "FINALIZADO";
