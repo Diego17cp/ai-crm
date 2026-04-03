@@ -60,6 +60,7 @@ export class PrismaChatsRepository implements IChatsRepository {
             created_at: chat.created_at,
             estado: chat.estado,
             canal: chat.canal,
+            session_id: chat.session_id,
         }));
         return {
             data,
@@ -120,7 +121,7 @@ export class PrismaChatsRepository implements IChatsRepository {
                 }
             }
         })
-        return chat;
+        return chat ? chat as ChatDTO : null;
     }
     async findChatBySessionId(sessionId: string): Promise<ChatDTO | null> {
         const chat = await this.prisma.conversaciones.findFirst({
@@ -169,7 +170,7 @@ export class PrismaChatsRepository implements IChatsRepository {
                 }
             }
         })
-        return chat;
+        return chat ? chat as ChatDTO : null;
     }
     async findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]> {
         const chats = await this.prisma.conversaciones.findMany({

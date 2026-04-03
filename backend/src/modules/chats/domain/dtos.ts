@@ -17,6 +17,7 @@ export interface ChatMessageDTO {
 };
 export interface ChatDTO {
     id: string;
+    session_id: string | null;
     cliente: {
         id: number;
         nombres: string | null;
