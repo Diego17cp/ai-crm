@@ -545,7 +545,10 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 												<SearchableSelect
 													options={booleanOptions}
 													value={esPeruano}
-													onChange={setEsPeruano}
+													onChange={(val) => {
+														setEsPeruano(val);
+														if (val === "true") setNacionalidad("");
+													}}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
