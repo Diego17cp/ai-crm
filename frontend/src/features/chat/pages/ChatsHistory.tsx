@@ -13,13 +13,9 @@ import { Pagination } from "@/shared/components/Pagination";
 import { EmptyState, ErrorState } from "@/shared/components";
 import { useChatModals } from "../hooks/useChatModals";
 import { ChatDetailsModal } from "../components/ChatDetailsModal";
+import { classes } from "@/shared/constants";
 
-const selectClasses = {
-    input: "bg-gray-50! dark:bg-gray-800/50! border-transparent! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! rounded-xl! disabled:opacity-50! text-sm! py-2.5!",
-    option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40! text-sm!",
-    dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-    clearButton: "dark:text-gray-400! dark:hover:text-gray-200!",
-};
+const selectClasses = classes.searchableSelect;
 
 const estadoOptions = [
     { value: "BOT", label: "Bot" },

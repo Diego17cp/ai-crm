@@ -11,7 +11,7 @@ import {
 	FiPlus,
 	FiTrash2,
 } from "react-icons/fi";
-import { SearchableSelect as Select } from "dialca-ui";
+import { SearchableSelect } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
 import { useAppointments } from "../hooks/useAppointments";
@@ -24,58 +24,28 @@ import type {
 	EstadoCivil,
 	Solvencia,
 	Actitud,
+	TipoTelefono,
 } from "@/features/leads/types";
 import type { Lote } from "@/features/lots/types";
 import type { ApiError } from "@/core/types";
 import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
 import { useAuthStore } from "@/features/auth";
+import { classes, options } from "@/shared/constants";
+import { toast } from "sonner";
 
-// ================= Clases y Constantes =================
-const selectClasses = {
-	input: "bg-gray-50! dark:bg-gray-800/50! border-transparent! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! rounded-xl! disabled:opacity-50! text-sm! py-2.5! w-full!",
-	option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40! text-sm!",
-	dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-	clearButton: "dark:text-gray-400! dark:hover:text-gray-200!",
-    label: "text-sm! text-gray-700! dark:text-gray-300!",
-};
+const selectClasses = classes.searchableSelect
 
-const sexoOptions = [
-	{ value: "M", label: "Masculino" },
-	{ value: "F", label: "Femenino" },
-];
-const booleanOptions = [
-	{ value: "true", label: "Sí" },
-	{ value: "false", label: "No" },
-];
-const estadoCivilOptions = [
-	{ value: "SOLTERO", label: "Soltero/a" },
-	{ value: "CASADO", label: "Casado/a" },
-	{ value: "DIVORCIADO", label: "Divorciado/a" },
-	{ value: "CONVIVIENTE", label: "Conviviente" },
-];
-const solvenciaOptions = [
-	{ value: "EXCELENTE", label: "Excelente" },
-	{ value: "BUEN_PAGADOR", label: "Buen Pagador" },
-	{ value: "PAGA ATRASADO", label: "Paga Atrasado" },
-	{ value: "MOROSO", label: "Moroso" },
-	{ value: "DESCARTADO", label: "Descartado" },
-];
-const actitudOptions = [
-	{ value: "AMABLE", label: "Amable" },
-	{ value: "ENOJADO", label: "Enojado" },
-	{ value: "DESCONFIADO", label: "Desconfiado" },
-	{ value: "QUEJOSO", label: "Quejoso" },
-];
-const phoneTypeOptions = [
-	{ value: "PERSONAL", label: "Personal" },
-	{ value: "TRABAJO", label: "Trabajo" },
-	{ value: "WHATSAPP", label: "WhatsApp" },
-];
+const sexoOptions = options.sexo;
+const booleanOptions = options.boolean;
+const estadoCivilOptions = options.estadoCivil;
+const solvenciaOptions = options.solvencia;
+const actitudOptions = options.actitud;
+const phoneTypeOptions = options.phoneType;
 
 interface PhoneUI {
 	uiId: string;
 	numero: string;
-	tipo: string;
+	tipo: TipoTelefono;
 }
 
 interface Props {
@@ -84,7 +54,6 @@ interface Props {
 }
 
 export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
-	// ---- ESTADOS CITA (Step 1) ----
 	const [step, setStep] = useState<1 | 2>(1);
 	const [idProyecto, setIdProyecto] = useState("");
 	const [idEtapa, setIdEtapa] = useState("");
@@ -94,7 +63,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 	const [horaCita, setHoraCita] = useState("");
 	const [observaciones, setObservaciones] = useState("");
 
-	// ---- ESTADOS CLIENTE EXISTENTE (Step 2) ----
 	const [clientMode, setClientMode] = useState<"existing" | "new">(
 		"existing",
 	);
@@ -102,7 +70,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		null,
 	);
 
-	// ---- ESTADOS CLIENTE NUEVO (Step 2) ----
 	const [numeroDoc, setNumeroDoc] = useState("");
 	const [nombres, setNombres] = useState("");
 	const [apellidos, setApellidos] = useState("");
@@ -126,7 +93,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 
 	const { user } = useAuthStore();
 
-	// ---- FETCHERS CASCADA CITA ----
 	const etapasQuery = useQuery({
 		queryKey: ["etapas", idProyecto],
 		queryFn: async () => {
@@ -189,7 +155,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			label: `${u.id} - ${u.nombre}`,
 		})) || [];
 
-	// ---- RESET ESTADO MODAL ----
 	useEffect(() => {
 		if (isOpen) {
 			setStep(1);
@@ -222,7 +187,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		}
 	}, [isOpen]);
 
-	// ---- HANDLERS TELEFONOS NUEVO CLIENTE ----
 	const handleAddPhone = () => {
 		setPhones([
 			...phones,
@@ -242,7 +206,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
 	};
 
-	// ---- PAYLOAD & MUTACION ----
 	const createPayload = useMemo((): CreateAppointmentPayload => {
 		const payload: CreateAppointmentPayload = {
 			id_proyecto: Number(idProyecto),
@@ -318,11 +281,13 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		setError(null);
 
 		if (clientMode === "existing" && !selectedClientId) {
+			toast.error("Debes buscar y seleccionar un cliente existente de la agenda.");
 			return setError(
 				"Debes buscar y seleccionar un cliente existente de la agenda.",
 			);
 		}
 		if (clientMode === "new" && !numeroDoc.trim()) {
+			toast.error("El número de documento del nuevo cliente es obligatorio.");
 			return setError(
 				"El número de documento del nuevo cliente es obligatorio.",
 			);
@@ -333,6 +298,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 				onSuccess: () => onClose(),
 			});
 		} catch (err: unknown) {
+			toast.error((err as ApiError)?.response?.data?.message || "Error al crear la cita.");
 			setError(
 				(err as ApiError)?.response?.data?.message ||
 					"Error al crear la cita.",
@@ -444,7 +410,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 												</h3>
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 													<div className="z-50">
-														<Select
+														<SearchableSelect
 															options={proyectoOptions}
 															value={idProyecto}
 															onChange={(val) => {
@@ -459,7 +425,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														/>
 													</div>
 													<div className="z-40">
-														<Select
+														<SearchableSelect
 															options={etapaOptions}
 															value={idEtapa}
 															onChange={(val) => {
@@ -474,7 +440,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														/>
 													</div>
 													<div className="z-30">
-														<Select
+														<SearchableSelect
 															options={manzanaOptions}
 															value={idManzana}
 															onChange={(val) => {
@@ -487,7 +453,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														/>
 													</div>
 													<div className="z-20">
-														<Select
+														<SearchableSelect
 															options={loteOptions}
 															value={idLote}
 															onChange={(val) =>
@@ -726,7 +692,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
                                                                                 <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
                                                                                     Tipo de Teléfono
                                                                                 </label>
-                                                                                <Select
+                                                                                <SearchableSelect
                                                                                     options={phoneTypeOptions}
                                                                                     value={phone.tipo}
                                                                                     onChange={(val) =>
@@ -793,7 +759,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														</h3>
 														<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 															<div className="flex flex-col gap-1.5 focus-within:z-40">
-																<Select
+																<SearchableSelect
 																	options={booleanOptions}
 																	value={esPeruano}
 																	onChange={(val) => setEsPeruano(String(val))}
@@ -803,7 +769,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																/>
 															</div>
 															<div className="flex flex-col gap-1.5 focus-within:z-30">
-																<Select
+																<SearchableSelect
 																	options={sexoOptions}
 																	value={sexo}
 																	onChange={(val) => setSexo(String(val))}
@@ -813,7 +779,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																/>
 															</div>
 															<div className="flex flex-col gap-1.5 focus-within:z-20 md:col-span-2">
-																<Select
+																<SearchableSelect
 																	options={ubigeoOptions}
 																	value={idUbigeo}
 																	onChange={(val) => setIdUbigeo(String(val))}
@@ -840,7 +806,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														</h3>
 														<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 															<div className="flex flex-col gap-1.5 focus-within:z-50">
-																<Select
+																<SearchableSelect
 																	options={estadoCivilOptions}
 																	value={estadoCivil}
 																	onChange={(val) => setEstadoCivil(String(val))}
@@ -850,7 +816,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																/>
 															</div>
 															<div className="flex flex-col gap-1.5 focus-within:z-40">
-																<Select
+																<SearchableSelect
 																	options={solvenciaOptions}
 																	value={solvencia}
 																	onChange={(val) => setSolvencia(String(val))}
@@ -860,7 +826,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																/>
 															</div>
 															<div className="flex flex-col gap-1.5 focus-within:z-30">
-																<Select
+																<SearchableSelect
 																	options={actitudOptions}
 																	value={actitud}
 																	onChange={(val) => setActitud(String(val))}

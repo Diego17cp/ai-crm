@@ -9,34 +9,14 @@ import { useClients } from "../hooks/useClients";
 import { useClientModals } from "../hooks/useClientsModals";
 import { toast } from "sonner";
 import { EditClientModal } from "../components/EditClientModal";
+import { classes, options } from "@/shared/constants";
 
-const selectClasses = {
-    input: "bg-gray-50! dark:bg-gray-800/50! border-transparent! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! rounded-xl! disabled:opacity-50! text-sm! py-2.5!",
-    option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40! text-sm!",
-    dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-    clearButton: "dark:text-gray-400! dark:hover:text-gray-200!"
-};
+const selectClasses = classes.searchableSelect;
 
-const sexoOptions = [{ value: "M", label: "Masculino" }, { value: "F", label: "Femenino" }];
-const estadoCivilOptions = [
-    { value: "SOLTERO", label: "Soltero/a" },
-    { value: "CASADO", label: "Casado/a" },
-    { value: "DIVORCIADO", label: "Divorciado/a" },
-    { value: "CONVIVIENTE", label: "Conviviente" }
-];
-const solvenciaOptions = [
-    { value: "EXCELENTE", label: "Excelente" },
-    { value: "BUEN_PAGADOR", label: "Buen Pagador" },
-    { value: "PAGA ATRASADO", label: "Paga Atrasado" },
-    { value: "MOROSO", label: "Moroso" },
-    { value: "DESCARTADO", label: "Descartado" }
-];
-const actitudOptions = [
-    { value: "AMABLE", label: "Amable" },
-    { value: "ENOJADO", label: "Enojado" },
-    { value: "DESCONFIADO", label: "Desconfiado" },
-    { value: "QUEJOSO", label: "Quejoso" }
-];
+const sexoOptions = options.sexo;
+const estadoCivilOptions = options.estadoCivil;
+const solvenciaOptions = options.solvencia;
+const actitudOptions = options.actitud;
 
 export const AllCustomers = () => {
     const {

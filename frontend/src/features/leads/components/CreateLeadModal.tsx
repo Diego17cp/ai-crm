@@ -21,6 +21,7 @@ import type {
 	CreateLeadPayload,
 	TipoTelefono,
 } from "../types";
+import { classes, options } from "@/shared/constants";
 
 interface Props {
 	isOpen: boolean;
@@ -33,45 +34,14 @@ interface PhoneUI {
 	tipo: TipoTelefono;
 }
 
-const selectClasses = {
-	input: "bg-gray-50! dark:bg-gray-800/50! border-transparent! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! rounded-xl! disabled:opacity-50! text-sm! py-2.5! w-full!",
-	option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40! text-sm!",
-	dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-	clearButton: "dark:text-gray-400! dark:hover:text-gray-200!",
-};
+const selectClasses = classes.searchableSelect
 
-const sexoOptions = [
-	{ value: "M", label: "Masculino" },
-	{ value: "F", label: "Femenino" },
-];
-const booleanOptions = [
-	{ value: "true", label: "Sí" },
-	{ value: "false", label: "No" },
-];
-const estadoCivilOptions = [
-	{ value: "SOLTERO", label: "Soltero/a" },
-	{ value: "CASADO", label: "Casado/a" },
-	{ value: "DIVORCIADO", label: "Divorciado/a" },
-	{ value: "CONVIVIENTE", label: "Conviviente" },
-];
-const solvenciaOptions = [
-	{ value: "EXCELENTE", label: "Excelente" },
-	{ value: "BUEN_PAGADOR", label: "Buen Pagador" },
-	{ value: "PAGA ATRASADO", label: "Paga Atrasado" },
-	{ value: "MOROSO", label: "Moroso" },
-	{ value: "DESCARTADO", label: "Descartado" },
-];
-const actitudOptions = [
-	{ value: "AMABLE", label: "Amable" },
-	{ value: "ENOJADO", label: "Enojado" },
-	{ value: "DESCONFIADO", label: "Desconfiado" },
-	{ value: "QUEJOSO", label: "Quejoso" },
-];
-const phoneTypeOptions = [
-	{ value: "PERSONAL", label: "Personal" },
-	{ value: "TRABAJO", label: "Trabajo" },
-	{ value: "WHATSAPP", label: "WhatsApp" },
-];
+const sexoOptions = options.sexo;
+const booleanOptions = options.boolean
+const estadoCivilOptions = options.estadoCivil;
+const solvenciaOptions = options.solvencia;
+const actitudOptions = options.actitud;
+const phoneTypeOptions = options.phoneType;
 
 export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 	const [numeroDoc, setNumeroDoc] = useState("");
@@ -83,6 +53,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 	const [ocupacion, setOcupacion] = useState("");
 
 	const [esPeruano, setEsPeruano] = useState<string>("true");
+	const [nacionalidad, setNacionalidad] = useState<string>("");
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
 	const [solvencia, setSolvencia] = useState<string>("");
@@ -105,6 +76,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 			setDireccion("");
 			setOcupacion("");
 			setEsPeruano("true");
+			setNacionalidad("");
 			setSexo("");
 			setEstadoCivil("");
 			setSolvencia("");
@@ -124,6 +96,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 			email: email.trim() || undefined,
 			fecha_nacimiento: fechaNacimiento || undefined,
 			es_peruano: esPeruano === "true",
+			nacionalidad: nacionalidad.trim() || undefined,
 			direccion: direccion.trim() || undefined,
 			ocupacion: ocupacion.trim() || undefined,
 			sexo: (sexo as Sexo) || undefined,
@@ -150,6 +123,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 		actitud,
 		idUbigeo,
 		phones,
+		nacionalidad
 	]);
 
 	const createLeadMutation = useCreateLeadMutation(createPayload);
@@ -332,7 +306,10 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 															e.target.value,
 														)
 													}
+													maxLength={11}
+													minLength={8}
 													disabled={isSubmitting}
+													placeholder="Ej: 12345678"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
@@ -554,6 +531,25 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													classes={selectClasses}
 												/>
 											</div>
+											{esPeruano === "false" && (
+												<div className="flex flex-col gap-1.5 focus-within:z-20 col-span-1 md:col-span-2">
+													<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 block">
+														Nacionalidad
+													</label>
+													<input
+														type="text"
+														value={nacionalidad}
+														onChange={(e) =>
+															setNacionalidad(
+																e.target.value,
+															)
+														}
+														disabled={isSubmitting}
+														placeholder="Ej: Argentina, Colombia..."
+														className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													/>
+												</div>
+											)}
 										</div>
 									</div>
 									<div className="flex flex-col gap-4 pb-4">

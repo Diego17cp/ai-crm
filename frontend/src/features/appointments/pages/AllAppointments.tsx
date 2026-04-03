@@ -11,19 +11,11 @@ import { EditAppointmentModal } from "../components/EditAppointmentModal";
 import { UpdateAppointmentStatusModal } from "../components/UpdateAppointmentStatusModal";
 import { CreateAppointmentModal } from "../components/CreateAppointmentModal";
 import { DeleteAppointmentModal } from "../components/DeleteAppointmentModal";
+import { classes, options } from "@/shared/constants";
 
-const selectClasses = {
-    input: "bg-gray-50! dark:bg-gray-800/50! border-transparent! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! rounded-xl! disabled:opacity-50! text-sm! py-2.5!",
-    option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40! text-sm!",
-    dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-    clearButton: "dark:text-gray-400! dark:hover:text-gray-200!"
-};
+const selectClasses = classes.searchableSelect;
 
-const estadoOpciones = [
-    { value: "PROGRAMADA", label: "Programadas" },
-    { value: "ATENDIDA", label: "Atendidas" },
-    { value: "CANCELADA", label: "Canceladas" }
-];
+const estadoOpciones = options.estadoCita;
 
 export const AllAppointments = () => {
     const {
