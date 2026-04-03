@@ -9,6 +9,8 @@ import { env } from "@/config";
 import { ResolveChatSessionUseCase } from "../../application/use-cases/ResolveChatSessionUseCase";
 import { GeminiLLMService } from "../adapters/GeminiLLMService";
 import { SocketEventNotifier } from "../adapters/SocketEventNotifier";
+import { KapsoWhatsAppService } from "../adapters/KapsoWhatsAppService";
+import { WhatsappWebhookController } from "../controllers/WhatsappWebhookController";
 
 export function createChatbotRouter(): Router {
 	const router = Router();
@@ -31,8 +33,19 @@ export function createChatbotRouter(): Router {
 		toolsRegistry,
 		chatbotRepo,
 	);
+	
     const resolveChatSessionUseCase = new ResolveChatSessionUseCase(chatbotRepo);
 	const chatbotController = new ChatbotController(processChatMessage, resolveChatSessionUseCase);
+	
+	const kapsoService = new KapsoWhatsAppService();
+	const whatsappWebhookController = new WhatsappWebhookController(
+		kapsoService,
+		processChatMessage,
+		resolveChatSessionUseCase,
+		chatbotRepo
+	)
 	router.post("/message", chatbotController.handleMessage);
+	router.post("/webhook/whatsapp", whatsappWebhookController.handleWebhookEvent);
+	router.get("/webhook/whatsapp", whatsappWebhookController.verifyWebook);
 	return router;
 }

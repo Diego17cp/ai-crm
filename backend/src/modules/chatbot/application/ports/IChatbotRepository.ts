@@ -1,3 +1,5 @@
+import { Conversaciones } from "generated/prisma/client";
+
 export interface ChatMessage {
 	id?: number;
 	remitente: "HUMANO" | "BOT";
@@ -13,5 +15,6 @@ export interface IChatbotRepository {
 		contenido: string,
 	): Promise<void>;
 	findActiveConversationBySession(sessionId: string): Promise<{ id: string } | null>;
+	findChatById(chatId: string): Promise<Conversaciones | null>;
 	createConversation(sessionId: string, canal: "WEB" | "WHATSAPP"): Promise<{ id: string }>;
 }

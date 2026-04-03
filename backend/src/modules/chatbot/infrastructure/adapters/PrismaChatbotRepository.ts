@@ -1,4 +1,4 @@
-import { PrismaClient } from "generated/prisma/client";
+import { Conversaciones, PrismaClient } from "generated/prisma/client";
 import {
 	ChatMessage,
 	IChatbotRepository,
@@ -50,15 +50,38 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 		return conversacion;
 	}
 
+	async findChatById(
+		chatId: string,
+	): Promise<Conversaciones | null> {
+		const chat = await this.prisma.conversaciones.findFirst({
+			where: {
+				id: chatId,
+			},
+			orderBy: { created_at: "desc" },
+		});
+		return chat;
+	}
+
 	async createConversation(
 		sessionId: string,
 		canal: "WEB" | "WHATSAPP",
 	): Promise<{ id: string }> {
+		let idClienteEncontrado: number | null = null;
+		if (canal === "WHATSAPP") {
+			const clienteRelacion = await this.prisma.telefonosCliente.findFirst({
+				where: {
+					numero: { endsWith: sessionId.slice(-9) }, // Busca por los últimos dígitos del número de teléfono, whatsapp lo trae como 51+ número, pero en la base de datos se guarda sin el código de país. Ejemplo: si el número es 51987654321, se busca por 987654321
+				},
+				select: { id_cliente: true },
+			});
+			if (clienteRelacion) idClienteEncontrado = clienteRelacion.id_cliente;
+		}
 		const nueva = await this.prisma.conversaciones.create({
 			data: {
 				session_id: sessionId,
 				canal: canal,
 				estado: "BOT",
+				id_cliente: idClienteEncontrado,
 			},
 			select: { id: true },
 		});
