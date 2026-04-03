@@ -10,4 +10,7 @@ export const env = {
     JWT_SECRET_REFRESH: process.env.JWT_SECRET_REFRESH || "default_jwt_refresh_secret",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
     GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+    KAPSO_API_KEY: process.env.KAPSO_API_KEY || "",
+    WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
+    WEBHOOK_VERIFY_TOKEN: process.env.WEBHOOK_VERIFY_TOKEN || "",
 }
