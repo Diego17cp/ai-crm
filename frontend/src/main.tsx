@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./core/theme/index.css";
-import "@fontsource-variable/onest";
+import "@fontsource-variable/onest/index.css";
 import App from "./app/App.tsx";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
