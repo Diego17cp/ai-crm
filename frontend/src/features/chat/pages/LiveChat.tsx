@@ -22,6 +22,7 @@ export const LiveChat = () => {
                 isQueue={activeTab === "queue"} 
                 onTakeChat={handleTakeChat}
                 onSendMessage={handleSendMessage}
+                onCloseChat={() => setSelectedChatId(null)}
             />
         </div>
     );

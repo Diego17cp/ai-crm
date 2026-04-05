@@ -28,6 +28,13 @@ export const useChatbot = () => {
 	});
 	const [localMessages, setLocalMessages] = useState<Message[]>([]);
 	const isLiveMode = useMemo(() =>  chatHistory?.data?.estado === "ATENDIDO_HUMANO", [chatHistory]);
+	const activeChatIdRef = useRef<string | null>(null);
+	useEffect(() => {
+		activeChatIdRef.current = chatHistory?.data.id || null;
+	}, [chatHistory?.data?.id]);
+	useEffect(() => {
+		if (chatHistory?.data.mensajes) setLocalMessages([]);
+	}, [chatHistory?.data.mensajes]);
 	useEffect(() => {
 		const socketOrigin = new URL(BACKEND_BASE_URL).origin;
 		socket.current = io(socketOrigin, {
@@ -35,11 +42,11 @@ export const useChatbot = () => {
 			transports: ["websocket", "polling"],
 		});
 		socket.current.on("connect", () => {
-			if (chatHistory?.data.id) socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: chatHistory.data.id });
+			if (activeChatIdRef.current) socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: activeChatIdRef.current });
 		})
 		socket.current.on("server:CHAT_ASSIGNED", (payload: { chatId: string, asesorId: string }) => {
-			queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
-			if (payload.chatId === chatHistory?.data.id) {
+			if (payload.chatId === activeChatIdRef.current) {
+				queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
 				toast.info("¡Un asesor se acaba de unir al chat para asistirte!");
 				setLocalMessages(prev => [...prev, {
 					id: `sys-${Date.now()}`,
@@ -49,7 +56,7 @@ export const useChatbot = () => {
 			}
 		});
 		socket.current.on("server:NEW_MESSAGE", (payload: { chatId: string, content: string, role: string }) => {
-            if (payload.chatId === chatHistory?.data?.id && payload.role !== "cliente") {
+            if (payload.chatId === activeChatIdRef.current && payload.role !== "cliente") {
                 setLocalMessages(prev => [...prev, {
                     id: `asesor-${Date.now()}`,
                     role: "asesor",
@@ -64,7 +71,12 @@ export const useChatbot = () => {
 				console.log("Socket desconectado");
 			}
 		}
-	}, [chatHistory]);
+	}, [sessionId, queryClient]);
+	useEffect(() => {
+		if (socket.current && socket.current.connected && chatHistory?.data.id) {
+			socket.current.emit("client:JOIN_CHAT_ROOM", { chatId: chatHistory.data.id });
+		}
+	}, [chatHistory?.data.id]);
 	const welcomeMessage: Message = {
 		id: "welcome",
 		role: "bot",
@@ -90,6 +102,7 @@ export const useChatbot = () => {
 				content: data,
 			};
 			setLocalMessages((prev) => [...prev, newBotMsg]);
+			queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
 		}
 	});
 	const isLoading = messageMutation.isPending;

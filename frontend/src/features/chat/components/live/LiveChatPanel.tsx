@@ -11,9 +11,10 @@ interface Props {
     isQueue: boolean;
     onTakeChat: (chatId: string) => void;
     onSendMessage: (chatId: string, message: string) => void;
+    onCloseChat: () => void;
 }
 
-export const LiveChatPanel = ({ chatId, isQueue, onTakeChat, onSendMessage }: Props) => {
+export const LiveChatPanel = ({ chatId, isQueue, onTakeChat, onSendMessage, onCloseChat }: Props) => {
     const { useChatByIdQuery } = useChats();
     const { useUpdateChatStatusMutation } = useLiveChat();
     const mutation = useUpdateChatStatusMutation(chatId || "", "BOT");
@@ -100,7 +101,7 @@ export const LiveChatPanel = ({ chatId, isQueue, onTakeChat, onSendMessage }: Pr
                     <button 
                         className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium transition-colors"
                         onClick={() => mutation.mutate(undefined, {
-                            onSuccess: () => window.location.reload()
+                            onSuccess: () => onCloseChat()
                         })}
                     >
                         <FiXCircle /> Reasignar al Bot
@@ -140,7 +141,10 @@ export const LiveChatPanel = ({ chatId, isQueue, onTakeChat, onSendMessage }: Pr
                 {isQueue ? (
                     <button
                         className="w-full py-3.5 bg-teal-600 cursor-pointer hover:bg-teal-700 text-white rounded-xl font-bold shadow-md shadow-teal-500/30 transition-all flex justify-center items-center gap-2"
-                        onClick={() => onTakeChat(chatId)}
+                        onClick={() => {
+                            onTakeChat(chatId);
+                            onCloseChat();
+                        }}
                     >
                         Unirse y Atender a este Cliente
                     </button>
