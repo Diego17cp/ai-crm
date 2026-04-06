@@ -1,12 +1,15 @@
 import ReactMarkdown from "react-markdown";
 import { motion } from "motion/react";
 import { FiUser } from "react-icons/fi";
+import type { Chat } from "../types";
 
 interface AsesorMessageProps {
     content: string;
+    asesor: Chat["asesor"];
 }
 
-export const AsesorMessage = ({ content }: AsesorMessageProps) => {
+export const AsesorMessage = ({ content, asesor }: AsesorMessageProps) => {
+    const asesorName = asesor ? `${asesor.nombres} ${asesor.apellidos?.split(" ")[0] || ""}` : "Asesor Especializado";
     return (
         <motion.div
             initial={{ opacity: 0, x: -10 }}
@@ -20,7 +23,7 @@ export const AsesorMessage = ({ content }: AsesorMessageProps) => {
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl rounded-tl-none p-4 shadow-sm border border-blue-100 dark:border-blue-800/50 w-full overflow-hidden">
                 <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-1 block">
-                    Asesor Especializado
+                    {asesorName}
                 </span>
                 <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
                     <ReactMarkdown>

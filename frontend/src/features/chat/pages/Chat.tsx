@@ -18,7 +18,8 @@ export const Chat = () => {
 		handleSubmit,
 		isFatalError,
 		isInitialLoading,
-		isLiveMode
+		isLiveMode,
+		chatHistory
 	} = useChatbot();
 
 	if (isFatalError) return (
@@ -64,9 +65,9 @@ export const Chat = () => {
 					): (
 						<>
 							{messages.map((msg) => {
-                                if (msg.role === "asesor") {
-                                    return <AsesorMessage key={msg.id} content={msg.content} />;
-                                }
+								if (msg.role === "asesor") {
+									return <AsesorMessage key={msg.id} content={msg.content} asesor={chatHistory?.data.asesor ?? null} />;
+								}
                                 if (msg.role === "bot") {
                                     return <BotMessage key={msg.id} content={msg.content} />;
                                 }
