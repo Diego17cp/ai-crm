@@ -36,13 +36,13 @@ export class SalesUseCases {
 
 	async processCollectionBoard(query: GetCollectionsQueryDTO) {
 		const collections = await this.repo.findCollections(query);
-		const hoyString = new Date().toISOString().split("T")[0];
-		const hoyTime = new Date(hoyString || "").getTime();
+		const hoy = new Date();
+		const hoyUTC = Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 
 		const enrichedData = collections.data.map((c: any) => {
-			const vencimiento = new Date(c.fecha_vencimiento).getTime();
+            const vencimientoUTC = new Date(c.fecha_vencimiento).getTime();
 			let dias_mora = 0;
-			if (vencimiento < hoyTime) dias_mora = Math.ceil((hoyTime - vencimiento) / (1000 * 3600 * 24));
+			if (vencimientoUTC < hoyUTC) dias_mora = Math.round((hoyUTC - vencimientoUTC) / (1000 * 3600 * 24));
 			return { ...c, dias_mora };
 		});
 
