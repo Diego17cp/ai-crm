@@ -20,9 +20,9 @@ export const useLiveChat = () => {
 		addChatToQueue,
 		removeChatFromQueue,
 		moveChatToActive,
-        updateChatLastMessage
+		updateChatLastMessage,
 	} = useLiveChatStore();
-    const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 	const { isLoading: isLoadingQueue } = useQuery({
 		queryKey: ["live-chat-queue"],
 		queryFn: async () => {
@@ -37,27 +37,40 @@ export const useLiveChat = () => {
 		queryFn: async () => {
 			const data = await liveChatService.getActiveChats();
 			setInitialActiveChats(data);
-            if (socket.current) {
-                data.forEach(chat => {
-                    socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: chat.id });
-                })
-            }
+			if (socket.current) {
+				data.forEach((chat) => {
+					socket.current?.emit("client:JOIN_CHAT_ROOM", {
+						chatId: chat.id,
+					});
+				});
+			}
 			return data;
 		},
 	});
-    const useUpdateChatStatusMutation = (chatId: string, newState: ChatStatus) => useMutation({
-        mutationFn: () => chatsService.updateStatusChat(chatId, newState),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-            queryClient.invalidateQueries({ queryKey: ["live-chat-queue"] });
-            queryClient.invalidateQueries({ queryKey: ["live-chat-active"] });
-            toast.success("Estado del chat actualizado");
-        },
-        onError: (error: ApiError) => {
-            const errorMessage = error.response?.data?.message || error.message || "Error al actualizar el estado del chat";
-            toast.error(errorMessage);
-        } 
-    })
+	const useUpdateChatStatusMutation = (
+		chatId: string,
+		newState: ChatStatus,
+	) =>
+		useMutation({
+			mutationFn: () => chatsService.updateStatusChat(chatId, newState),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+				queryClient.invalidateQueries({
+					queryKey: ["live-chat-queue"],
+				});
+				queryClient.invalidateQueries({
+					queryKey: ["live-chat-active"],
+				});
+				toast.success("Estado del chat actualizado");
+			},
+			onError: (error: ApiError) => {
+				const errorMessage =
+					error.response?.data?.message ||
+					error.message ||
+					"Error al actualizar el estado del chat";
+				toast.error(errorMessage);
+			},
+		});
 	useEffect(() => {
 		if (!socket.current) {
 			const socketOrigin = new URL(BACKEND_BASE_URL).origin;
@@ -66,66 +79,6 @@ export const useLiveChat = () => {
 				transports: ["websocket", "polling"],
 				withCredentials: true,
 			});
-			socket.current.on(
-				"server:CHAT_REQUIRES_HUMAN",
-				(payload: ChatRequiresHumanEvt) => {
-					const nombreCliente = payload.info?.cliente?.nombres
-						? `${payload.info.cliente.nombres} ${payload.info.cliente.apellidos ?? ""}`.trim()
-						: "Cliente anónimo";
-					const newChatInQueue = {
-						id: payload.conversacionId,
-						nombre: nombreCliente,
-						canal: payload.info?.canal ?? "WEB",
-						lastMessage:
-							payload.info?.ultimo_mensaje ?? payload.message,
-						createdAt: payload.timeStamp,
-					};
-					addChatToQueue(newChatInQueue);
-					toast.info("Nuevo cliente en espera", {
-						description: `El cliente ${nombreCliente} necesita asistencia.`,
-						duration: 5000,
-					});
-					const audio = new Audio("/sounds/notification.mp3");
-					audio
-						.play()
-						.catch((e) =>
-							console.warn(
-								"No se pudo reproducir el sonido de notificación:",
-								e,
-							),
-						);
-				},
-			);
-			socket.current.on(
-				"server:CHAT_ASSIGNED",
-				(payload: { chatId: string; asesorId: string }) => {
-					if (payload.asesorId === user?.id) {
-						moveChatToActive(payload.chatId);
-						toast.success("Has tomado el chat exitosamente");
-                        socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: payload.chatId });
-					} else removeChatFromQueue(payload.chatId);
-				},
-			);
-            socket.current.on("server:NEW_MESSAGE", (payload: { chatId: string, content: string, role: string }) => {
-                queryClient.invalidateQueries({ queryKey: ["chat", payload.chatId] });
-                if (payload.role === "cliente") {
-                    updateChatLastMessage(payload.chatId, payload.content);
-                    toast("Nuevo mensaje", {
-                        description: payload.content,
-                        duration: 5000,
-                        icon: "📩",
-                    });
-                    const audio = new Audio("/sounds/notification.mp3");
-                    audio
-                        .play()
-                        .catch((e) =>
-                            console.warn(
-                                "No se pudo reproducir el sonido de notificación:",
-                                e,
-                            ),
-                        );
-                }
-            })
 			socket.current.on("connect_error", (err) => {
 				console.error(
 					"Error de conexión al servidor de WebSocket:",
@@ -133,13 +86,91 @@ export const useLiveChat = () => {
 				);
 			});
 		}
-		return () => {
-			if (socket.current) {
-				socket.current.disconnect();
-				socket.current = null;
+		const currentSocket = socket.current;
+		const handleChatRequiresHuman = (payload: ChatRequiresHumanEvt) => {
+			const nombreCliente = payload.info?.cliente?.nombres
+				? `${payload.info.cliente.nombres} ${payload.info.cliente.apellidos ?? ""}`.trim()
+				: "Cliente anónimo";
+			const newChatInQueue = {
+				id: payload.conversacionId,
+				nombre: nombreCliente,
+				canal: payload.info?.canal ?? "WEB",
+				lastMessage: payload.info?.ultimo_mensaje ?? payload.message,
+				createdAt: payload.timeStamp,
+			};
+			addChatToQueue(newChatInQueue);
+			toast.info("Nuevo cliente en espera", {
+				description: `El cliente ${nombreCliente} necesita asistencia.`,
+				duration: 5000,
+			});
+			const audio = new Audio("/sounds/notification.mp3");
+			audio
+				.play()
+				.catch((e) =>
+					console.warn(
+						"No se pudo reproducir el sonido de notificación:",
+						e,
+					),
+				);
+		};
+		const handleChatAssigned = (payload: {
+			chatId: string;
+			asesorId: string;
+		}) => {
+			if (payload.asesorId === user?.id) {
+				moveChatToActive(payload.chatId);
+				toast.success("Has tomado el chat exitosamente");
+				currentSocket.emit("client:JOIN_CHAT_ROOM", {
+					chatId: payload.chatId,
+				});
+			} else removeChatFromQueue(payload.chatId);
+		};
+		const handleNewMessage = (payload: {
+			chatId: string;
+			content: string;
+			role: string;
+		}) => {
+			queryClient.invalidateQueries({
+				queryKey: ["chat", payload.chatId],
+			});
+			if (payload.role === "cliente") {
+				updateChatLastMessage(payload.chatId, payload.content);
+				toast("Nuevo mensaje", {
+					description: payload.content,
+					duration: 5000,
+					icon: "📩",
+				});
+				const audio = new Audio("/sounds/notification.mp3");
+				audio
+					.play()
+					.catch((e) =>
+						console.warn(
+							"No se pudo reproducir el sonido de notificación:",
+							e,
+						),
+					);
 			}
 		};
-	}, [addChatToQueue, removeChatFromQueue, moveChatToActive, updateChatLastMessage, user]);
+		socket.current.on(
+			"server:CHAT_REQUIRES_HUMAN",
+			handleChatRequiresHuman,
+		);
+		socket.current.on("server:CHAT_ASSIGNED", handleChatAssigned);
+		socket.current.on("server:NEW_MESSAGE", handleNewMessage);
+		return () => {
+			currentSocket.off("server:CHAT_REQUIRES_HUMAN", handleChatRequiresHuman);
+			currentSocket.off("server:CHAT_ASSIGNED", handleChatAssigned);
+			currentSocket.off("server:NEW_MESSAGE", handleNewMessage);
+			// currentSocket.disconnect();
+		};
+	}, [
+		addChatToQueue,
+		removeChatFromQueue,
+		moveChatToActive,
+		updateChatLastMessage,
+		user,
+		queryClient
+	]);
 	const handleTakeChat = (chatId: string) => {
 		if (!user) {
 			toast.error(
@@ -165,6 +196,6 @@ export const useLiveChat = () => {
 		isLoadingItems: isLoadingQueue || isLoadingActive,
 		handleTakeChat,
 		handleSendMessage,
-        useUpdateChatStatusMutation,
+		useUpdateChatStatusMutation,
 	};
 };

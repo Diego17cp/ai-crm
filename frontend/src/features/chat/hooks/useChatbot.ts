@@ -24,27 +24,34 @@ export const useChatbot = () => {
 		queryKey: ["chatSession", sessionId],
 		queryFn: () => chatsService.getChatsBySessionId(sessionId),
 		enabled: !!sessionId,
-		staleTime: Infinity,
+		// staleTime: Infinity,
 	});
 	const [localMessages, setLocalMessages] = useState<Message[]>([]);
 	const isLiveMode = useMemo(() =>  chatHistory?.data?.estado === "ATENDIDO_HUMANO", [chatHistory]);
 	const activeChatIdRef = useRef<string | null>(null);
 	useEffect(() => {
 		activeChatIdRef.current = chatHistory?.data.id || null;
+		console.log("Chat history updated, active chat ID set to:", activeChatIdRef.current);
 	}, [chatHistory?.data?.id]);
 	useEffect(() => {
 		if (chatHistory?.data.mensajes) setLocalMessages([]);
 	}, [chatHistory?.data.mensajes]);
 	useEffect(() => {
 		const socketOrigin = new URL(BACKEND_BASE_URL).origin;
-		socket.current = io(socketOrigin, {
-			path: "/api/socket.io",
-			transports: ["websocket", "polling"],
-		});
-		socket.current.on("connect", () => {
-			if (activeChatIdRef.current) socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: activeChatIdRef.current });
-		})
-		socket.current.on("server:CHAT_ASSIGNED", (payload: { chatId: string, asesorId: string }) => {
+		if (!socket.current) {
+			socket.current = io(socketOrigin, {
+				path: "/api/socket.io",
+				transports: ["websocket", "polling"],
+			});
+		}
+		const currentSocket = socket.current;
+		const handleConnect = () => {
+			if (activeChatIdRef.current) {
+				currentSocket.emit("client:JOIN_CHAT_ROOM", { chatId: activeChatIdRef.current });
+				queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
+			}
+		}
+		const handleChatAssigned = (payload: { chatId: string, asesorId: string }) => {
 			if (payload.chatId === activeChatIdRef.current) {
 				queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
 				toast.info("¡Un asesor se acaba de unir al chat para asistirte!");
@@ -52,24 +59,26 @@ export const useChatbot = () => {
 					id: `sys-${Date.now()}`,
 					role: "bot",
 					content: "¡Un asesor se acaba de unir al chat para asistirte!"
-				}])
+				}]);
 			}
-		});
-		socket.current.on("server:NEW_MESSAGE", (payload: { chatId: string, content: string, role: string }) => {
-            if (payload.chatId === activeChatIdRef.current && payload.role !== "cliente") {
-                setLocalMessages(prev => [...prev, {
-                    id: `asesor-${Date.now()}`,
-                    role: "asesor",
-                    content: payload.content,
-                }]);
-            }
-        });
+		};
+		const handleNewMessage = (payload: { chatId: string, content: string, role: string }) => {
+			if (payload.chatId === activeChatIdRef.current && payload.role !== "cliente") {
+				setLocalMessages(prev => [...prev, {
+					id: `asesor-${Date.now()}`,
+					role: "asesor",
+					content: payload.content,
+				}]);
+			}
+		}
+		socket.current.on("connect", handleConnect);
+		socket.current.on("server:CHAT_ASSIGNED", handleChatAssigned);
+		socket.current.on("server:NEW_MESSAGE", handleNewMessage);
 		return () => {
-			if (socket.current) {
-				socket.current.disconnect();
-				socket.current = null;
-				console.log("Socket desconectado");
-			}
+			currentSocket.off("connect", handleConnect);
+			currentSocket.off("server:CHAT_ASSIGNED", handleChatAssigned);
+			currentSocket.off("server:NEW_MESSAGE", handleNewMessage);
+			// currentSocket.disconnect();
 		}
 	}, [sessionId, queryClient]);
 	useEffect(() => {
@@ -146,6 +155,7 @@ export const useChatbot = () => {
 		isInitialLoading: chatQuery.isLoading,
 		isFatalError,
 		chatQuery,
-		isLiveMode
+		isLiveMode,
+		chatHistory
 	};
 };
