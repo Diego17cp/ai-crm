@@ -49,6 +49,7 @@ export const AppointmentsCalendar = ({ events, isLoading }: Props) => {
             year: "numeric",
             month: "long",
             day: "numeric",
+            timeZone: "UTC",
         }).format(date);
     };
 
@@ -58,6 +59,7 @@ export const AppointmentsCalendar = ({ events, isLoading }: Props) => {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
+            timeZone: "UTC",
         }).format(date);
     };
 
