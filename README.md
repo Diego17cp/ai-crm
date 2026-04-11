@@ -123,6 +123,7 @@ JWT_SECRET_REFRESH="refresh_secret_token..."
 # IA e Integraciones
 GEMINI_API_KEY="AIz..."
 OPENAI_API_KEY="sk-..."
+AI_MODEL_PROVIDER="openai"
 
 # Kapso (Meta WhatsApp)
 KAPSO_API_KEY="tu_token_kapso..."
@@ -274,6 +275,7 @@ JWT_SECRET_REFRESH="refresh_secret_token..."
 # AI and Integrations
 GEMINI_API_KEY="AIz..."
 OPENAI_API_KEY="sk-..."
+AI_MODEL_PROVIDER="openai"
 
 # Kapso (Meta WhatsApp)
 KAPSO_API_KEY="your_kapso_token..."

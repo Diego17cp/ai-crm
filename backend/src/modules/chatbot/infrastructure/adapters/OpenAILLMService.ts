@@ -13,9 +13,37 @@ export class OpenAILLMService implements ILLMService {
 	}
 
 	async chat(messages: LLMMessage[]): Promise<LLMMessage> {
+		const openAIMessages: OpenAI.ChatCompletionMessageParam[] = messages.map(msg => {
+			if (msg.role === "tool") return {
+				role: "tool",
+				content: msg.content || "",
+				tool_call_id: msg.tool_call_id!,
+			}
+			if (msg.role === "assistant") {
+				const assistantMsg: OpenAI.Chat.ChatCompletionAssistantMessageParam = {
+					role: "assistant",
+					content: msg.content || null,
+				};
+				if (msg.tool_calls && msg.tool_calls.length > 0) {
+					assistantMsg.tool_calls = msg.tool_calls.map(tc => ({
+						id: tc.id,
+						type: "function",
+						function: {
+							name: tc.name,
+							arguments: typeof tc.arguments === "string" ? tc.arguments : JSON.stringify(tc.arguments),
+						}
+					}));
+				}
+				return assistantMsg;
+			}
+			return {
+				role: msg.role,
+				content: msg.content || "",
+			} as OpenAI.Chat.ChatCompletionSystemMessageParam | OpenAI.Chat.ChatCompletionUserMessageParam;
+		})
 		const response = await this.openai.chat.completions.create({
 			model: "gpt-4o-mini",
-			messages: messages as any,
+			messages: openAIMessages,
 			tools: this.toolsRegistry.getToolsDefinition(),
 			tool_choice: "auto",
 			temperature: 0.2,

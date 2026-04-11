@@ -13,4 +13,5 @@ export const env = {
     KAPSO_API_KEY: process.env.KAPSO_API_KEY || "",
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
     WEBHOOK_VERIFY_TOKEN: process.env.WEBHOOK_VERIFY_TOKEN || "",
+    AI_MODEL_PROVIDER: process.env.AI_MODEL_PROVIDER || "openai",
 }

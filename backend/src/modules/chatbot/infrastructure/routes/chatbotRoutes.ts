@@ -11,6 +11,7 @@ import { GeminiLLMService } from "../adapters/GeminiLLMService";
 import { SocketEventNotifier } from "../adapters/SocketEventNotifier";
 import { KapsoWhatsAppService } from "../adapters/KapsoWhatsAppService";
 import { WhatsappWebhookController } from "../controllers/WhatsappWebhookController";
+import { OpenAILLMService } from "../adapters/OpenAILLMService";
 
 export function createChatbotRouter(): Router {
 	const router = Router();
@@ -20,14 +21,26 @@ export function createChatbotRouter(): Router {
 	const eventNotifier = new SocketEventNotifier();
 
 	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier);
-	// const llmService = new OpenAILLMService(
-	// 	env.OPENAI_API_KEY,
-	// 	toolsRegistry,
-	// );
-    const llmService = new GeminiLLMService(
-        env.GEMINI_API_KEY,
-        toolsRegistry,
-    )
+
+	let llmService = null;
+
+	switch (env.AI_MODEL_PROVIDER.toLowerCase()) {
+		case "gemini":
+			llmService = new GeminiLLMService(
+				env.GEMINI_API_KEY,
+				toolsRegistry,
+			);
+			break;
+		case "openai":
+			llmService = new OpenAILLMService(
+				env.OPENAI_API_KEY,
+				toolsRegistry
+			);
+			break;
+		default:
+			throw new Error(`Proveedor de modelo AI no soportado: ${env.AI_MODEL_PROVIDER}`);
+	}
+	console.log(`Usando proveedor de modelo AI: ${env.AI_MODEL_PROVIDER}`);
 	const processChatMessage = new ProcessChatMessageUseCase(
 		llmService,
 		toolsRegistry,
