@@ -37,5 +37,9 @@ export const salesService = {
         if (filters.dias_proximas) queryParams.append("dias", filters.dias_proximas.toString());
         const response = await apiClient.get<CobrosResponse>(`/ventas/cobranzas?${queryParams.toString()}`);
         return response.data;
+    },
+    notifyDebtReminder: async (idCuota: number) => {
+        const res = await apiClient.post(`/ventas/cuotas/${idCuota}/recordatorios`);
+        return res.data;
     }
 }
