@@ -270,4 +270,27 @@ export class PrismaSalesRepository implements ISalesRepository {
 			}
 		});
 	}
+	async findCuotaById(id: number): Promise<CuotaWithRelations | null> {
+		return this.prisma.cuotas.findUnique({
+			where: { id },
+			include: {
+				venta: {
+					include: {
+						cliente: { include: { telefonos: true } },
+						lote: {
+							include: {
+								manzana: {
+									include: {
+										etapa: {
+											include: { proyecto: true },
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+	}
 }
