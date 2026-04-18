@@ -12,7 +12,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset && db:generate && db:push"
+    "db:reset": "prisma migrate reset && db:generate && db:push",
+    "job:debt-reminders": "tsx scripts/sendDebtReminder.ts"
   },
   "keywords": [],
   "author": "",
