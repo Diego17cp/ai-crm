@@ -14,4 +14,8 @@ export const env = {
     WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
     WEBHOOK_VERIFY_TOKEN: process.env.WEBHOOK_VERIFY_TOKEN || "",
     AI_MODEL_PROVIDER: process.env.AI_MODEL_PROVIDER || "openai",
+    META_VERIFY_TOKEN: process.env.META_VERIFY_TOKEN || "",
+    META_ACCESS_TOKEN: process.env.META_ACCESS_TOKEN || "",
+    META_WHATSAPP_PHONE_NUMBER_ID: process.env.META_WHATSAPP_PHONE_NUMBER_ID || "",
+    WHATSAPP_PROVIDER: process.env.WHATSAPP_PROVIDER || "kapso",
 }
