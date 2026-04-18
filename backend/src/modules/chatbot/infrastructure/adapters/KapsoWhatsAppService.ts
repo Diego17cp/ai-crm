@@ -1,7 +1,8 @@
 import { env } from "@/config";
 import { WhatsAppClient } from "@kapso/whatsapp-cloud-api";
+import { IWhatsappService } from "../../application/ports/IWhatsappService";
 
-export class KapsoWhatsAppService {
+export class KapsoWhatsAppService implements IWhatsappService {
     private readonly kapsoClient: WhatsAppClient;
     constructor() {
         this.kapsoClient = new WhatsAppClient({
