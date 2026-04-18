@@ -65,7 +65,7 @@ export class WhatsappWebhookController {
         return res.status(400).send("Faltan parámetros de verificación");
     }
     handleWebhookEvent = async (req: Request, res: Response, next: NextFunction) => {
-        console.log("[Whatsapp] Body recibido:", JSON.stringify(req.body, null, 2));
+        // console.log("[Whatsapp] Body recibido:", JSON.stringify(req.body, null, 2));
         try {
             const extracted = this.extractMessage(req.body);
             if (!extracted) return res.sendStatus(200); // Ignorar eventos que no sean mensajes de texto entrantes
