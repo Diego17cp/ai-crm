@@ -2,7 +2,6 @@ import { Router } from "express";
 import { ChatbotController } from "../controllers/ChatbotController";
 import { ProcessChatMessageUseCase } from "../../application/use-cases/ProcessChatMessageUseCase";
 import { ChatToolsRegistry } from "../adapters/ChatToolsRegistry";
-// import { OpenAILLMService } from "../adapters/OpenAILLMService";
 import { PrismaChatbotRepository } from "../adapters/PrismaChatbotRepository";
 import { prisma } from "@/infrastructure/database/prismaClient";
 import { env } from "@/config";
@@ -12,6 +11,7 @@ import { SocketEventNotifier } from "../adapters/SocketEventNotifier";
 import { KapsoWhatsAppService } from "../adapters/KapsoWhatsAppService";
 import { WhatsappWebhookController } from "../controllers/WhatsappWebhookController";
 import { OpenAILLMService } from "../adapters/OpenAILLMService";
+import { MetaWhatsappService } from "../adapters/MetaWhatsappService";
 
 export function createChatbotRouter(): Router {
 	const router = Router();
@@ -23,6 +23,7 @@ export function createChatbotRouter(): Router {
 	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier);
 
 	let llmService = null;
+	let whatsappService = null;
 
 	switch (env.AI_MODEL_PROVIDER.toLowerCase()) {
 		case "gemini":
@@ -40,7 +41,19 @@ export function createChatbotRouter(): Router {
 		default:
 			throw new Error(`Proveedor de modelo AI no soportado: ${env.AI_MODEL_PROVIDER}`);
 	}
+
+	switch (env.WHATSAPP_PROVIDER?.toLowerCase()) {
+		case "meta":
+			whatsappService = new MetaWhatsappService();
+			break;
+		case "kapso":
+			whatsappService = new KapsoWhatsAppService();
+			break;
+		default:
+			throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
+	}
 	console.log(`Usando proveedor de modelo AI: ${env.AI_MODEL_PROVIDER}`);
+	console.log(`Usando proveedor de WhatsApp: ${env.WHATSAPP_PROVIDER}`);
 	const processChatMessage = new ProcessChatMessageUseCase(
 		llmService,
 		toolsRegistry,
@@ -50,9 +63,8 @@ export function createChatbotRouter(): Router {
     const resolveChatSessionUseCase = new ResolveChatSessionUseCase(chatbotRepo);
 	const chatbotController = new ChatbotController(processChatMessage, resolveChatSessionUseCase);
 	
-	const kapsoService = new KapsoWhatsAppService();
 	const whatsappWebhookController = new WhatsappWebhookController(
-		kapsoService,
+		whatsappService,
 		processChatMessage,
 		resolveChatSessionUseCase,
 		chatbotRepo
