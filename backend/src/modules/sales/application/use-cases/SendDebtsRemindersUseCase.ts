@@ -1,125 +1,20 @@
-import { IWhatsappService } from "@/modules/chatbot/application/ports/IWhatsappService";
 import { ISalesRepository } from "../ports/ISalesRepository";
-
-type ReminderLevel = "today" | "soon" | "overdue";
+import { ReminderSenderService } from "../services/ReminderSenderService";
 
 export class SendDebtsRemindersUseCase {
     constructor(
         private readonly salesRepo: ISalesRepository,
-        private readonly whatsappService: IWhatsappService
+        private readonly reminderSender: ReminderSenderService
     ) {}
 
     async execute(): Promise<void> {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Establecer a medianoche para comparar solo fechas
         const overdueQuotas = await this.salesRepo.getOverdueQuotas();
         for (const cuota of overdueQuotas) {
-            const phone = cuota.venta.cliente.telefonos
-                .find(t => t.tipo?.toUpperCase() === "WHATSAPP")?.numero;
-            if (!phone) {
-                console.log(`[Reminder] Cliente sin número de WhatsApp registrado, cuota #${cuota.id} omitida.`);
-                continue;
-            }
-            const daysOverdue = this.getDaysOverdue(cuota.fecha_vencimiento, today);
-            const level = this.getReminderLevel(daysOverdue);
-            const cliente = cuota.venta.cliente;
-            const lote = cuota.venta.lote;
-            const proyecto = cuota.venta.lote.manzana.etapa.proyecto;
-            const manzana = cuota.venta.lote.manzana;
-            const clientName = cliente.nombres?.trim();
             try {
-                const dueDateUtc = new Intl.DateTimeFormat("es-PE", {
-                    timeZone: "UTC",
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric"
-                }).format(cuota.fecha_vencimiento);
-
-                await this.sendReminder(phone, {
-                    clientName: clientName && clientName.length > 0 ? clientName : "Cliente",
-                    project: proyecto.nombre,
-                    block: manzana.codigo,
-                    lot: lote.numero_lote.replace(/^\D+/g, ""), // Eliminar prefijos no numéricos
-                    amount: Number(cuota.monto_cuota),
-                    dueDate: dueDateUtc,
-                    daysOverdue,
-                    paymentCode: cliente.numero,
-                    level
-                });
-                console.log(`[Reminder] ${level} → ${phone} (${clientName}) - cuota #${cuota.id}`);
+                await this.reminderSender.send(cuota, false);
             } catch (error) {
-                console.error(`[Reminder] Fallo al enviar a ${phone} - cuota #${cuota.id}:`, error);
+                console.error(`[Reminder] Fallo al enviar cuota #${cuota.id}:`, error);
             }
         }
     }
-
-    private getDaysOverdue(fechaVencimiento: Date, today: Date): number {
-        const diff = today.getTime() - fechaVencimiento.getTime();
-        return Math.floor(diff / (1000 * 60 * 60 * 24));
-    }
-    private getReminderLevel(daysOverdue: number): ReminderLevel {
-        if (daysOverdue > 0) return "overdue";
-        if (daysOverdue === 0) return "today";
-        return "soon";
-    }
-    private async sendReminder(phone: string, data: {
-        clientName: string;
-        project: string;
-        block: string;
-        lot: string;
-        amount: number;
-        dueDate: string;
-        daysOverdue: number;
-        paymentCode: string;
-        level: ReminderLevel;
-    }): Promise<void> {
-        const date = data.dueDate;
-        const amount = data.amount.toFixed(2);
-
-        const baseParams = [
-            data.clientName,
-            data.block,
-            data.lot,
-            data.project,
-            date
-        ]
-        const templates: Record<ReminderLevel, { name: string; parameters: string[] }> = {
-            today: {
-                name: "recordatorio_pago_vence_hoy",
-                parameters: [
-                    ...baseParams,
-                    date,
-                    amount,
-                    data.paymentCode
-                ]
-            },
-            soon: {
-                name: "recordatorio_pago_lote",
-                parameters: [
-                    ...baseParams,
-                    date,
-                    amount,
-                    data.paymentCode
-                ]
-            },
-            overdue: {
-                name: "notificacion_cuota_vencida",
-                parameters: [
-                    ...baseParams,
-                    amount,
-                    data.paymentCode
-                ]
-            }
-        };
-        const template = templates[data.level];
-        const { name, parameters } = template;
-        let langCode = "es_PE";
-        const sendTemplateMessage = this.whatsappService.sendTemplateMessage;
-        if (!sendTemplateMessage) {
-            console.warn(`[Reminder] whatsappService.sendTemplateMessage no implementado`);
-            return
-        }
-        if (template.name === "recordatorio_pago_lote") langCode = "es" // El template está configurado con idioma "es" en Meta Business, no "es_PE"
-        await sendTemplateMessage.call(this.whatsappService, phone, name, parameters, langCode);
-    }
-}   
+}
