@@ -41,8 +41,8 @@ pnpm run dev       # Inicia el servidor de desarrollo
 - **Prisma ORM (`@prisma/client`, `@prisma/adapter-pg`)**: Manejo de base de datos relacional y migraciones.
 - **PostgreSQL**: Base de datos principal.
 - **Socket.IO**: Comunicación bidireccional en tiempo real para el chat (asesor-cliente).
-- **Kapso API (`@kapso/whatsapp-cloud-api`)**: Integración con WhatsApp de Meta.
-- **Gemini / OpenAI API**: Motor de IA para el procesamiento de lenguaje natural en el chatbot.
+- **Integración WhatsApp Business API**: Arquitectura agnóstica mediante puertos e interfaces, soportando adaptadores duales: Meta Directo Oficial (`axios`) y Kapso AI SDK (`@kapso/whatsapp-cloud-api`).
+- **Gemini / OpenAI API**: Motor de IA para el procesamiento de lenguaje natural en el chatbot, configurable mediante el entorno.
 
 ### Frontend
 - **React & Vite**: Librería y empaquetador ultrarrápido.
@@ -120,14 +120,22 @@ FRONTEND_URL="http://localhost:5173"
 JWT_SECRET="secret_token..."
 JWT_SECRET_REFRESH="refresh_secret_token..."
 
-# IA e Integraciones
+# IA e LLMs
 GEMINI_API_KEY="AIz..."
 OPENAI_API_KEY="sk-..."
-AI_MODEL_PROVIDER="openai"
+AI_MODEL_PROVIDER="openai" # Opciones: "openai" o "gemini"
 
-# Kapso (Meta WhatsApp)
+# Proveedor de WhatsApp (Activo)
+WHATSAPP_PROVIDER="meta" # Opciones: "meta" o "kapso"
+
+# Variables para Meta Oficial (si WHATSAPP_PROVIDER="meta")
+META_ACCESS_TOKEN="AccessTokenForMetaWhatsApp..."
+META_VERIFY_TOKEN="SecretTokenForWebhook..."
+META_WHATSAPP_PHONE_NUMBER_ID="..."
+
+# Variables para Kapso AI (si WHATSAPP_PROVIDER="kapso")
 KAPSO_API_KEY="tu_token_kapso..."
-WHATSAPP_PHONE_NUMBER_ID="id_de_telefono_meta..."
+WHATSAPP_PHONE_NUMBER_ID="id_de_telefono_meta_via_kapso"
 WEBHOOK_VERIFY_TOKEN="mi_token_secreto_para_webhook"
 ```
 ### Frontend `.env` (Ejemplo)
@@ -137,24 +145,24 @@ VITE_API_URL="http://localhost:3000/api"
 
 ---
 
-## Funcionalidad de KAPSO AI (WhatsApp Webhook para Dev)
-Para probar la integración del Chatbot con WhatsApp en entorno de desarrollo (**`localhost`**), debemos configurar el servicio Sandbox de Kapso y exponer nuestro puerto local:
+## Configuración de WhatsApp (Meta Oficial vs Kapso AI)
 
-1. **Iniciar Sesión de Sandbox**: Entra al [Dashboard de Kapso](https://kapso.ai) y obtén tu API Key. Colócalo en el `.env` del backend.
-2. **Configurar Número de Prueba**: Ve a la sección Phone Numbers > Sandbox. Allí deberás verificar el número de teléfono celular que usarás para tus testeos. 
-**IMPORTANTE**: *Únicamente el número celular ingresado y verificado en la Sandbox podrá interactuar y escribirle al número temporal que Kapso te brinda.*
-3. **Exponer el Puerto Local**:
-    - Abre VS Code (u otro editor que lo soporte).
-    - Abre la terminal integrada.
-    - Ve a la pestaña de `Ports` (puertos) en la barra lateral 
-    - Haz click en `Forward a Port` o `Redireccionar un puerto` y selecciona el puerto `3000` (o el que uses para el backend).
-    - Localiza la URL generada. Haz click derecho sobre ella, selecciona `Visibilidad de Puerto (Port Visibility)` y elige `Public` (Pública). (Si no es público, los servidores de Kapso no podrán entrar).
-    - Copia la URL pública generada.
-4. **Configurar Webhook en Kapso**:
-    - Regresa al dashboard de Kapso y navega hasta la sección de `Webhooks`.
-    - Haz clic en `Add Webhook` o `Agregar Webhook`.
-    - En el endpoint URL, pega la URL que copiaste y añádele la ruta programada. Debe quedar exactamente así: `{url_de_tu_puerto_publico}/api/chatbot/webhook/whatsapp`.
-5. Listo! Escríbele al número de pruebas de Kapso; el evento pegará en tu controlador `WhatsappWebhookController` y la IA responderá / derivará vía mensajes.
+El backend cuenta con una arquitectura de Puertos y Adaptadores (`IWhatsappService`), lo que le permite al sistema cambiar dinámicamente el proveedor que despacha y recibe los mensajes de WhatsApp sin tocar la lógica de negocio ni el ruteo. Esto se controla mediante la variable `WHATSAPP_PROVIDER` en tu `.env`.
+
+### 1. Proveedor Meta (Oficial)
+Ideal para producción. Usa las APIs directas de Meta for Developers (`graph.facebook.com`).
+- **`WHATSAPP_PROVIDER="meta"`**
+- Debes configurar un Meta App con el producto WhatsApp activado.
+- Configura el Webhook en el panel de Meta apuntando a tu servidor: `https://tu-dominio.com/api/chatbot/webhook/whatsapp`.
+- Usa tu **Verify Token** (`META_VERIFY_TOKEN`) para validar el endpoint y el **Access Token** (`META_ACCESS_TOKEN`) para enviar los mensajes vía Axios.
+
+### 2. Proveedor Kapso AI (Dev / Sandbox)
+Ideal para saltarse las burocracias de Meta en etapa de desarrollo o pruebas rápidas utilizando un entorno Sandbox.
+- **`WHATSAPP_PROVIDER="kapso"`**
+- Entra al [Dashboard de Kapso](https://kapso.ai) y obtén tu API Key (`KAPSO_API_KEY`).
+- Verifica en su panel el número celular desde el cual vas a probar (Sandbox mode).
+- Expon tu puerto local (usando VS Code Port Forwarding o Ngrok): `https://id-ngrok.app/api/chatbot/webhook/whatsapp` y pégalo en la configuración de Webhooks de Kapso con tu `WEBHOOK_VERIFY_TOKEN`.
+- El sistema inyectará automáticamente el SDK de Kapso para manejar los mensajes salientes.
 
 ---
 ## Advertencia sobre Inserción manual en la Base de Datos
@@ -199,7 +207,7 @@ pnpm run dev       # Starts the development server
 - **Prisma ORM (`@prisma/client`, `@prisma/adapter-pg`)**: Relational database management and migrations.
 - **PostgreSQL**: Main database.
 - **Socket.IO**: Real-time bidirectional communication for chat (advisor-client).
-- **Kapso API (`@kapso/whatsapp-cloud-api`)**: Integration with Meta's WhatsApp.
+- **WhatsApp Business API Integration**: Agnostic architecture via ports and interfaces, supporting dual adapters: Official Meta Direct (`axios`) and Kapso AI SDK (`@kapso/whatsapp-cloud-api`).
 - **Gemini / OpenAI API**: AI engine for natural language processing in the chatbot
 
 ### Frontend
@@ -272,12 +280,20 @@ FRONTEND_URL="http://localhost:5173"
 JWT_SECRET="secret_token..."
 JWT_SECRET_REFRESH="refresh_secret_token..."
 
-# AI and Integrations
+# AI and LLMs
 GEMINI_API_KEY="AIz..."
 OPENAI_API_KEY="sk-..."
-AI_MODEL_PROVIDER="openai"
+AI_MODEL_PROVIDER="openai" # Options: "openai" or "gemini"
 
-# Kapso (Meta WhatsApp)
+# WhatsApp Provider (Active)
+WHATSAPP_PROVIDER="meta" # Options: "meta" or "kapso"
+
+# Variables for Official Meta (if WHATSAPP_PROVIDER="meta")
+META_ACCESS_TOKEN="AccessTokenForMetaWhatsApp..."
+META_VERIFY_TOKEN="SecretTokenForWebhook..."
+META_WHATSAPP_PHONE_NUMBER_ID="..."
+
+# Variables for Kapso AI (if WHATSAPP_PROVIDER="kapso")
 KAPSO_API_KEY="your_kapso_token..."
 WHATSAPP_PHONE_NUMBER_ID="meta_phone_id..."
 WEBHOOK_VERIFY_TOKEN="my_secret_token_for_webhook"
@@ -288,23 +304,23 @@ WEBHOOK_VERIFY_TOKEN="my_secret_token_for_webhook"
 VITE_API_URL="http://localhost:3000/api"
 ```
 ---
-## KAPSO AI Functionality (WhatsApp Webhook for Dev)
-To test the Chatbot integration with WhatsApp in a development environment (**`localhost`**), we need to configure the Kapso Sandbox service and expose our local port:
-1. **Start Sandbox Session**: Log in to the [Kapso Dashboard](https://kapso.ai) and get your API Key. Place it in the backend `.env`.
-2. **Configure Test Number**: Go to the Phone Numbers > Sandbox section. There you must verify the cell phone number you will use for your tests.
-**IMPORTANT**: *Only the cell phone number entered and verified in the Sandbox will be able to interact and write to the temporary number that Kapso provides you.*
-3. **Expose Local Port**:
-    - Open VS Code (or another editor that supports it).
-    - Open the integrated terminal.
-    - Go to the `Ports` tab in the sidebar.
-    - Click on `Forward a Port` and select port `3000` (or the one you use for the backend).
-    - Locate the generated URL. Right-click on it, select `Port Visibility`, and choose `Public`. (If it's not public, Kapso's servers won't be able to enter).
-    - Copy the generated public URL.
-4. **Configure Webhook in Kapso**:
-    - Go back to the Kapso dashboard and navigate to the `Webhooks` section.
-    - Click on `Add Webhook`.
-    - In the endpoint URL, paste the URL you copied and add the scheduled route. It should look exactly like this: `{your_public_port_url}/api/chatbot/webhook/whatsapp`.
-5. Done! Write to the Kapso test number; the event will hit your `WhatsappWebhookController` and the AI will respond / handoff via messages.
+## WhatsApp Configuration (Official Meta vs Kapso AI)
+The backend has a Ports and Adapters architecture (`IWhatsappService`), allowing the system to dynamically switch the provider that dispatches and receives WhatsApp messages without touching the business logic or routing. This is controlled by the `WHATSAPP_PROVIDER` variable in your `.env`.
+
+### 1. Meta Provider (Official)
+Ideal for production. Uses direct Meta for Developers APIs (`graph.facebook.com`).
+- **`WHATSAPP_PROVIDER="meta"`**
+- You must set up a Meta App with the WhatsApp product activated.
+- Configure the Webhook in the Meta panel pointing to your server: `https://your-domain.com/api/chatbot/webhook/whatsapp`.
+- Use your **Verify Token** (`META_VERIFY_TOKEN`) to validate the endpoint and the **Access Token** (`META_ACCESS_TOKEN`) to send messages via Axios.
+
+### 2. Kapso AI Provider (Dev / Sandbox)
+Ideal for bypassing Meta's bureaucracies in the development stage or quick testing using a Sandbox environment.
+- **`WHATSAPP_PROVIDER="kapso"`**
+- Go to the [Kapso Dashboard](https://kapso.ai) and get your API Key (`KAPSO_API_KEY`).
+- Verify in their panel the cell phone number from which you will test (Sandbox mode).
+- Expose your local port (using VS Code Port Forwarding or Ngrok): `https://your-ngrok-id.app/api/chatbot/webhook/whatsapp` and paste it in the Webhooks configuration of Kapso with your `WEBHOOK_VERIFY_TOKEN`.
+- The system will automatically inject the Kapso SDK to handle outgoing messages.
 ---
 ## Warning about Manual Insertion in the Database
 If as an administrator you need to insert records directly through SQL commands or interfaces in Postgres (outside of Prisma ORM):
