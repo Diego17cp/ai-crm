@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { FiUser, FiPhone, FiCalendar, FiAlertCircle, FiArrowRight, FiMail } from "react-icons/fi";
+import { FiUser, FiPhone, FiCalendar, FiAlertCircle, FiArrowRight, FiMail, FiRefreshCw } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import { Link } from "react-router";
 import type { Cobro } from "../../types";
@@ -8,9 +8,11 @@ import { formatCurrency, formatDate } from "../../utils/salesFormatters";
 interface Props {
     cobro: Cobro;
     onPayClick: (cuotaId: number, saleId: number) => void;
+    onRemindClick: (cuotaId: number) => void;
+    isReminding: boolean;
 }
 
-export const CollectionListItem = ({ cobro, onPayClick }: Props) => {
+export const CollectionListItem = ({ cobro, onPayClick, onRemindClick, isReminding }: Props) => {
     const isOverdue = (cobro.dias_mora ?? 0) > 0;
 
     const d = new Date(cobro.fecha_vencimiento);
@@ -49,14 +51,19 @@ export const CollectionListItem = ({ cobro, onPayClick }: Props) => {
                     </div>                    
                     <div className="flex items-center gap-2 mb-1">
                         {wpPhone && (
-                            <a 
-                                href={`https://wa.me/51${wpPhone.numero}`} 
-                                target="_blank" 
-                                rel="noreferrer"
-                                className="flex items-center gap-1.5 px-3 py-1 bg-[#25D366]/10 text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/20 rounded-lg text-xs font-bold transition-colors w-fit border border-[#25D366]/20"
+                            <button 
+                                type="button"
+                                onClick={() => onRemindClick(cobro.id)}
+                                disabled={isReminding}
+                                className="flex items-center gap-1.5 px-3 py-1 bg-[#25D366]/10 cursor-pointer text-[#128C7E] dark:text-[#25D366] hover:bg-[#25D366]/20 rounded-lg text-xs font-bold transition-colors w-fit border border-[#25D366]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <FaWhatsapp size={14} /> Escribir
-                            </a>
+                                {isReminding ? (
+                                    <FiRefreshCw className="animate-spin" size={14} />
+                                ) : (
+                                    <FaWhatsapp size={14} />
+                                )}
+                                {isReminding ? "Enviando..." : "Notificar"}
+                            </button>
                         )}
                         {callPhone && (
                             <a

@@ -23,6 +23,7 @@ export const Collections = () => {
         handleTabChange,
         refetch,
         isRefetching,
+        notifyReminderMutation
     } = useCollections();
 
     const [selectedPayment, setSelectedPayment] = useState<{
@@ -46,7 +47,6 @@ export const Collections = () => {
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
-            {/* Header unificado (Título + Acciones principales) */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -148,14 +148,14 @@ export const Collections = () => {
                                     onPayClick={(cuotaId, saleId) =>
                                         setSelectedPayment({ cuotaId, saleId })
                                     }
+                                    onRemindClick={(cuotaId) => notifyReminderMutation.mutate(cuotaId)}
+                                    isReminding={notifyReminderMutation.isPending && notifyReminderMutation.variables === cobro.id}
                                 />
                             ))}
                         </AnimatePresence>
                     </motion.div>
                 )}
             </div>
-
-            {/* Paginación (Pegada al final si es necesario) */}
             {!isLoading && cobros.length > 0 && meta && meta.totalPages > 1 && (
                 <div className="mt-auto flex justify-center">
                     <Pagination
@@ -169,8 +169,6 @@ export const Collections = () => {
                     />
                 </div>
             )}
-
-            {/* Acciones Globales */}
             {selectedPayment && (
                 <PayQuotaModal
                     isOpen={!!selectedPayment}
