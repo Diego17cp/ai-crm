@@ -5,7 +5,7 @@ import {
 	EstadoCuota,
     TipoPersona,
 } from "generated/prisma/client";
-import { ISalesRepository } from "../../application/ports/ISalesRepository";
+import { CuotaWithRelations, ISalesRepository } from "../../application/ports/ISalesRepository";
 import {
 	GetSalesQueryDTO,
 	GetCollectionsQueryDTO,
@@ -229,5 +229,45 @@ export class PrismaSalesRepository implements ISalesRepository {
 			data,
 			meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
 		};
+	}
+	async getOverdueQuotas(): Promise<CuotaWithRelations[]> {
+		const todayStart = new Date();
+		todayStart.setHours(0, 0, 0, 0); // Normalizar a medianoche para comparar solo fechas
+		const todayEnd = new Date(todayStart);
+		todayEnd.setDate(todayEnd.getDate() + 1); // Siguiente día a medianoche
+
+		const reminderStart = new Date(todayStart);
+		reminderStart.setDate(reminderStart.getDate() + 5);
+		const reminderEnd = new Date(reminderStart);
+		reminderEnd.setDate(reminderEnd.getDate() + 1);
+
+		return this.prisma.cuotas.findMany({
+			where: {
+				estado: EstadoCuota.PENDIENTE,
+				OR: [
+					{ fecha_vencimiento: { lt: todayStart } }, // Vencidas
+					{ fecha_vencimiento: { gte: todayStart, lt: todayEnd } }, // Vencen hoy
+					{ fecha_vencimiento: { gte: reminderStart, lt: reminderEnd } }, // Próximas a vencer en 5 días
+				]
+			},
+			include: {
+				venta: {
+					include: {
+						cliente: { include: { telefonos: true } },
+						lote: {
+							include: {
+								manzana: {
+									include: {
+										etapa: {
+											include: { proyecto: true },
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
 	}
 }
