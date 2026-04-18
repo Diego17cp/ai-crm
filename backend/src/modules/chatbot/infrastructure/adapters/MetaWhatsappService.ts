@@ -26,22 +26,25 @@ export class MetaWhatsappService implements IWhatsappService {
             throw error;
         }
     }
-    async sendTemplateMessage(to: string, templateName: string, parameters: string[]): Promise<void> {
+    async sendTemplateMessage(to: string, templateName: string, parameters: string[], languageCode: string = "es_PE"): Promise<void> {
         try {
+            const components = parameters.length > 0 
+                ? [{
+                    type: "body",
+                    parameters: parameters.map(param => ({
+                        type: "text",
+                        text: param,
+                    }))
+                }]
+                : [];
             await axios.post(this.baseUrl, {
                 messaging_product: "whatsapp",
                 recipient_type: "individual",
                 to,
                 template: {
                     name: templateName,
-                    language: { code: "es_PE" },
-                    components: [{
-                        type: "body",
-                        parameters: parameters.map(param => ({
-                            type: "text",
-                            text: param,
-                        }))
-                    }]
+                    language: { code: languageCode },
+                    ...(components.length > 0 && { components })
                 }
             }, {
                 headers: this.headers,
