@@ -282,7 +282,17 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			take: 8,
             orderBy: args.area_aproximada_m2 ? { area_m2: "asc" } : { precio_total: "asc" }
 		});
-		return lotes;
+		return lotes.map(lt => {
+			const normalizedNumber = lt.numero_lote.replace(/^LT-/i, "");
+			const manzanaCode = lt.manzana?.codigo || "N/A";
+			const proyectoName = lt.manzana?.etapa?.proyecto?.nombre || "N/A";
+			return {
+				identificador: `Lote ${manzanaCode}-${normalizedNumber}`,
+				area_m2: lt.area_m2,
+				precio_total: lt.precio_total,
+				proyecto: proyectoName,
+			}
+		});
 	}
 
 	private async calcularFinanciamientoLote(args: {
