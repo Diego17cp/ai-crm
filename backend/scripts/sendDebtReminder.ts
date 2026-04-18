@@ -2,6 +2,7 @@ import { env } from "@/config";
 import { prisma } from "@/infrastructure/database/prismaClient";
 import { KapsoWhatsAppService } from "@/modules/chatbot/infrastructure/adapters/KapsoWhatsAppService";
 import { MetaWhatsappService } from "@/modules/chatbot/infrastructure/adapters/MetaWhatsappService";
+import { ReminderSenderService } from "@/modules/sales/application/services/ReminderSenderService";
 import { SendDebtsRemindersUseCase } from "@/modules/sales/application/use-cases/SendDebtsRemindersUseCase";
 import { PrismaSalesRepository } from "@/modules/sales/infrastructure/adapters/PrismaSalesRepository";
 
@@ -20,7 +21,8 @@ async function main() {
             default:
                 throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
         }
-        const sendRemindersUseCase = new SendDebtsRemindersUseCase(salesRepo, whatsappService);
+        const reminderSender = new ReminderSenderService(whatsappService);
+        const sendRemindersUseCase = new SendDebtsRemindersUseCase(salesRepo, reminderSender);
         
         await sendRemindersUseCase.execute();
         console.log("[Script] Recordatorios de deuda enviados.");

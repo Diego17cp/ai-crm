@@ -91,4 +91,17 @@ export class SalesController {
 			next(error);
 		}
 	};
+
+	sendDebtRemind = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			await this.useCases.sendDebtRemind(Number(req.params.idCuota));
+			res.status(200).json({
+				success: true,
+				message: "Recordatorio de deuda enviado",
+			});
+		} catch (error) {
+			next(error);
+			return;
+		}
+	};
 }
