@@ -53,3 +53,4 @@ export interface PaginatedResult<T> {
         hasPreviousPage: boolean;
 	};
 }
+export type ReminderLevel = "today" | "soon" | "overdue";

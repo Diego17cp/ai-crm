@@ -34,4 +34,5 @@ export interface ISalesRepository {
 		query: GetCollectionsQueryDTO,
 	): Promise<PaginatedResult<any>>;
 	getOverdueQuotas(): Promise<CuotaWithRelations[]>;
+	findCuotaById(id: number): Promise<CuotaWithRelations | null>;
 }
