@@ -40,6 +40,7 @@ export class MetaWhatsappService implements IWhatsappService {
             await axios.post(this.baseUrl, {
                 messaging_product: "whatsapp",
                 recipient_type: "individual",
+                type: "template",
                 to,
                 template: {
                     name: templateName,

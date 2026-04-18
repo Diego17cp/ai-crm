@@ -28,13 +28,20 @@ export class SendDebtsRemindersUseCase {
             const manzana = cuota.venta.lote.manzana;
             const clientName = cliente.nombres?.trim();
             try {
+                const dueDateUtc = new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "UTC",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }).format(cuota.fecha_vencimiento);
+
                 await this.sendReminder(phone, {
                     clientName: clientName && clientName.length > 0 ? clientName : "Cliente",
                     project: proyecto.nombre,
                     block: manzana.codigo,
                     lot: lote.numero_lote.replace(/^\D+/g, ""), // Eliminar prefijos no numéricos
                     amount: Number(cuota.monto_cuota),
-                    dueDate: cuota.fecha_vencimiento.toLocaleDateString("es-PE"),
+                    dueDate: dueDateUtc,
                     daysOverdue,
                     paymentCode: cliente.numero,
                     level
@@ -104,12 +111,15 @@ export class SendDebtsRemindersUseCase {
                 ]
             }
         };
-        const { name, parameters } = templates[data.level];
+        const template = templates[data.level];
+        const { name, parameters } = template;
+        let langCode = "es_PE";
         const sendTemplateMessage = this.whatsappService.sendTemplateMessage;
         if (!sendTemplateMessage) {
             console.warn(`[Reminder] whatsappService.sendTemplateMessage no implementado`);
             return
         }
-        await sendTemplateMessage.call(this.whatsappService, phone, name, parameters, "en_US");
+        if (template.name === "recordatorio_pago_lote") langCode = "es" // El template está configurado con idioma "es" en Meta Business, no "es_PE"
+        await sendTemplateMessage.call(this.whatsappService, phone, name, parameters, langCode);
     }
 }   
