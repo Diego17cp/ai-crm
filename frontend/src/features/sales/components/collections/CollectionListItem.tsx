@@ -87,6 +87,12 @@ export const CollectionListItem = ({ cobro, onPayClick, onRemindClick, isRemindi
                             <span className="text-xs text-gray-400 italic">Sin datos de contacto</span>
                         )}
                     </div>
+                    {cobro.numero_de_notificaciones > 0 && (
+                        <span className="inline-flex mt-1 items-center gap-1 px-2.5 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/50 w-fit">
+                            <FiAlertCircle size={14} />
+                            {cobro.numero_de_notificaciones} notificación{cobro.numero_de_notificaciones > 1 ? "es" : ""} enviada{cobro.numero_de_notificaciones > 1 ? "s" : ""}
+                        </span>
+                    )}
                 </div>
                 <div className="flex flex-col min-w-50 border-l-2 xl:border-l-0 pl-3 xl:pl-0 border-gray-100 dark:border-gray-800">
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">

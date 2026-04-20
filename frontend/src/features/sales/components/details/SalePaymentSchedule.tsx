@@ -2,11 +2,20 @@ import { useState } from "react";
 import type { VentaById } from "../../types";
 import { formatCurrency, formatDate, getEstadoCuotaColor } from "../../utils/salesFormatters";
 import { PayQuotaModal } from "./PayQuotaModal";
+import { QuotaNotificationsModal } from "./QuotaNotificationModal";
+import { FiBell } from "react-icons/fi";
 
 export const SalePaymentSchedule = ({ sale }: { sale: VentaById }) => {
-    const [selectedCuotaId, setSelectedCuotaId] = useState<number | null>(null);
+    const [modalState, setModalState] = useState<{
+        type: "payment" | "notifications" | null;
+        cuotaId: number | null;
+    }>({
+        type: null,
+        cuotaId: null
+    });
+    const handleCloseModal = () => setModalState({ type: null, cuotaId: null });
 
-    const handleCloseModal = () => setSelectedCuotaId(null);
+    const selectedCuota = sale.cuotas.find(c => c.id === modalState.cuotaId) || null;
 
     return (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -49,10 +58,17 @@ export const SalePaymentSchedule = ({ sale }: { sale: VentaById }) => {
                                 <td className="px-6 py-4 text-gray-500">
                                     {cuota.fecha_pago ? formatDate(cuota.fecha_pago) : "-"}
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right flex gap-4 justify-end items-center">
+                                    <button
+                                        onClick={() => setModalState({ type: "notifications", cuotaId: cuota.id })}
+                                        title="Ver notificaciones"
+                                        className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                                    >
+                                        <FiBell size={16} />
+                                    </button>
                                     {cuota.estado === "PENDIENTE" ? (
                                         <button 
-                                            onClick={() => setSelectedCuotaId(cuota.id)}
+                                            onClick={() => setModalState({ type: "payment", cuotaId: cuota.id })}
                                             className="text-blue-600 cursor-pointer hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm transition-colors"
                                         >
                                             Registrar Pago
@@ -67,11 +83,19 @@ export const SalePaymentSchedule = ({ sale }: { sale: VentaById }) => {
                 </table>
             </div>
             <PayQuotaModal 
-                isOpen={!!selectedCuotaId}
+                isOpen={modalState.type === "payment"}
                 onClose={handleCloseModal}
-                cuotaId={selectedCuotaId!}
+                cuotaId={modalState.cuotaId!}
                 saleId={sale.id}
             />
+            {selectedCuota && (
+                <QuotaNotificationsModal
+                    isOpen={modalState.type === "notifications"}
+                    onClose={handleCloseModal}
+                    notificaciones={selectedCuota.notificaciones}
+                    cuotaNro={selectedCuota.numero_cuota}
+                />
+            )}
         </div>
     );
 };
