@@ -21,7 +21,7 @@ async function main() {
             default:
                 throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
         }
-        const reminderSender = new ReminderSenderService(whatsappService);
+        const reminderSender = new ReminderSenderService(whatsappService, salesRepo);
         const sendRemindersUseCase = new SendDebtsRemindersUseCase(salesRepo, reminderSender);
         
         await sendRemindersUseCase.execute();
