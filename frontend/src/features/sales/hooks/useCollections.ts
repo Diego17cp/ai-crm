@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { usePagination } from "@/shared/hooks";
 import { salesService } from "../service/salesService";
@@ -9,6 +9,7 @@ import type { ApiError } from "@/core/types";
 export type CollectionFilterTab = "vencidas" | "proximas" | "todas";
 
 export const useCollections = () => {
+    const queryClient = useQueryClient();
     const { currentPage, perPage, goToPage, setPerPage } = usePagination({ 
         initialPage: 1, 
         initialPerPage: 10 
@@ -38,6 +39,7 @@ export const useCollections = () => {
         mutationFn: (idCuota: number) => salesService.notifyDebtReminder(idCuota),
         onSuccess: () => {
             toast.success("Recordatorio enviado exitosamente");
+            queryClient.invalidateQueries({ queryKey: ["cobranzas"] });
         },
         onError: (error: ApiError) => {
             const msg = error.response?.data?.message || "Error al enviar recordatorio";
