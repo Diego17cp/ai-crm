@@ -91,6 +91,18 @@ export interface CreateSalePayload {
 	estado_contrato?: EstadoContrato;
 }
 
+export interface Notificacion {
+	id: number;
+	template: string;
+	nivel_urgencia: string | null;
+	es_automatica: boolean;
+	fecha_envio: string;
+	usuario: {
+		nombres: string;
+		apellidos: string;
+	} | null;
+}
+
 export interface VentaById {
 	id: number;
 	fecha_venta: string;
@@ -123,6 +135,7 @@ export interface VentaById {
         fecha_pago: string | null;
         estado: EstadoCuota;
         metodo_pago: string | null;
+		notificaciones: Notificacion[];
     }[];
 }
 export interface VentaByIdResponse {
@@ -143,6 +156,7 @@ export interface Cobro {
 	metodo_pago: MetodoPago | null;
 	venta: VentaWithClienteWithTelefonos;
 	dias_mora: number | null;
+	numero_de_notificaciones: number;
 }
 export interface CobrosResponse {
 	success: boolean;

@@ -53,3 +53,33 @@ export const getEstadoContratoColor = (estado: EstadoContrato) => {
 		default: return "bg-gray-100 text-gray-700";
 	}
 };
+
+export const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleString("es-PE", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    });
+};
+
+export const getUrgencyLevelLabel = (urgency: string | null) => {
+    switch (urgency?.toLowerCase()) {
+        case "soon": return "Próximo a vencer";
+        case "today": return "Vence hoy";
+        case "overdue": return "Con mora";
+        default: return "Normal";
+    }
+};
+
+export const getUrgencyLevelColor = (urgency: string | null) => {
+    switch (urgency?.toLowerCase()) {
+        case "soon": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800/50";
+        case "today": return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800/50";
+        case "overdue": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800/50";
+        default: return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700";
+    }
+};
