@@ -10,6 +10,7 @@ import {
 	GetSalesQueryDTO,
 	GetCollectionsQueryDTO,
 	PaginatedResult,
+	ReminderLevel,
 } from "../../domain/dtos";
 
 export class PrismaSalesRepository implements ISalesRepository {
@@ -138,10 +139,31 @@ export class PrismaSalesRepository implements ISalesRepository {
 						},
 					},
 				},
-				cuotas: { orderBy: { numero_cuota: "asc" } },
+				cuotas: { 
+					orderBy: { numero_cuota: "asc" },
+					include: {
+						notificaciones: {
+							orderBy: { fecha_envio: "desc" },
+							select: {
+								id: true,
+								template: true,
+								nivel_urgencia: true,
+								es_automatica: true,
+								fecha_envio: true,
+								telefono_destino: true,
+								usuario: {
+									select: {
+										nombres: true,
+										apellidos: true,
+									}
+								}
+							}
+						}
+					}
+				},
 			},
 		});
-	}
+	};
 
 	async createSaleWithQuotas(
 		createPayload: Prisma.VentasCreateInput,
@@ -219,14 +241,27 @@ export class PrismaSalesRepository implements ISalesRepository {
 							cliente: { include: { telefonos: true } },
 						},
 					},
+					_count: {
+						select: {
+							notificaciones: true,
+						}
+					}
 				},
 			}),
 		]);
 
+		const formattedData = data.map((i) => {
+			const { _count, ...cuota } = i;
+			return {
+				...cuota,
+				numero_de_notificaciones: _count.notificaciones,
+			};
+		})
+
         const totalPages = Math.ceil(total / limit);
 
 		return {
-			data,
+			data: formattedData,
 			meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
 		};
 	}
@@ -292,5 +327,24 @@ export class PrismaSalesRepository implements ISalesRepository {
 				}
 			}
 		});
+	}
+	async logReminder(data: { 
+		id_cuota: number; 
+		id_usuario: string | null; 
+		template: string; 
+		telefono_destino: string; 
+		nivel_urgencia: ReminderLevel; 
+		es_automatica: boolean; 
+	}): Promise<void> {
+		await this.prisma.notificacionesCuota.create({
+			data: {
+				id_cuota: data.id_cuota,
+				id_usuario: data.id_usuario,
+				template: data.template,
+				telefono_destino: data.telefono_destino,
+				nivel_urgencia: data.nivel_urgencia,
+				es_automatica: data.es_automatica,
+			}
+		})
 	}
 }

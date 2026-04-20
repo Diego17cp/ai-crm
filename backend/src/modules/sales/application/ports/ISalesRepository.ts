@@ -3,6 +3,7 @@ import {
 	GetSalesQueryDTO,
 	PaginatedResult,
 	GetCollectionsQueryDTO,
+	ReminderLevel,
 } from "../../domain/dtos";
 
 export type CuotaWithRelations = Cuotas & {
@@ -35,4 +36,12 @@ export interface ISalesRepository {
 	): Promise<PaginatedResult<any>>;
 	getOverdueQuotas(): Promise<CuotaWithRelations[]>;
 	findCuotaById(id: number): Promise<CuotaWithRelations | null>;
+	logReminder(data:{
+		id_cuota: number;
+		id_usuario: string | null;
+		template: string;
+		telefono_destino: string;
+		nivel_urgencia: ReminderLevel;
+		es_automatica: boolean;
+	}): Promise<void>;
 }
