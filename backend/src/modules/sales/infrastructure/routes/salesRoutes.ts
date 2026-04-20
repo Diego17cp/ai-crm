@@ -25,7 +25,7 @@ export function salesRoutes(): Router {
 				`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`,
 			);
 	}
-    const reminderSender = new ReminderSenderService(whatsappService);
+    const reminderSender = new ReminderSenderService(whatsappService, repository);
 	const useCases = new SalesUseCases(repository, reminderSender);
 	const controller = new SalesController(useCases);
 

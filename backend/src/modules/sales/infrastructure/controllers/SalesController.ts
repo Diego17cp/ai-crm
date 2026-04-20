@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { SalesUseCases } from "../../application/use-cases/SalesUseCases";
+import { AuthRequest } from "@/app/middlewares/authGuard";
 
 export class SalesController {
 	constructor(private readonly useCases: SalesUseCases) {}
@@ -92,9 +93,10 @@ export class SalesController {
 		}
 	};
 
-	sendDebtRemind = async (req: Request, res: Response, next: NextFunction) => {
+	sendDebtRemind = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
-			await this.useCases.sendDebtRemind(Number(req.params.idCuota));
+			const userId = req.user!.id;
+			await this.useCases.sendDebtRemind(Number(req.params.idCuota), userId);
 			res.status(200).json({
 				success: true,
 				message: "Recordatorio de deuda enviado",
