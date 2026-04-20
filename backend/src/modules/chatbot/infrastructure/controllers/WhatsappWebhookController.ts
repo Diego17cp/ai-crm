@@ -23,7 +23,7 @@ export class WhatsappWebhookController {
 
     private readonly whatsappProvider = env.WHATSAPP_PROVIDER?.toLowerCase() || "meta";
     private readonly processedWamids = new Set<string>();
-    private readonly accessToken = this.whatsappProvider === "meta" ? env.META_ACCESS_TOKEN : env.WEBHOOK_VERIFY_TOKEN;
+    private readonly verifyToken = this.whatsappProvider === "meta" ? env.META_VERIFY_TOKEN : env.WEBHOOK_VERIFY_TOKEN;
 
     private extractMessage(body: any): NormalizedMessage | null {
         // Formato esperado de Kapso:
@@ -56,7 +56,7 @@ export class WhatsappWebhookController {
         const token = req.query['hub.verify_token'];
         const challenge = req.query['hub.challenge'];
         if (mode && token) {
-            if (mode === "subscribe" && token === this.accessToken) {
+            if (mode === "subscribe" && token === this.verifyToken) {
                 console.log("[Whatsapp] Webhook verificado exitosamente");
                 return res.status(200).send(challenge);
             }
