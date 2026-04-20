@@ -37,10 +37,10 @@ export const CollectionListItem = ({ cobro, onPayClick, onRemindClick, isRemindi
             animate={{ opacity: 1, y: 0 }}
             className={`group p-5 bg-white dark:bg-gray-900 border-l-4 rounded-2xl shadow-sm hover:shadow-md transition-all ${
                 isOverdue 
-                    ? "border-l-red-500 border border-gray-100 dark:border-gray-800" 
+                    ? "border-l-red-500 border border-gray-100 dark:border-gray-800 dark:border-l-red-800/50" 
                     : isToday 
-                        ? "border-l-amber-500 border border-gray-100 dark:border-gray-800"
-                        : "border-l-blue-500 border border-gray-100 dark:border-gray-800"
+                        ? "border-l-amber-500 border border-gray-100 dark:border-gray-800 dark:border-l-amber-800/50"
+                        : "border-l-blue-500 border border-gray-100 dark:border-gray-800 dark:border-l-blue-800/50"
             }`}
         >
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">                
@@ -90,7 +90,7 @@ export const CollectionListItem = ({ cobro, onPayClick, onRemindClick, isRemindi
                     {cobro.numero_de_notificaciones > 0 && (
                         <span className="inline-flex mt-1 items-center gap-1 px-2.5 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/50 w-fit">
                             <FiAlertCircle size={14} />
-                            {cobro.numero_de_notificaciones} notificación{cobro.numero_de_notificaciones > 1 ? "es" : ""} enviada{cobro.numero_de_notificaciones > 1 ? "s" : ""}
+                            {cobro.numero_de_notificaciones} notificaci{cobro.numero_de_notificaciones > 1 ? "ones" : "ón"} enviada{cobro.numero_de_notificaciones > 1 ? "s" : ""}
                         </span>
                     )}
                 </div>
