@@ -1,14 +1,20 @@
 import { IWhatsappService } from "@/modules/chatbot/application/ports/IWhatsappService";
 import { ReminderLevel } from "../../domain/dtos";
 import { AppError } from "@/core/errors/AppError";
-import { CuotaWithRelations } from "../ports/ISalesRepository";
+import { CuotaWithRelations, ISalesRepository } from "../ports/ISalesRepository";
 
 export class ReminderSenderService {
-	constructor(private readonly whatsappService: IWhatsappService) {}
+	constructor(
+		private readonly whatsappService: IWhatsappService,
+		private readonly salesRepo: ISalesRepository
+	) {}
 
 	async send(
 		cuota: CuotaWithRelations,
-		isManual: boolean = false,
+		options: {
+			isManual: boolean,
+			userId?: string
+		}
 	): Promise<void> {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
@@ -31,7 +37,7 @@ export class ReminderSenderService {
 			(t) => t.tipo?.toUpperCase() === "WHATSAPP",
 		)?.numero;
 		if (!phone) {
-			if (isManual)
+			if (options.isManual)
 				throw new AppError(
 					"El cliente no tiene un número de WhatsApp registrado.",
 					400,
@@ -51,7 +57,7 @@ export class ReminderSenderService {
 			year: "numeric",
 		}).format(cuota.fecha_vencimiento);
 
-		await this.dispatchTemplate(phone, {
+		const templateName = await this.dispatchTemplate(phone, {
 			clientName: cliente.nombres?.trim() || "Cliente",
 			project: proyecto.nombre,
 			block: lote.manzana.codigo,
@@ -61,6 +67,14 @@ export class ReminderSenderService {
 			daysOverdue,
 			paymentCode: cliente.numero,
 			level,
+		});
+		await this.salesRepo.logReminder({
+			id_cuota: cuota.id,
+			id_usuario: options.isManual ? (options.userId || null) : null,
+			template: templateName,
+			telefono_destino: phone,
+			nivel_urgencia: level,
+			es_automatica: !options.isManual,
 		});
 	}
 
@@ -83,9 +97,10 @@ export class ReminderSenderService {
 			paymentCode: string;
 			level: ReminderLevel;
 		},
-	): Promise<void> {
+	): Promise<string> {
 		const date = data.dueDate;
 		const amount = data.amount.toFixed(2);
+		const formattedPhone = phone.startsWith("51") ? phone : `51${phone}`;
 
 		const baseParams = [
 			data.clientName,
@@ -119,15 +134,16 @@ export class ReminderSenderService {
 			console.warn(
 				`[Reminder] whatsappService.sendTemplateMessage no implementado`,
 			);
-			return;
+			throw new AppError("El servicio de WhatsApp no soporta mensajes template", 500);
 		}
 		if (template.name === "recordatorio_pago_lote") langCode = "es"; // El template está configurado con idioma "es" en Meta Business, no "es_PE"
 		await sendTemplateMessage.call(
 			this.whatsappService,
-			phone,
+			formattedPhone,
 			name,
 			parameters,
 			langCode,
 		);
+		return name;
 	}
 }

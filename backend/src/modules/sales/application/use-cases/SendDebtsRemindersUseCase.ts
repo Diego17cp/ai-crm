@@ -11,7 +11,7 @@ export class SendDebtsRemindersUseCase {
         const overdueQuotas = await this.salesRepo.getOverdueQuotas();
         for (const cuota of overdueQuotas) {
             try {
-                await this.reminderSender.send(cuota, false);
+                await this.reminderSender.send(cuota, { isManual: false });
             } catch (error) {
                 console.error(`[Reminder] Fallo al enviar cuota #${cuota.id}:`, error);
             }

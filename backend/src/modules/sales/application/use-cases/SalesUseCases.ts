@@ -118,7 +118,7 @@ export class SalesUseCases {
 			monto_total: data.monto_total,
 			cuota_inicial: isCredito ? data.cuota_inicial || 0 : 0,
 			tipo_pago: data.tipo_pago,
-			num_cuotas: isCredito ? data.num_cuotas : null,
+			num_cuotas: isCredito ? (data.num_cuotas ?? null) : null,
 			monto_cuota,
 			tasa_interes: data.tasa_interes || null,
 			dia_pago: data.dia_pago || null,
@@ -162,9 +162,9 @@ export class SalesUseCases {
 		return this.repo.payQuota(idCuota, updatePayload);
 	}
 
-	async sendDebtRemind(idCuota: number) {
+	async sendDebtRemind(idCuota: number, userId: string) {
         const cuota = await this.repo.findCuotaById(idCuota);
         if (!cuota) throw new AppError("Cuota no encontrada", 404);        
-        await this.reminderSender.send(cuota, true); 
+        await this.reminderSender.send(cuota, { isManual: true, userId });
     }
 }
