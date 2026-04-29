@@ -59,13 +59,15 @@ export const SalePaymentSchedule = ({ sale }: { sale: VentaById }) => {
                                     {cuota.fecha_pago ? formatDate(cuota.fecha_pago) : "-"}
                                 </td>
                                 <td className="px-6 py-4 text-right flex gap-4 justify-end items-center">
-                                    <button
-                                        onClick={() => setModalState({ type: "notifications", cuotaId: cuota.id })}
-                                        title="Ver notificaciones"
-                                        className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-                                    >
-                                        <FiBell size={16} />
-                                    </button>
+                                    {cuota.notificaciones.length > 0 && (
+                                        <button
+                                            onClick={() => setModalState({ type: "notifications", cuotaId: cuota.id })}
+                                            title="Ver notificaciones"
+                                            className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                                        >
+                                            <FiBell size={16} />
+                                        </button>
+                                    )}
                                     {cuota.estado === "PENDIENTE" ? (
                                         <button 
                                             onClick={() => setModalState({ type: "payment", cuotaId: cuota.id })}
