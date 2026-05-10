@@ -34,6 +34,7 @@ export interface ChatDTO {
     } | null;
     mensajes: ChatMessageDTO[];
     created_at: Date;
+    last_message_at: Date | null;
     estado: EstadoChat;
     canal: CanalContacto | null;
 }
@@ -41,6 +42,7 @@ export interface GetChatsQueryDTO {
     q?: string | undefined;
     estado?: EstadoChat | undefined;
     canal?: CanalContacto | undefined;
+    id_asesor?: string | undefined;
     page: number;
     limit: number;
 }

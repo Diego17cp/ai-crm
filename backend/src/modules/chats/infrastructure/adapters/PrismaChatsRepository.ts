@@ -6,7 +6,7 @@ import { ConversacionesWhereInput } from "generated/prisma/models";
 export class PrismaChatsRepository implements IChatsRepository {
     constructor(private readonly prisma: PrismaClient) {}
     async findChats(query: GetChatsQueryDTO): Promise<PaginatedChatResults<Omit<ChatDTO, "mensajes">>> {
-        const { q, estado, canal, page, limit } = query;
+        const { q, estado, canal, page, limit, id_asesor } = query;
         const skip = (page - 1) * limit;
         const whereCondition: ConversacionesWhereInput = {};
         if (q) {
@@ -21,13 +21,14 @@ export class PrismaChatsRepository implements IChatsRepository {
 
         if (estado) whereCondition.estado = estado;
         if (canal) whereCondition.canal = canal;
+        if (id_asesor) whereCondition.id_usuario_asignado = id_asesor;
         const [total, chats] = await Promise.all([
             this.prisma.conversaciones.count({ where: whereCondition }),
             this.prisma.conversaciones.findMany({
                 where: whereCondition,
                 skip,
                 take: limit,
-                orderBy: { created_at: "desc" },
+                orderBy: { updated_at: "desc" },
                 include: {
                     cliente: {
                         select: {
@@ -48,6 +49,11 @@ export class PrismaChatsRepository implements IChatsRepository {
                                 }
                             }
                         }
+                    },
+                    mensajes: {
+                        take: 1,
+                        orderBy: { created_at: "desc" },
+                        select: { created_at: true }
                     }
                 }
             })
@@ -58,10 +64,12 @@ export class PrismaChatsRepository implements IChatsRepository {
             cliente: chat.cliente,
             asesor: chat.asesor,
             created_at: chat.created_at,
+            last_message_at: chat.mensajes[0]?.created_at || null,
             estado: chat.estado,
             canal: chat.canal,
             session_id: chat.session_id,
         }));
+        data.sort((a, b) => (b.last_message_at?.getTime() ?? 0) - (a.last_message_at?.getTime() ?? 0));
         return {
             data,
             meta: {
@@ -121,7 +129,7 @@ export class PrismaChatsRepository implements IChatsRepository {
                 }
             }
         })
-        return chat ? chat as ChatDTO : null;
+        return chat ? { ...chat, last_message_at: null } as ChatDTO : null;
     }
     async findChatBySessionId(sessionId: string): Promise<ChatDTO | null> {
         const chat = await this.prisma.conversaciones.findFirst({
@@ -170,7 +178,7 @@ export class PrismaChatsRepository implements IChatsRepository {
                 }
             }
         })
-        return chat ? chat as ChatDTO : null;
+        return chat ? { ...chat, last_message_at: null } as ChatDTO : null;
     }
     async findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]> {
         const chats = await this.prisma.conversaciones.findMany({
