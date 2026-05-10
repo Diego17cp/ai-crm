@@ -58,6 +58,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
             { text: "Contratos de Venta", icon: FiDollarSign, to: "/admin/sales/contracts" },
             { text: "Control de Cuotas", icon: FiList, to: "/admin/sales/installments" },
         ],
+        restricted: true,
     },
     {
         text: "Administración",
