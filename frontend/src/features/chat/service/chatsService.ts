@@ -7,6 +7,7 @@ export const chatsService = {
         if (query.q) params.append("q", String(query.q));
         if (query.estado) params.append("estado", String(query.estado));
         if (query.canal) params.append("canal", String(query.canal));
+        if (query.userId) params.append("id_asesor", String(query.userId));
         params.append("page", String(query.page));
         params.append("limit", String(query.limit));
         const response = await apiClient.get<AllChatsResponse>(`/chats?${params.toString()}`);

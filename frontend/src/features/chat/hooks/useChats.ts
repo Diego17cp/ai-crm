@@ -3,12 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { CanalContacto, ChatFilters, EstadoChat } from "../types";
 import { chatsService } from "../service/chatsService";
+import { useAuthStore } from "@/features/auth";
 
 export const useChats = () => {
     const { currentPage, perPage, goToPage, setPerPage } = usePagination({
         initialPage: 1,
         initialPerPage: 12
-    })
+    });
+    const { user } = useAuthStore();
+
+    const userId = user?.id;
+    const userRole = user?.rol;
+    const isAdmin = userRole === "ADMIN";
+
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     useEffect(() => {
@@ -47,6 +54,7 @@ export const useChats = () => {
         page: currentPage,
         limit: perPage,
         q: debouncedSearch || undefined,
+        userId: !isAdmin ? userId : undefined,
         ...filters
     };
     const query = useQuery({
@@ -56,7 +64,8 @@ export const useChats = () => {
             filtersPayload.page,
             filtersPayload.limit,
             filtersPayload.estado,
-            filtersPayload.canal
+            filtersPayload.canal,
+            !isAdmin ? userId : undefined
         ],
         queryFn: () => chatsService.getChats(filtersPayload),
     });

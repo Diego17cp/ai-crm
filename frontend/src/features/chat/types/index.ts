@@ -15,6 +15,7 @@ export interface Chat {
         apellidos: string | null;
     } | null;
     created_at: string;
+    last_message_at: string | null;
     estado: EstadoChat;
     canal: CanalContacto | null;
 }
@@ -36,6 +37,7 @@ export interface ChatFilters {
     q?: string;
     estado?: EstadoChat;
     canal?: CanalContacto;
+    userId?: string;
     page: number;
     limit: number;
 }
