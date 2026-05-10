@@ -21,6 +21,8 @@ export const ChatListItem = ({ chat, onClick }: ChatListItemProps) => {
         ? `${chat.asesor.nombres || ""} ${chat.asesor.apellidos || ""}`.trim()
         : "Sin asignar";
 
+    const lastMessageTime = chat.last_message_at ? formatChatDate(chat.last_message_at) : "Sin mensajes";
+
     return (
         <motion.div
             layout
@@ -54,7 +56,7 @@ export const ChatListItem = ({ chat, onClick }: ChatListItemProps) => {
             </div>
             <div className="mt-4 md:mt-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center">
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-800">
-                    {formatChatDate(chat.created_at)}
+                    {lastMessageTime}
                 </span>
             </div>
         </motion.div>
