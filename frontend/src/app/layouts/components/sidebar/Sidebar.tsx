@@ -6,7 +6,7 @@ import { SIDEBAR_ITEMS } from "./constants/sidebarItems";
 import { SidebarItem, SidebarSubmenu } from "./components";
 import { isSuperAdmin } from "@/core/utils/users";
 import { useAuthStore } from "@/features/auth";
-import { NOMBRE_EMPRESA } from "@/shared/constants";
+import { INICIALES_EMPRESA } from "@/shared/constants";
 
 interface Props {
     onLogoutClick: () => void;
@@ -39,10 +39,10 @@ export const Sidebar = ({
                 <div className="h-16 shrink-0 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800">
                     <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${!isOpen && "md:w-0"}`}>
                         <Link to="/admin/dashboard" className="shrink-0 flex items-center justify-center w-8 h-8 bg-linear-to-tr from-teal-600 to-teal-400 rounded-lg shadow-sm shadow-teal-500/30">
-                            <span className="text-white text-xs font-black">AK</span>
+                            <span className="text-white text-xs font-black">{INICIALES_EMPRESA}</span>
                         </Link>
                         <span className="font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap tracking-tight">
-                            {NOMBRE_EMPRESA} Admin
+                            {INICIALES_EMPRESA} Admin
                         </span>
                     </div>
                     <button
