@@ -1,12 +1,12 @@
 import { Server, Socket } from "socket.io";
 import { ChatUseCases } from "../../application/use-cases/ChatsUseCases";
-import { KapsoWhatsAppService } from "@/modules/chatbot/infrastructure/adapters/KapsoWhatsAppService";
+import { IWhatsappService } from "@/modules/chatbot/application/ports/IWhatsappService";
 
 export class SocketChatController {
-    private readonly kapsoService = new KapsoWhatsAppService();
     constructor(
         private io: Server,
-        private chatUseCases: ChatUseCases
+        private chatUseCases: ChatUseCases,
+        private whatsappService: IWhatsappService
     ) {}
     registerListeners(socket: Socket) {
         socket.on("client:JOIN_CHAT_ROOM", (payload: { chatId: string }) => {
@@ -30,7 +30,7 @@ export class SocketChatController {
                 if (payload.senderRole === "ASESOR") {
                     const chat = await this.chatUseCases.getChatById(payload.chatId);
                     if (chat.canal === "WHATSAPP" && chat.session_id) {
-                        await this.kapsoService.sendTextMessage(chat.session_id, payload.content);
+                        await this.whatsappService.sendTextMessage(chat.session_id, payload.content);
                     }
                 }
                 this.io.to(payload.chatId).emit("server:NEW_MESSAGE", {
