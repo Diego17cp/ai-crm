@@ -130,20 +130,20 @@ model Roles {
 }
 
 model Usuarios {
-  id                  String              @id @default(uuid()) @db.Uuid
+  id                  String                @id @default(uuid()) @db.Uuid
   id_rol              Int
-  rol                 Roles               @relation(fields: [id_rol], references: [id])
-  dni                 String              @db.Char(8)
-  nombres             String              @db.VarChar(100)
-  apellidos           String              @db.VarChar(100)
-  email               String              @unique @db.VarChar(100)
-  password_hash       String              @db.VarChar(150)
-  telefono            String?             @db.VarChar(20)
+  rol                 Roles                 @relation(fields: [id_rol], references: [id])
+  dni                 String                @db.Char(8)
+  nombres             String                @db.VarChar(100)
+  apellidos           String                @db.VarChar(100)
+  email               String                @unique @db.VarChar(100)
+  password_hash       String                @db.VarChar(150)
+  telefono            String?               @db.VarChar(20)
   ultimo_login        DateTime?
-  estado              EstadoGeneral       @default(ACTIVO)
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
-  conversaciones_asig Conversaciones[]    @relation("AsignacionAsesor")
+  estado              EstadoGeneral         @default(ACTIVO)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  conversaciones_asig Conversaciones[]      @relation("AsignacionAsesor")
   mensajes            Mensajes[]
   citas_responsable   Citas[]
   notificaciones      NotificacionesCuota[]
@@ -153,18 +153,19 @@ model Usuarios {
 }
 
 model Proyectos {
-  id          Int            @id @default(autoincrement())
-  id_ubigeo   String         @db.Char(6)
-  ubigeo      Ubigeos        @relation(fields: [id_ubigeo], references: [id])
-  nombre      String         @db.VarChar(100)
-  abreviatura String?        @db.VarChar(20)
-  ubicacion   String?        @db.Text
-  descripcion String?        @db.Text
-  estado      EstadoGeneral?
-  created_at  DateTime       @default(now())
-  updated_at  DateTime       @updatedAt
-  etapas      Etapas[]
-  citas       Citas[]
+  id                   Int            @id @default(autoincrement())
+  id_ubigeo            String         @db.Char(6)
+  ubigeo               Ubigeos        @relation(fields: [id_ubigeo], references: [id])
+  nombre               String         @db.VarChar(100)
+  abreviatura          String?        @db.VarChar(20)
+  ubicacion            String?        @db.Text
+  descripcion          String?        @db.Text
+  porcentaje_descuento Decimal?       @default(0) @db.Decimal(5, 2)
+  estado               EstadoGeneral?
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @updatedAt
+  etapas               Etapas[]
+  citas                Citas[]
 
   @@index([id_ubigeo])
   @@map("proyectos")
@@ -365,18 +366,18 @@ model Ventas {
 }
 
 model Cuotas {
-  id                Int                 @id @default(autoincrement())
+  id                Int                   @id @default(autoincrement())
   id_venta          Int
-  venta             Ventas              @relation(fields: [id_venta], references: [id])
+  venta             Ventas                @relation(fields: [id_venta], references: [id])
   numero_cuota      Int
-  monto_cuota       Decimal             @db.Decimal(12, 2)
-  fecha_vencimiento DateTime            @db.Date
+  monto_cuota       Decimal               @db.Decimal(12, 2)
+  fecha_vencimiento DateTime              @db.Date
   fecha_pago        DateTime?
-  estado            EstadoCuota?        @default(PENDIENTE)
+  estado            EstadoCuota?          @default(PENDIENTE)
   metodo_pago       MetodoPago?
-  comprobante_url   String?             @db.VarChar(150)
-  created_at        DateTime            @default(now())
-  updated_at        DateTime            @updatedAt
+  comprobante_url   String?               @db.VarChar(150)
+  created_at        DateTime              @default(now())
+  updated_at        DateTime              @updatedAt
   notificaciones    NotificacionesCuota[]
 
   @@index([id_venta])
