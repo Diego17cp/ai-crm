@@ -438,7 +438,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				nombre: true,
 				ubicacion: true,
 				descripcion: true,
-				porcentaje_descuento: true,
+				// porcentaje_descuento: true,
 			},
 		});
 		if (proyectos.length === 0)
