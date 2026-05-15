@@ -6,12 +6,12 @@ export const projectsService = {
         const response = await apiClient.get(`/projects?page=${page}&limit=${limit}${q ? `&q=${q}` : ''}`);
         return response.data;
     },
-    createProject: async (idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string) => {
-        const response = await apiClient.post('/projects', { id_ubigeo: idUbigeo, nombre, abreviatura, ubicacion, descripcion });
+    createProject: async (idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string, porcentaje_descuento?: number) => {
+        const response = await apiClient.post('/projects', { id_ubigeo: idUbigeo, nombre, abreviatura, ubicacion, descripcion, porcentaje_descuento });
         return response.data;
     },
-    editProject: async (id: number, idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string) => {
-        const response = await apiClient.put(`/projects/${id}`, { id_ubigeo: idUbigeo, nombre, abreviatura, ubicacion, descripcion });
+    editProject: async (id: number, idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string, porcentaje_descuento?: number) => {
+        const response = await apiClient.put(`/projects/${id}`, { id_ubigeo: idUbigeo, nombre, abreviatura, ubicacion, descripcion, porcentaje_descuento });
         return response.data;
     },
     toggleProjectStatus: async (id: number) => {

@@ -33,19 +33,19 @@ export const useProjects = () => {
         placeholderData: (previousData) => previousData
     });
 
-    const useCreateProjectMutation = (idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string) => useMutation({
-        mutationFn: () => projectsService.createProject(idUbigeo, nombre, abreviatura, ubicacion, descripcion),
+    const useCreateProjectMutation = (idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string, porcentaje_descuento?: number) => useMutation({
+        mutationFn: () => projectsService.createProject(idUbigeo, nombre, abreviatura, ubicacion, descripcion, porcentaje_descuento),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
             toast.success("Proyecto creado exitosamente");
         },
         onError: (error: ApiError) => {
-            const message = error?.response?.data?.message || "Error al editar etapa";
+            const message = error?.response?.data?.message || "Error al crear proyecto";
             toast.error(message);
         }
     });
-    const useEditProjectMutation = (id: number, idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string) => useMutation({
-        mutationFn: () => projectsService.editProject(id, idUbigeo, nombre, abreviatura, ubicacion, descripcion),
+    const useEditProjectMutation = (id: number, idUbigeo: string, nombre: string, abreviatura?: string, ubicacion?: string, descripcion?: string, porcentaje_descuento?: number) => useMutation({
+        mutationFn: () => projectsService.editProject(id, idUbigeo, nombre, abreviatura, ubicacion, descripcion, porcentaje_descuento),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
             toast.success("Proyecto editado exitosamente");
