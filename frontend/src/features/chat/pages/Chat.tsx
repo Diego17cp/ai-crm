@@ -144,7 +144,6 @@ export const Chat = () => {
 							onChange={handleInputChange}
 							placeholder="Escribe tu consulta sobre lotes, precios..."
 							className="flex-1 max-h-32 bg-transparent border-none focus:ring-0 resize-none px-4 py-3 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none"
-							disabled={isLoading}
 						/>
 						<button
 							type="submit"

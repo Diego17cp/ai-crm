@@ -126,6 +126,7 @@ export const useChatbot = () => {
 
 	const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		if (isLoading) return;
 		const messageToSend = inputValue.trim();
 		if (!messageToSend) return;
 		const newUserMsg: Message = {
