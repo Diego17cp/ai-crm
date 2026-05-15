@@ -274,7 +274,14 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					select: {
 						codigo: true,
 						etapa: {
-							select: { proyecto: { select: { nombre: true } } },
+							select: { 
+								proyecto: { 
+									select: { 
+										nombre: true,
+										porcentaje_descuento: true,
+									} 
+								} 
+							},
 						},
 					},
 				},
@@ -286,10 +293,12 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			const normalizedNumber = lt.numero_lote.replace(/^LT-/i, "");
 			const manzanaCode = lt.manzana?.codigo || "N/A";
 			const proyectoName = lt.manzana?.etapa?.proyecto?.nombre || "N/A";
+            const descuentoActivo = Number(lt.manzana?.etapa?.proyecto?.porcentaje_descuento || 0);
 			return {
 				identificador: `Lote ${manzanaCode}-${normalizedNumber}`,
 				area_m2: lt.area_m2,
-				precio_total: lt.precio_total,
+				precio_total_sin_descuento: lt.precio_total,
+				porcentaje_descuento: descuentoActivo,
 				proyecto: proyectoName,
 			}
 		});
@@ -429,6 +438,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				nombre: true,
 				ubicacion: true,
 				descripcion: true,
+				porcentaje_descuento: true,
 			},
 		});
 		if (proyectos.length === 0)

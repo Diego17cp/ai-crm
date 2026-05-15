@@ -6,6 +6,7 @@ export interface CreateProyectoDTO {
 	abreviatura?: string;
 	ubicacion?: string;
 	descripcion?: string;
+	porcentaje_descuento?: number;
 }
 
 export interface UpdateProyectoDTO extends Partial<CreateProyectoDTO> {

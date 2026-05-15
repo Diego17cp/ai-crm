@@ -1,6 +1,6 @@
 import { PrismaClient, EstadoGeneral, Prisma, Manzanas, Proyectos, Etapas } from "generated/prisma/client";
 import { IProyectosRepository, ProyectoWithDetails } from "../../application/ports/IProyectosRepository";
-import { CreateManzanaDTO, CreateManzanasBatchDTO, GetProyectosQueryDTO, PaginatedResult } from "../../domain/dtos";
+import { CreateManzanaDTO, CreateManzanasBatchDTO, CreateProyectoDTO, GetProyectosQueryDTO, PaginatedResult, UpdateProyectoDTO } from "../../domain/dtos";
 
 export class PrismaProyectosRepository implements IProyectosRepository {
     constructor(private readonly prisma: PrismaClient) {}
@@ -100,13 +100,13 @@ export class PrismaProyectosRepository implements IProyectosRepository {
         });
     }
 
-    async create(data: any) {
+    async create(data: CreateProyectoDTO): Promise<Proyectos> {
         return this.prisma.proyectos.create({
             data: { ...data, estado: EstadoGeneral.ACTIVO }
         });
     }
 
-    async update(id: number, data: any) {
+    async update(id: number, data: UpdateProyectoDTO): Promise<Proyectos> {
         return this.prisma.proyectos.update({
             where: { id },
             data
