@@ -18,18 +18,22 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
     const [ubicacion, setUbicacion] = useState("");
     const [descripcion, setDescripcion] = useState("");
     const [idUbigeo, setIdUbigeo] = useState<string>("");
+    const [descuentoStr, setDescuentoStr] = useState("");
     
     const [error, setError] = useState<string | null>(null);
 
     const { ubigeosQuery } = useUbigeos();
     const { useCreateProjectMutation } = useProjects();
+
+    const descuentoNum = descuentoStr.trim() !== "" ? parseFloat(descuentoStr) / 100 : undefined;
     
     const createProjectMutation = useCreateProjectMutation(
         idUbigeo, 
         nombre, 
         abreviatura, 
         ubicacion, 
-        descripcion
+        descripcion, 
+        descuentoNum
     );
     
     const isSubmitting = createProjectMutation.isPending;
@@ -41,6 +45,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
             setUbicacion("");
             setDescripcion("");
             setIdUbigeo("");
+            setDescuentoStr("");
             setError(null);
         }
     }, [isOpen]);
@@ -73,6 +78,13 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
         if (!idUbigeo) {
             setError("Debes seleccionar un ubigeo válido.");
             return;
+        }
+        if (descuentoStr.trim() !== "") {
+            const num = parseFloat(descuentoStr);
+            if (isNaN(num) || num < 0 || num > 100) {
+                setError("El descuento debe ser un porcentaje válido entre 0 y 100%.");
+                return;
+            }
         }
         try {
             createProjectMutation.mutate();
@@ -188,6 +200,30 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
                                                     }}
                                                 />
                                             )}
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 md:col-span-2">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+                                                Porcentaje Max % Descuento
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="1"
+                                                    min="0"
+                                                    max="100"
+                                                    value={descuentoStr}
+                                                    onChange={(e) => setDescuentoStr(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-' || e.key === '+') {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    disabled={isSubmitting}
+                                                    placeholder="Ej: 10"
+                                                    className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
+                                                />
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">%</span>
+                                            </div>
                                         </div>
                                         <div className="flex flex-col gap-1.5 md:col-span-2 xl:col-span-2">
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">

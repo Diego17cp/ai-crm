@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FiX, FiMapPin, FiCalendar, FiLayers, FiBox, FiPlusCircle, FiEdit2, FiTrash2, FiRefreshCw } from "react-icons/fi";
+import { FiX, FiMapPin, FiCalendar, FiLayers, FiBox, FiPlusCircle, FiEdit2, FiTrash2, FiRefreshCw, FiTag } from "react-icons/fi";
 import type { Etapa, Manzana, Proyecto } from "../types";
 import { getBadgeStyle } from "../utils/stateColors";
 
@@ -39,6 +39,8 @@ export const ProjectDetailsModal = ({
     if (!project) return null;
 
     const totalManzanas = project.etapas.reduce((acc, etapa) => acc + etapa.manzanas.length, 0);
+    const parsedDiscount = parseFloat(project.porcentaje_descuento || "0");
+    const hasDiscount = !isNaN(parsedDiscount) && parsedDiscount > 0;
 
     return (
         <AnimatePresence>
@@ -69,9 +71,19 @@ export const ProjectDetailsModal = ({
                                             {project.estado}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                                        ID Interno: #{project.id} | Código: {project.abreviatura || "N/A"}
-                                    </p>
+                                    <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                        <span>ID Interno: #{project.id}</span>
+                                        <span>|</span>
+                                        <span>Código: {project.abreviatura || "N/A"}</span>
+                                        {hasDiscount && (
+                                            <>
+                                                <span>|</span>
+                                                <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-lg border border-orange-200 dark:border-orange-800/50">
+                                                    <FiTag size={12} /> {Math.round(parsedDiscount * 100)}% Descuento
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 <button

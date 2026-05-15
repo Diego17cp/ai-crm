@@ -18,14 +18,21 @@ export const ProjectCard = ({ project, onViewDetails, onEdit, onAddEtapa, onTogg
     const menuRef = useClickOutside(() => setIsMenuOpen(false));
 
     const totalManzanas = project.etapas.reduce((acc, etapa) => acc + etapa.manzanas.length, 0);
+    const parsedDiscount = parseFloat(project.porcentaje_descuento || "0");
+    const hasDiscount = !isNaN(parsedDiscount) && parsedDiscount > 0;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col gap-4 group"
+            className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col gap-4 group relative"
         >
+            {hasDiscount && (
+                <div className="absolute -top-3 -right-3 z-10 px-3 py-1 bg-linear-to-r from-orange-500 to-rose-500 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg border-2 border-white dark:border-gray-900 animate-pulse">
+                    {Math.round(parsedDiscount * 100)}% DCTO
+                </div>
+            )}
             <div className="flex justify-between items-start gap-4">
                 <div className="flex flex-col gap-1.5 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
