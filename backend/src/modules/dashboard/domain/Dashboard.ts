@@ -12,4 +12,5 @@ export interface AppointmentEvent {
     end?: string;
     allDay?: boolean;
     backgroundColor?: string;
+    client_number?: string;
 }

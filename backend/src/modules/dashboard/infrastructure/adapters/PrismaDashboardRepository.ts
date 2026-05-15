@@ -19,7 +19,14 @@ export class PrismaDashboardRepository implements IDashboardRepository {
     async getRecentEvents(): Promise<AppointmentEvent[]> {
         const citas = await this.prisma.citas.findMany({
             include: {
-                cliente: true,
+                cliente: {
+                    select: {
+                        nombres: true,
+                        apellidos: true,
+                        numero: true,
+                        telefonos: true,
+                    }
+                },
                 proyecto: true,
                 lote: true,
             },
@@ -42,6 +49,7 @@ export class PrismaDashboardRepository implements IDashboardRepository {
                 start: `${dateStr}T${startTime}.000Z`,
                 allDay: !cita.hora_cita,
                 backgroundColor: cita.estado_cita === "PROGRAMADA" ? "#2563eb" : "#0d9488",
+                client_number: cita.cliente.telefonos[0]?.numero || "N/A"
             };
         });
     }
