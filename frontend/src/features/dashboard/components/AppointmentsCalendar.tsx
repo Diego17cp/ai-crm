@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import type { AppointmentEvent } from "../types";
-import { FiCalendar, FiClock, FiX } from "react-icons/fi";
+import { FiCalendar, FiClock, FiPhone, FiX } from "react-icons/fi";
 
 interface Props {
     events: AppointmentEvent[];
@@ -20,6 +20,7 @@ export const AppointmentsCalendar = ({ events, isLoading }: Props) => {
         end: Date | null;
         allDay: boolean;
         color?: string;
+        client_number: string;
     } | null>(null);
 
     useEffect(() => {
@@ -39,6 +40,7 @@ export const AppointmentsCalendar = ({ events, isLoading }: Props) => {
             end: event.end,
             allDay: event.allDay,
             color: event.backgroundColor,
+            client_number: event.extendedProps.client_number || "N/A",
         });
     };
 
@@ -175,6 +177,25 @@ export const AppointmentsCalendar = ({ events, isLoading }: Props) => {
                                                     : `${formatTime(selectedEvent.start)} ${selectedEvent.end ? `- ${formatTime(selectedEvent.end)}` : ''}`
                                                 }
                                             </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400 shrink-0">
+                                            <FiPhone size={18} />
+                                        </div>
+                                        <div className="flex flex-col w-full">
+                                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Contacto</span>
+                                            {selectedEvent.client_number !== "N/A" ? (
+                                                <a 
+                                                    href={`tel:${selectedEvent.client_number}`}
+                                                    title="Llamar al cliente"
+                                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline w-fit"
+                                                >
+                                                    {selectedEvent.client_number}
+                                                </a>
+                                            ) : (
+                                                <span className="text-sm text-gray-500 italic">No disponible</span>
+                                            )}
                                         </div>
                                     </div>
                                     <button 
