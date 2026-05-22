@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Proyecto } from "../types";
 import { getBadgeStyle } from "../utils/stateColors";
-import { FiMapPin, FiLayers, FiBox, FiMoreVertical, FiEdit2, FiPlusCircle, FiTrash2 } from "react-icons/fi";
+import { FiMapPin, FiLayers, FiBox, FiMoreVertical, FiEdit2, FiPlusCircle, FiTrash2, FiUpload } from "react-icons/fi";
 import { useClickOutside } from "@/shared/hooks";
 
 interface Props {
@@ -11,9 +11,10 @@ interface Props {
     onEdit?: () => void;
     onAddEtapa?: () => void;
     onToggle?: () => void;
+    onUploadPlano?: () => void;
 }
 
-export const ProjectCard = ({ project, onViewDetails, onEdit, onAddEtapa, onToggle }: Props) => {
+export const ProjectCard = ({ project, onViewDetails, onEdit, onAddEtapa, onToggle, onUploadPlano }: Props) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useClickOutside(() => setIsMenuOpen(false));
 
@@ -80,6 +81,12 @@ export const ProjectCard = ({ project, onViewDetails, onEdit, onAddEtapa, onTogg
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors cursor-pointer"
                                 >
                                     <FiEdit2 size={15} /> Editar Proyecto
+                                </button>
+                                <button
+                                    onClick={() => { setIsMenuOpen(false); onUploadPlano?.(); }}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                    <FiUpload size={15} /> Subir Plano
                                 </button>
                                 <button 
                                     onClick={() => { setIsMenuOpen(false); onAddEtapa?.(); }}

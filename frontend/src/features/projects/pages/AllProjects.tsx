@@ -18,6 +18,7 @@ import { ToggleManzanaStatusModal } from "../components/ToggleManzanaStatusModal
 import { CreateProjectModal } from "../components/CreateProjectModal";
 import { ToggleProjectStatusModal } from "../components/ToggleProjectStatusModal";
 import { EditProjectModal } from "../components/EditProjectModal";
+import { UploadPlanoModal } from "../components/UploadPlanoModal";
 
 export const AllProjects = () => {
     const {
@@ -136,6 +137,7 @@ export const AllProjects = () => {
                                     onAddEtapa={() => openModal("create_etapa", project)}
                                     onEdit={() => openModal("edit_project", project)}
                                     onToggle={() => openModal("toggle_project_status", project)}
+                                    onUploadPlano={() => openModal("upload_plano", project)}
                                 />
                             ))}
                         </motion.div>
@@ -216,6 +218,11 @@ export const AllProjects = () => {
             />
             <ToggleProjectStatusModal
                 isOpen={activeModal === "toggle_project_status"}
+                onClose={closeModal}
+                project={selectedProject}
+            />
+            <UploadPlanoModal
+                isOpen={activeModal === "upload_plano"}
                 onClose={closeModal}
                 project={selectedProject}
             />
