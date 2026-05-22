@@ -19,6 +19,7 @@ export class PrismaLotesRepository implements ILotesRepository {
             whereCondition.OR = [
                 { numero_lote: { contains: q, mode: 'insensitive' } },
                 { numero_partida: { contains: q, mode: 'insensitive' } },
+                { ubicacion_referencial: { contains: q, mode: 'insensitive' } },
                 {
                     manzana: {
                         codigo: { contains: q, mode: 'insensitive' }
