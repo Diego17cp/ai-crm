@@ -137,6 +137,9 @@ META_WHATSAPP_PHONE_NUMBER_ID="..."
 KAPSO_API_KEY="tu_token_kapso..."
 WHATSAPP_PHONE_NUMBER_ID="id_de_telefono_meta_via_kapso"
 WEBHOOK_VERIFY_TOKEN="mi_token_secreto_para_webhook"
+
+# URL base del API (usada para construir URLs completas en herramientas como envío de planos)
+API_URL="http://localhost:3000"
 ```
 ### Frontend `.env` (Ejemplo)
 ```env
@@ -297,6 +300,9 @@ META_WHATSAPP_PHONE_NUMBER_ID="..."
 KAPSO_API_KEY="your_kapso_token..."
 WHATSAPP_PHONE_NUMBER_ID="meta_phone_id..."
 WEBHOOK_VERIFY_TOKEN="my_secret_token_for_webhook"
+
+# Base URL of the API (used to build full URLs in tools like sending blueprints)
+API_URL="http://localhost:3000"
 ```
 
 ### Frontend `.env` (Example)
