@@ -73,6 +73,27 @@ export class ProyectosController {
 		}
 	};
 
+	uploadPlano = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const id = Number(req.params.id);
+			if (!req.file) return res.status(400).json({
+				success: false,
+				message: "No se ha proporcionado un archivo PDF"
+			});
+			const fileName = req.file.filename;
+			const proyecto = await this.proyectosUseCases.updateProyecto(id, {
+				plano_url: fileName
+			});
+			return res.status(200).json({
+				success: true,
+				data: proyecto,
+				message: "Plano subido y URL actualizada en el proyecto"
+			});
+		} catch (error) {
+			return next(error);
+		}
+	}
+
 	createEtapa = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const id_proyecto = Number(req.params.id_proyecto);

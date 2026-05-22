@@ -4,6 +4,7 @@ import { ProyectosUseCases } from "../../application/use-cases/ProyectosUseCases
 import { PrismaProyectosRepository } from "../adapters/PrismaProyectosRepository";
 import { prisma } from "@/infrastructure/database/prismaClient";
 import { authGuard } from "@/app/middlewares/authGuard";
+import { uploadPlanosMiddleware } from "@/app/middlewares/uploadPlanosMiddleware";
 
 export function proyectosRoutes(): Router {
     const router = Router();
@@ -17,6 +18,7 @@ export function proyectosRoutes(): Router {
     router.post("/", authGuard, controller.create);
     router.put("/:id", authGuard, controller.update);
     router.delete("/:id", authGuard, controller.delete);
+    router.post("/:id/upload-plano", uploadPlanosMiddleware.single("plano"), authGuard, controller.uploadPlano);
 
     router.get("/etapas", authGuard, controller.getAllEtapas);
     router.get("/etapas/:id_proyecto", authGuard, controller.getEtapasByProyectoId);
