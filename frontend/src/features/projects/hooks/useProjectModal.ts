@@ -9,6 +9,7 @@ export type ProjectModalType =
 	| "create_manzana"
     | "edit_project"
     | "toggle_project_status"
+    | "upload_plano"
     | "edit_etapa"
     | "toggle_etapa_status"
     | "edit_manzana"

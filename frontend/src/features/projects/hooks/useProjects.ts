@@ -66,6 +66,17 @@ export const useProjects = () => {
             toast.error(message);
         }
     });
+    const useUploadPlanoMutation = (idProyecto: number, file: File) => useMutation({
+        mutationFn: () => projectsService.uploadPlano(idProyecto, file),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects"] });
+            toast.success("Plano subido exitosamente");
+        },
+        onError: (error: ApiError) => {
+            const message = error?.response?.data?.message || "Error al subir plano";
+            toast.error(message);
+        }
+    })
 
     return {
         ...query,
@@ -80,6 +91,7 @@ export const useProjects = () => {
         meta: query.data?.meta,
         useCreateProjectMutation,
         useEditProjectMutation,
-        useToggleProjectStatusMutation
+        useToggleProjectStatusMutation,
+        useUploadPlanoMutation
     }
 }

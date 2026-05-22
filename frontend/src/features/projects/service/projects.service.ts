@@ -41,5 +41,15 @@ export const projectsService = {
     toggleManzanaStatus: async (id_manzana: number) => {
         const response = await apiClient.delete(`/projects/manzanas/${id_manzana}`);
         return response.data;
+    },
+    uploadPlano: async (idProyecto: number, file: File) => {
+        const formData = new FormData();
+        formData.append('plano', file);
+        const response = await apiClient.post(`/projects/${idProyecto}/upload-plano`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
     }
 };

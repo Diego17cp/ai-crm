@@ -40,6 +40,7 @@ export interface Proyecto {
     // Es una string porque en la base de datos es un decimal, 
     // pero lo manejamos como string para evitar problemas de precisión en JS
     porcentaje_descuento: string;
+    plano_url: string | null;
     estado: string;
     created_at: string;
     updated_at: string;
