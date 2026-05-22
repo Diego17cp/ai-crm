@@ -274,6 +274,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				numero_lote: true,
 				area_m2: true,
 				precio_total: true,
+				ubicacion_referencial: true,
 				manzana: {
 					select: {
 						codigo: true,
@@ -305,6 +306,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				precio_total_sin_descuento: lt.precio_total,
 				porcentaje_descuento: descuentoActivo,
 				proyecto: proyectoName,
+				ubicacion_referencial: lt.ubicacion_referencial ? lt.ubicacion_referencial : null,
 				cuota_inicial_estimada_credito: cuotaInicialCredito,
 				nota_interna: "Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas."
 			}
