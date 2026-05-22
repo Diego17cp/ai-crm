@@ -11,6 +11,7 @@ export interface CreateProyectoDTO {
 
 export interface UpdateProyectoDTO extends Partial<CreateProyectoDTO> {
 	estado?: EstadoGeneral;
+	plano_url?: string;
 }
 
 export interface CreateEtapaDTO {

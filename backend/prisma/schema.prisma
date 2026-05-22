@@ -161,6 +161,7 @@ model Proyectos {
   ubicacion            String?        @db.Text
   descripcion          String?        @db.Text
   porcentaje_descuento Decimal?       @default(0) @db.Decimal(5, 2)
+  plano_url            String?        @db.VarChar(255)
   estado               EstadoGeneral?
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
