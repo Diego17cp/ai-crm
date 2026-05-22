@@ -17,6 +17,7 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
     const [numeroPartida, setNumeroPartida] = useState("");
     const [areaM2, setAreaM2] = useState("");
     const [precioM2, setPrecioM2] = useState("");
+    const [ubicacionReferencial, setUbicacionReferencial] = useState("");
     const [error, setError] = useState<string | null>(null);
 
     const { useUpdateLoteMutation } = useLots();
@@ -26,6 +27,7 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
         area_m2: areaM2,
         precio_m2: precioM2,
         precio_total: String(Number(areaM2 || 0) * Number(precioM2 || 0)),
+        ubicacion_referencial: ubicacionReferencial || undefined,
     });
     
     const isSubmitting = updateLoteMutation.isPending;
@@ -36,6 +38,7 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
             setNumeroPartida(lot.numero_partida || "");
             setAreaM2(lot.area_m2 || "");
             setPrecioM2(lot.precio_m2 || "");
+            setUbicacionReferencial(lot.ubicacion_referencial || "");
             setError(null);
         }
     }, [isOpen, lot]);
@@ -116,7 +119,7 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Partida Registral</label>
-                                            <input type="text" value={numeroPartida} onChange={(e) => setNumeroPartida(e.target.value)} disabled={isSubmitting} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-blue-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" />
+                                            <input placeholder="Partida Registral" type="text" value={numeroPartida} onChange={(e) => setNumeroPartida(e.target.value)} disabled={isSubmitting} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-blue-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" />
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Área (m²) <span className="text-red-500">*</span></label>
@@ -125,6 +128,10 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Precio x m² (S/) <span className="text-red-500">*</span></label>
                                             <input type="number" step="0.01" value={precioM2} onChange={(e) => setPrecioM2(e.target.value)} disabled={isSubmitting} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-blue-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" />
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 md:col-span-2">
+                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">Ubicación Referencial</label>
+                                            <input placeholder="Ej: En una esquina" type="text" value={ubicacionReferencial} onChange={(e) => setUbicacionReferencial(e.target.value)} disabled={isSubmitting} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-blue-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20" />
                                         </div>
                                     </div>
                                 </div>

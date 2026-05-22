@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FiMoreVertical, FiMap, FiMaximize2, FiDollarSign, FiEdit2, FiTrash2, FiImage } from "react-icons/fi";
+import { FiMoreVertical, FiMap, FiMaximize2, FiDollarSign, FiEdit2, FiTrash2, FiImage, FiMapPin } from "react-icons/fi";
 import type { Lote, EstadoLote } from "../types";
 
 interface Props {
@@ -114,6 +114,16 @@ export const LotCard = ({ lote, onEdit, onDelete }: Props) => {
                             </span>
                             <span className="text-xs">
                                 {lote.manzana?.etapa?.nombre || 'Etapa'} • Mz. {lote.manzana?.codigo || '---'}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="mt-0.5 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 shrink-0">
+                            <FiMapPin size={14} />
+                        </div>
+                        <div className="flex flex-col leading-tight">
+                            <span className="font-medium text-gray-800 dark:text-gray-200">
+                                {lote.ubicacion_referencial || 'Sin ubicación referencial'}
                             </span>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ export interface Lote {
 	area_m2: string;
 	precio_m2: string;
 	precio_total: string;
+	ubicacion_referencial: string | null;
 	estado: EstadoLote;
 	created_at: string;
 	imagenes: ImagenLote[];
