@@ -49,13 +49,17 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				function: {
 					name: "calcular_financiamiento_lote",
 					description:
-						"Calcula de manera simulada la inicial y las cuotas de un lote si el cliente quiere crédito.",
+                        "Calcula la inicial y las cuotas de un lote. Úsalo ÚNICAMENTE cuando el cliente quiere crédito.",
 					parameters: {
 						type: "object",
 						properties: {
+							nombre_proyecto: {
+								type: "string",
+								description: "El nombre del proyecto. Indispensable para extraer el monto inicial correcto."
+							},
 							precio_total: {
 								type: "number",
-								description: "Precio total del lote en soles",
+                                description: "Precio total del lote en soles. IMPORTANTE: Los descuentos NO APLICAN para pagos a crédito. Aquí SIEMPRE debes enviar el 'precio_total_sin_descuento' original.",
 							},
 							meses: {
 								type: "number",
@@ -294,23 +298,27 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			const manzanaCode = lt.manzana?.codigo || "N/A";
 			const proyectoName = lt.manzana?.etapa?.proyecto?.nombre || "N/A";
             const descuentoActivo = Number(lt.manzana?.etapa?.proyecto?.porcentaje_descuento || 0);
+			const cuotaInicialCredito = Number(lt.precio_total) * 0.10;
 			return {
 				identificador: `Lote ${manzanaCode}-${normalizedNumber}`,
 				area_m2: lt.area_m2,
 				precio_total_sin_descuento: lt.precio_total,
 				porcentaje_descuento: descuentoActivo,
 				proyecto: proyectoName,
+				cuota_inicial_estimada_credito: cuotaInicialCredito,
+				nota_interna: "Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas."
 			}
 		});
 	}
 
 	private async calcularFinanciamientoLote(args: {
+		nombre_proyecto?: string;
 		precio_total: number;
 		meses: number;
 	}) {
 		const cuotaInicialPorcentaje = 0.10;
-		const inicial = args.precio_total * cuotaInicialPorcentaje;
-		const saldo = args.precio_total - inicial;
+		const inicialPorcentaje = args.precio_total * cuotaInicialPorcentaje;
+		const saldo = args.precio_total - inicialPorcentaje;
 
 		const tasa = 0; // no se aplica interes por ahora
 
@@ -318,13 +326,18 @@ export class ChatToolsRegistry implements IToolsRegistry {
             ? saldo / args.meses 
             : (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
 
+		const primerPago = inicialPorcentaje + cuotaMensual;
+
 
 		return {
 			precio_total: args.precio_total,
-			cuota_inicial: Math.round(inicial),
+			porcentaje_inicial_aplicado: "10%",
+			porcentaje_cuota_inicial: Math.round(inicialPorcentaje),
+			cuota_inicial: Math.round(primerPago),
+			saldo_a_financiar: Math.round(saldo),
 			meses_a_pagar: args.meses,
 			cuota_mensual_estimada: Math.round(cuotaMensual),
-			nota: "Este es un cálculo referencial, los montos finales pueden variar según evaluación crediticia."
+            instruccion_para_bot: `IMPORTANTE: Al mostrar esta cotización, ACLÁRALE amablemente al cliente que los descuentos publicados o mencionados anteriormente solo aplican para pagos AL CONTADO, por lo que esta cotización se basa en el precio de lista original (${args.precio_total} soles). EXPLÍCALE que para iniciar el financiamiento, el 'Monto Inicial a pagar en su primer mes' es de ${Math.round(primerPago)} soles, compuesto por el 10% del lote (${Math.round(inicialPorcentaje)} soles) MÁS su primera cuota (${Math.round(cuotaMensual)} soles). Luego restarán ${args.meses - 1} cuotas.`
 		}
 	}
 
