@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { env } from '@/config'
 import { errorHandler } from './middlewares';
 import router from './routes';
+import path from 'node:path';
 
 
 export const app: Application = express();
@@ -18,6 +19,8 @@ app.use(cors({
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
 
 app.get('/', (_, res) => {
     res.json({
