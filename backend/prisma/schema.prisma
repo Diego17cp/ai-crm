@@ -198,21 +198,22 @@ model Manzanas {
 }
 
 model Lotes {
-  id             Int             @id @default(autoincrement())
-  id_manzana     Int
-  manzana        Manzanas        @relation(fields: [id_manzana], references: [id])
-  numero_lote    String          @db.VarChar(10)
-  numero_partida String?         @db.VarChar(20)
-  area_m2        Decimal         @db.Decimal(10, 2)
-  precio_m2      Decimal         @db.Decimal(10, 2)
+  id                    Int             @id @default(autoincrement())
+  id_manzana            Int
+  manzana               Manzanas        @relation(fields: [id_manzana], references: [id])
+  numero_lote           String          @db.VarChar(10)
+  numero_partida        String?         @db.VarChar(20)
+  area_m2               Decimal         @db.Decimal(10, 2)
+  precio_m2             Decimal         @db.Decimal(10, 2)
   // Nota: precio_total es calculado en BD. Prisma lo lee pero no lo inserta directamente si es STORED.
-  precio_total   Decimal         @default(dbgenerated()) @db.Decimal(12, 2)
-  estado         EstadoLote?
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
-  imagenes       LotesImagenes[]
-  citas          Citas[]
-  ventas         Ventas[]
+  precio_total          Decimal         @default(dbgenerated()) @db.Decimal(12, 2)
+  ubicacion_referencial String?         @db.Text
+  estado                EstadoLote?
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
+  imagenes              LotesImagenes[]
+  citas                 Citas[]
+  ventas                Ventas[]
 
   @@index([id_manzana])
   @@map("lotes")

@@ -7,6 +7,7 @@ export interface CreateLoteDTO {
     area_m2: number;
     precio_m2: number;
     estado?: EstadoLote;
+    ubicacion_referencial?: string;
 }
 
 export interface UpdateLoteDTO extends Partial<CreateLoteDTO> {}
