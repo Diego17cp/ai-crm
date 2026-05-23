@@ -20,10 +20,21 @@ export function createChatbotRouter(): Router {
 
 	const eventNotifier = new SocketEventNotifier();
 
-	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier);
+	let whatsappService = null;
+	switch (env.WHATSAPP_PROVIDER?.toLowerCase()) {
+		case "meta":
+			whatsappService = new MetaWhatsappService();
+			break;
+		case "kapso":
+			whatsappService = new KapsoWhatsAppService();
+			break;
+		default:
+			throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
+	}
+
+	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier, whatsappService);
 
 	let llmService = null;
-	let whatsappService = null;
 
 	switch (env.AI_MODEL_PROVIDER.toLowerCase()) {
 		case "gemini":
@@ -42,16 +53,6 @@ export function createChatbotRouter(): Router {
 			throw new Error(`Proveedor de modelo AI no soportado: ${env.AI_MODEL_PROVIDER}`);
 	}
 
-	switch (env.WHATSAPP_PROVIDER?.toLowerCase()) {
-		case "meta":
-			whatsappService = new MetaWhatsappService();
-			break;
-		case "kapso":
-			whatsappService = new KapsoWhatsAppService();
-			break;
-		default:
-			throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
-	}
 	console.log(`Usando proveedor de modelo AI: ${env.AI_MODEL_PROVIDER}`);
 	console.log(`Usando proveedor de WhatsApp: ${env.WHATSAPP_PROVIDER}`);
 	const processChatMessage = new ProcessChatMessageUseCase(

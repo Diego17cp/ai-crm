@@ -2,11 +2,15 @@ import { PrismaClient } from "generated/prisma/client";
 import { IToolsRegistry } from "../../application/ports/IToolsRegistry";
 import { LotesWhereInput } from "generated/prisma/models";
 import { IEventNotifier } from "../../application/ports/IEventNotifier";
+import { IWhatsappService } from "../../application/ports/IWhatsappService";
+import { AppError } from "@/core/errors/AppError";
+import { env } from "@/config";
 
 export class ChatToolsRegistry implements IToolsRegistry {
 	constructor(
 		private readonly prisma: PrismaClient,
-		private readonly notifier: IEventNotifier
+		private readonly notifier: IEventNotifier,
+		private readonly whatsappService: IWhatsappService
 	) {}
 
 	getToolsDefinition() {
@@ -131,6 +135,23 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						required: ["documento_identidad"]
 					}
 				}
+			},
+			{
+				type: "function",
+				function: {
+					name: "enviar_plano_proyecto",
+					description: "Envía el plano en PDF de un proyecto de manera automática al cliente. Usa esto SOLO cuando el cliente pida ver el plano, mapa o diseño del proyecto.",
+					parameters: {
+						type: "object",
+						properties: {
+							nombre_proyecto: {
+								type: "string",
+								description: "El nombre del proyecto del cual se quiere recibir el plano en PDF",
+							}
+						},
+						required: ["nombre_proyecto"]
+					}
+				}
 			}
 		];
 	}
@@ -149,6 +170,8 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				return await this.derivarHumano(conversacionId);
 			case "consultar_cuenta_cliente":
 				return await this.consultarCuentaCliente(args);
+			case "enviar_plano_proyecto":
+				return await this.enviarPlanoProyecto(args, conversacionId);
 			default:
 				throw new Error(`Tool ${name} no existe`);
 		}
@@ -459,5 +482,68 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		if (proyectos.length === 0)
 			return { message: "No hay proyectos activos en este momento." };
 		return proyectos;
+	}
+
+	private async enviarPlanoProyecto(args: { nombre_proyecto: string }, conversacionId?: string) {
+		if (!conversacionId) return { message: "No se pudo enviar el plano porque no se proporcionó un ID de conversación válido." };
+		const conversacion = await this.prisma.conversaciones.findUnique({
+			where: { id: conversacionId },
+			include: {
+				cliente: {
+					include: {
+						telefonos: true,
+					}
+				}
+			}
+		});
+		if (!conversacion) return { message: "No se encontró la conversación para enviar el plano." };
+		if (conversacion.canal !== "WHATSAPP") return {
+			instruccion_para_bot: "Dile al cliente amablemente que, debido a que los planos son PDFs muy pesados, están limitados tecnológicamente y por políticas solo pueden enviarse al canal oficial de WhatsApp. No inventes excusas adicionales." 
+		}
+		const proyecto = await this.prisma.proyectos.findFirst({
+			where: {
+				nombre: {
+					contains: args.nombre_proyecto,
+					mode: "insensitive",
+				}
+			},
+			select: {
+				nombre: true,
+				plano_url: true,
+			}
+		});
+
+		if (!proyecto) return {
+			message: `No se encontró ningún proyecto que coincida con el nombre "${args.nombre_proyecto}". Por favor, pídele al cliente que verifique el nombre del proyecto e inténtalo nuevamente.`
+		}
+		if (!proyecto.plano_url) return {
+			instruccion_para_bot: `Dile al cliente que el plano del proyecto ${proyecto.nombre} está en fase de rediseño y aún no está disponible digitalmente, e invítalo a agendar una cita.`
+		}
+
+		const telefono = conversacion.session_id || conversacion.cliente?.telefonos[0]?.numero;
+		if (!telefono) return { message: "No se encontró un número de teléfono asociado a la conversación para enviar el plano." };
+
+		const fullDocumentUrl = `${env.API_URL}/uploads/planos/${proyecto.plano_url}`;
+
+        if (!this.whatsappService.sendDocumentTemplate) {
+            console.warn(`[Reminder] whatsappService.sendDocumentTemplate no implementado`);
+            throw new Error("El servicio de WhatsApp no soporta documentos template"); 
+        }
+
+        try {
+            await this.whatsappService.sendDocumentTemplate.call(
+                this.whatsappService,
+                telefono,
+                "envio_plano_proyecto",
+                fullDocumentUrl,
+                `Plano_Lotizacion_${proyecto.nombre.replace(/\s+/g, "_")}.pdf`,
+                [proyecto.nombre]
+            );
+            return {
+                instruccion_para_bot: "¡Éxito! El sistema ya mandó el PDF, acaba de vibrarle el celular al cliente. Confírmale al cliente en tu respuesta de chat que se lo acabas de mandar de manera automática en un documento adjunto aparte y pregúntale qué le parece."
+            }
+        } catch (e) {
+            return { instruccion_para_bot: "Hubo un error técnico al intentar enviar el PDF por debajo. Pídele disculpas al cliente." };
+        }
 	}
 }
