@@ -56,4 +56,45 @@ export class MetaWhatsappService implements IWhatsappService {
             throw error;
         }
     }
+    async sendDocumentTemplate(to: string, templateName: string, documentUrl: string, filename: string, bodyTexts: string[], languageCode?: string): Promise<void> {
+        try {
+            await axios.post(this.baseUrl, {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                type: "template",
+                to,
+                template: {
+                    name: templateName,
+                    language: { code: languageCode || "es" },
+                    components: [
+                        {
+                            type: "header",
+                            parameters: [
+                                {
+                                    type: "document",
+                                    document: {
+                                        link: documentUrl,
+                                        filename,
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            type: "body",
+                            parameters: bodyTexts.map(text => ({
+                                type: "text",
+                                text,
+                            }))
+                        }
+                    ]
+                }
+            }, {
+                headers: this.headers,
+            });
+            console.log(`[Meta] Plantilla de documento "${templateName}" enviada a ${to}`);
+        } catch (error: any) {
+            console.error(`[Meta Error] Error al enviar plantilla de documento "${templateName}" a ${to}:`, error.response?.data || error.message);
+            throw error;
+        }
+    }
 }
