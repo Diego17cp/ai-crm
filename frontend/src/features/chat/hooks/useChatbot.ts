@@ -120,7 +120,9 @@ export const useChatbot = () => {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
-	useEffect(() => scrollToBottom(), [messages, isLoading]);
+	useEffect(() => {
+		scrollToBottom();
+	}, [messages, isLoading]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value);
 
