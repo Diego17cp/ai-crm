@@ -1,9 +1,4 @@
-import {
-	PrismaClient,
-	Prisma,
-	EstadoCita,
-	TipoPersona,
-} from "generated/prisma/client";
+import { PrismaClient, Prisma, EstadoCita } from "generated/prisma/client";
 import { IAppointmentsRepository } from "../../application/ports/IAppointmentsRepository";
 import {
 	CreateAppointmentDTO,
@@ -49,62 +44,60 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 				take: limit,
 				orderBy: { fecha_cita: "desc" },
 				include: {
-					cliente: {
-                        select: {
-                            id: true,
-                            nombres: true,
-                            apellidos: true,
-                            email: true,
-                            telefonos: true,
-                            sexo: true,
-                            es_peruano: true,
-                            nacionalidad: true,
-                            direccion: true,
-                            solvencia: true,
-                            numero: true,
-                            actitud: true,
-                        }
-                    },
+					persona: {
+						select: {
+							id: true,
+							nombres: true,
+							apellidos: true,
+							email: true,
+							telefonos: true,
+							sexo: true,
+							es_peruano: true,
+							nacionalidad: true,
+							direccion: true,
+							numero: true,
+						},
+					},
 					asesor: {
-                        select: {
-                            nombres: true,
-                            apellidos: true,
-                            email: true,
-                            telefono: true,
-                            estado: true,
-                            rol: {
-                                select: {
-                                    nombre: true
-                                }
-                            }
-                        }
-                    },
+						select: {
+							nombres: true,
+							apellidos: true,
+							email: true,
+							telefono: true,
+							estado: true,
+							rol: {
+								select: {
+									nombre: true,
+								},
+							},
+						},
+					},
 					proyecto: {
-                        select: {
-                            id: true,
-                            nombre: true,
-                            abreviatura: true,
-                            ubicacion: true,
-                            descripcion: true,
-                        }
-                    },
+						select: {
+							id: true,
+							nombre: true,
+							abreviatura: true,
+							ubicacion: true,
+							descripcion: true,
+						},
+					},
 					lote: true,
 				},
 			}),
 		]);
 
-        const totalPages = Math.ceil(total / limit);
+		const totalPages = Math.ceil(total / limit);
 
 		return {
 			data,
-			meta: { 
-                total, 
-                page, 
-                limit, 
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPreviousPage: page > 1
-            },
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPreviousPage: page > 1,
+			},
 		};
 	}
 
@@ -112,47 +105,45 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 		return this.prisma.citas.findUnique({
 			where: { id },
 			include: {
-                cliente: {
-                    select: {
-                        id: true,
-                        nombres: true,
-                        apellidos: true,
-                        email: true,
-                        telefonos: true,
-                        sexo: true,
-                        es_peruano: true,
-                        nacionalidad: true,
-                        direccion: true,
-                        solvencia: true,
-                        numero: true,
-                        actitud: true,
-                    }
-                },
-                asesor: {
-                    select: {
-                        nombres: true,
-                        apellidos: true,
-                        email: true,
-                        telefono: true,
-                        estado: true,
-                        rol: {
-                            select: {
-                                nombre: true
-                            }
-                        }
-                    }
-                },
-                proyecto: {
-                    select: {
-                        id: true,
-                        nombre: true,
-                        abreviatura: true,
-                        ubicacion: true,
-                        descripcion: true,
-                    }
-                },
-                lote: true,
-            },
+				persona: {
+					select: {
+						id: true,
+						nombres: true,
+						apellidos: true,
+						email: true,
+						telefonos: true,
+						sexo: true,
+						es_peruano: true,
+						nacionalidad: true,
+						direccion: true,
+						numero: true,
+					},
+				},
+				asesor: {
+					select: {
+						nombres: true,
+						apellidos: true,
+						email: true,
+						telefono: true,
+						estado: true,
+						rol: {
+							select: {
+								nombre: true,
+							},
+						},
+					},
+				},
+				proyecto: {
+					select: {
+						id: true,
+						nombre: true,
+						abreviatura: true,
+						ubicacion: true,
+						descripcion: true,
+					},
+				},
+				lote: true,
+			},
 		});
 	}
 
@@ -165,7 +156,8 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 	) {
 		const OR_conditions: Prisma.CitasWhereInput[] = [];
 		if (id_lote) OR_conditions.push({ id_lote });
-		if (id_usuario_responsable) OR_conditions.push({ id_usuario_responsable });
+		if (id_usuario_responsable)
+			OR_conditions.push({ id_usuario_responsable });
 		const where: Prisma.CitasWhereInput = {
 			fecha_cita,
 			hora_cita,
@@ -187,12 +179,15 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 			estado_cita: EstadoCita.PROGRAMADA,
 			proyecto: { connect: { id: data.id_proyecto } },
 			asesor: { connect: { id: data.id_usuario_responsable } },
-			cliente: {} as any,
+			persona: {} as any,
 		};
 
-		if (data.id_lote) createPayload.lote = { connect: { id: data.id_lote } };
-		if (data.observaciones_visita) createPayload.observaciones_visita = data.observaciones_visita;
-		if (data.id_cliente) createPayload.cliente.connect = { id: data.id_cliente };
+		if (data.id_lote)
+			createPayload.lote = { connect: { id: data.id_lote } };
+		if (data.observaciones_visita)
+			createPayload.observaciones_visita = data.observaciones_visita;
+		if (data.id_cliente)
+			createPayload.persona.connect = { id: data.id_cliente };
 		else if (data.nuevo_cliente) {
 			const {
 				telefonos,
@@ -200,9 +195,8 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 				id_ubigeo,
 				...clienteData
 			} = data.nuevo_cliente;
-			createPayload.cliente.create = {
+			createPayload.persona.create = {
 				numero: clienteData.numero,
-				tipo_persona: TipoPersona.LEAD,
 				tipo_doc: { connect: { id: id_tipo_doc_identidad } },
 				nombres: clienteData.nombres || null,
 				apellidos: clienteData.apellidos || null,
