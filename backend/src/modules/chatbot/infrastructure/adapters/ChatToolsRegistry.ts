@@ -3,14 +3,13 @@ import { IToolsRegistry } from "../../application/ports/IToolsRegistry";
 import { LotesWhereInput } from "generated/prisma/models";
 import { IEventNotifier } from "../../application/ports/IEventNotifier";
 import { IWhatsappService } from "../../application/ports/IWhatsappService";
-import { AppError } from "@/core/errors/AppError";
 import { env } from "@/config";
 
 export class ChatToolsRegistry implements IToolsRegistry {
 	constructor(
 		private readonly prisma: PrismaClient,
 		private readonly notifier: IEventNotifier,
-		private readonly whatsappService: IWhatsappService
+		private readonly whatsappService: IWhatsappService,
 	) {}
 
 	getToolsDefinition() {
@@ -31,7 +30,8 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				type: "function",
 				function: {
 					name: "buscar_lotes_disponibles",
-					description: "Busca lotes disponibles. Puede buscar por proyecto y/o por un área aproximada en metros cuadrados (m2).",
+					description:
+						"Busca lotes disponibles. Puede buscar por proyecto y/o por un área aproximada en metros cuadrados (m2).",
 					parameters: {
 						type: "object",
 						properties: {
@@ -42,8 +42,9 @@ export class ChatToolsRegistry implements IToolsRegistry {
 							},
 							area_aproximada_m2: {
 								type: "number",
-								description: "El tamaño aproximado del lote en metros cuadrados, ej: 120. Úsalo para filtrar lotes disponibles que tengan un área similar a la indicada por el usuario. Si el usuario no da esta información, no apliques este filtro y muestra lotes de todos los tamaños."
-							}
+								description:
+									"El tamaño aproximado del lote en metros cuadrados, ej: 120. Úsalo para filtrar lotes disponibles que tengan un área similar a la indicada por el usuario. Si el usuario no da esta información, no apliques este filtro y muestra lotes de todos los tamaños.",
+							},
 						},
 					},
 				},
@@ -53,17 +54,19 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				function: {
 					name: "calcular_financiamiento_lote",
 					description:
-                        "Calcula la inicial y las cuotas de un lote. Úsalo ÚNICAMENTE cuando el cliente quiere crédito.",
+						"Calcula la inicial y las cuotas de un lote. Úsalo ÚNICAMENTE cuando el cliente quiere crédito.",
 					parameters: {
 						type: "object",
 						properties: {
 							nombre_proyecto: {
 								type: "string",
-								description: "El nombre del proyecto. Indispensable para extraer el monto inicial correcto."
+								description:
+									"El nombre del proyecto. Indispensable para extraer el monto inicial correcto.",
 							},
 							precio_total: {
 								type: "number",
-                                description: "Precio total del lote en soles. IMPORTANTE: Los descuentos NO APLICAN para pagos a crédito. Aquí SIEMPRE debes enviar el 'precio_total_sin_descuento' original.",
+								description:
+									"Precio total del lote en soles. IMPORTANTE: Los descuentos NO APLICAN para pagos a crédito. Aquí SIEMPRE debes enviar el 'precio_total_sin_descuento' original.",
 							},
 							meses: {
 								type: "number",
@@ -84,15 +87,27 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					parameters: {
 						type: "object",
 						properties: {
-							nombres: { type: "string", description: "Solo los nombre(s) de pila" },
-							apellidos: {  type: "string", description: "Solo los apellido(s), si el usuario los dio por separado. Si no, infiérelo del nombre completo." },
-							sexo: { type: "string", enum: ["M", "F"], description: "M o F, infiere esto basándote estrictamente en el nombre de pila del cliente." },
+							nombres: {
+								type: "string",
+								description: "Solo los nombre(s) de pila",
+							},
+							apellidos: {
+								type: "string",
+								description:
+									"Solo los apellido(s), si el usuario los dio por separado. Si no, infiérelo del nombre completo.",
+							},
+							sexo: {
+								type: "string",
+								enum: ["M", "F"],
+								description:
+									"M o F, infiere esto basándote estrictamente en el nombre de pila del cliente.",
+							},
 							telefono: { type: "string" },
 							email: { type: "string" },
 							fecha_esperada: {
 								type: "string",
 								description:
-                                    "¡IMPORTANTE! Fecha calculada estrictamente en formato YYYY-MM-DD. Ejemplo: 2026-03-31",
+									"¡IMPORTANTE! Fecha calculada estrictamente en formato YYYY-MM-DD. Ejemplo: 2026-03-31",
 							},
 							hora_esperada: {
 								type: "string",
@@ -105,7 +120,14 @@ export class ChatToolsRegistry implements IToolsRegistry {
 									"Nombre del proyecto que el cliente quiere visitar, ej: Santa Rosa",
 							},
 						},
-                        required: ["nombres", "apellidos", "sexo", "telefono", "fecha_esperada", "hora_esperada"],
+						required: [
+							"nombres",
+							"apellidos",
+							"sexo",
+							"telefono",
+							"fecha_esperada",
+							"hora_esperada",
+						],
 					},
 				},
 			},
@@ -116,7 +138,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					description:
 						"Usa esta herramienta para marcar la conversación como que requiere asistencia humana. Solo debes usarla si el cliente exige reiteradamente o pide explícitamente 'hablar con un humano' o un 'asesor de verdad', y sientes que su frustración va en aumento. No la uses solo porque el cliente hizo una pregunta difícil o pidió algo que no entiendes, solo úsala si el cliente claramente quiere ser atendido por una persona real.",
 					parameters: { type: "object", properties: {} },
-				}
+				},
 			},
 			{
 				type: "function",
@@ -129,34 +151,41 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						properties: {
 							documento_identidad: {
 								type: "string",
-								description: "Número de documento de identidad del cliente (DNI, CE, RUC). Sin esto no puedes consultar.",
-							}
+								description:
+									"Número de documento de identidad del cliente (DNI, CE, RUC). Sin esto no puedes consultar.",
+							},
 						},
-						required: ["documento_identidad"]
-					}
-				}
+						required: ["documento_identidad"],
+					},
+				},
 			},
 			{
 				type: "function",
 				function: {
 					name: "enviar_plano_proyecto",
-					description: "Envía el plano en PDF de un proyecto de manera automática al cliente. Usa esto SOLO cuando el cliente pida ver el plano, mapa o diseño del proyecto.",
+					description:
+						"Envía el plano en PDF de un proyecto de manera automática al cliente. Usa esto SOLO cuando el cliente pida ver el plano, mapa o diseño del proyecto.",
 					parameters: {
 						type: "object",
 						properties: {
 							nombre_proyecto: {
 								type: "string",
-								description: "El nombre del proyecto del cual se quiere recibir el plano en PDF",
-							}
+								description:
+									"El nombre del proyecto del cual se quiere recibir el plano en PDF",
+							},
 						},
-						required: ["nombre_proyecto"]
-					}
-				}
-			}
+						required: ["nombre_proyecto"],
+					},
+				},
+			},
 		];
 	}
 
-	async executeTool(name: string, args: any, conversacionId?: string): Promise<any> {
+	async executeTool(
+		name: string,
+		args: any,
+		conversacionId?: string,
+	): Promise<any> {
 		switch (name) {
 			case "buscar_proyectos":
 				return await this.buscarProyectos();
@@ -177,37 +206,60 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		}
 	}
 
-	private async consultarCuentaCliente(args: { documento_identidad: string }) {
+	private async consultarCuentaCliente(args: {
+		documento_identidad: string;
+	}) {
 		try {
 			const cliente = await this.prisma.clientes.findFirst({
-				where: { numero: args.documento_identidad },
+				where: { persona: { numero: args.documento_identidad } },
 				include: {
+					persona: true,
 					ventas: {
 						include: {
 							lote: {
 								include: {
 									manzana: {
-										include: { etapa: { include: { proyecto: true } } }
-									}
-								}
+										include: {
+											etapa: {
+												include: { proyecto: true },
+											},
+										},
+									},
+								},
 							},
 							cuotas: {
 								orderBy: { numero_cuota: "asc" },
-							}
-						}
-					}
-				}
+							},
+						},
+					},
+				},
 			});
-            if (!cliente) return { message: `No se encontró ningún cliente registrado con el documento ${args.documento_identidad}. Pídele que verifique y te indique si lo digitó correctamente.` };
-            if (!cliente.ventas || cliente.ventas.length === 0) return { message: `El cliente ${cliente.nombres || ''} ${cliente.apellidos || ''} no cuenta con ventas de lotes o créditos activos en el sistema.` };
+			if (!cliente)
+				return {
+					message: `No se encontró ningún cliente registrado con el documento ${args.documento_identidad}. Pídele que verifique y te indique si lo digitó correctamente.`,
+				};
+			if (!cliente.ventas || cliente.ventas.length === 0)
+				return {
+					message: `El cliente ${cliente.persona.nombres || ""} ${cliente.persona.apellidos || ""} no cuenta con ventas de lotes o créditos activos en el sistema.`,
+				};
 			const today = new Date();
-			const resumenCuentas = cliente.ventas.map(venta => {
-				const proyecto = venta.lote?.manzana?.etapa?.proyecto?.nombre || "N/A";
+			const resumenCuentas = cliente.ventas.map((venta) => {
+				const proyecto =
+					venta.lote?.manzana?.etapa?.proyecto?.nombre || "N/A";
 				const numeroLote = venta.lote?.numero_lote || "N/A";
-				const cuotasPagadas = venta.cuotas.filter(c => c.estado === "PAGADO");
-				const cuotasPendientes = venta.cuotas.filter(c => c.estado === "PENDIENTE");
-				const cuotasAtrasadas = cuotasPendientes.filter(c => new Date(c.fecha_vencimiento) < today);
-				const proximaCuota = cuotasPendientes.find(c => new Date(c.fecha_vencimiento) >= today) || cuotasPendientes[0];
+				const cuotasPagadas = venta.cuotas.filter(
+					(c) => c.estado === "PAGADO",
+				);
+				const cuotasPendientes = venta.cuotas.filter(
+					(c) => c.estado === "PENDIENTE",
+				);
+				const cuotasAtrasadas = cuotasPendientes.filter(
+					(c) => new Date(c.fecha_vencimiento) < today,
+				);
+				const proximaCuota =
+					cuotasPendientes.find(
+						(c) => new Date(c.fecha_vencimiento) >= today,
+					) || cuotasPendientes[0];
 				return {
 					proyecto_y_lote: `${proyecto} - Lote ${numeroLote}`,
 					estado_general_credito: venta.estado,
@@ -218,44 +270,62 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						pendientes: cuotasPendientes.length,
 					},
 					tiene_cuotas_atrasadas: cuotasAtrasadas.length > 0,
-					cuotas_atrasadas_detalle: cuotasAtrasadas.map(c => ({
+					cuotas_atrasadas_detalle: cuotasAtrasadas.map((c) => ({
 						numero_cuota: c.numero_cuota,
 						monto: Number(c.monto_cuota).toFixed(2),
-						vencio_el: new Date(c.fecha_vencimiento).toISOString().split("T")[0],
+						vencio_el: new Date(c.fecha_vencimiento)
+							.toISOString()
+							.split("T")[0],
 					})),
-					proxima_cuota_a_pagar: proximaCuota ? {
-						numero_cuota: proximaCuota.numero_cuota,
-						monto: Number(proximaCuota.monto_cuota).toFixed(2),
-						fecha_vencimiento: new Date(proximaCuota.fecha_vencimiento).toISOString().split("T")[0],
-					} : "Crédito totalmente pagado",
+					proxima_cuota_a_pagar: proximaCuota
+						? {
+								numero_cuota: proximaCuota.numero_cuota,
+								monto: Number(proximaCuota.monto_cuota).toFixed(
+									2,
+								),
+								fecha_vencimiento: new Date(
+									proximaCuota.fecha_vencimiento,
+								)
+									.toISOString()
+									.split("T")[0],
+							}
+						: "Crédito totalmente pagado",
 				};
 			});
 			return {
-				cliente: `${cliente.nombres} ${cliente.apellidos}`,
-				documento: cliente.numero,
+				cliente: `${cliente.persona.nombres} ${cliente.persona.apellidos}`,
+				documento: cliente.persona.numero,
 				cuentas_activas: resumenCuentas,
-                instruccion_para_respuesta: "Explícale de manera muy amable y comprensible cómo va su cuenta en base a este JSON. Dile cuánto lleva pagado, cuánto le falta y cuál es su próxima cuota a pagar junto con la fecha. Si tiene cuotas atrasadas, indícaselo muy sutil y amablemente."
+				instruccion_para_respuesta:
+					"Explícale de manera muy amable y comprensible cómo va su cuenta en base a este JSON. Dile cuánto lleva pagado, cuánto le falta y cuál es su próxima cuota a pagar junto con la fecha. Si tiene cuotas atrasadas, indícaselo muy sutil y amablemente.",
 			};
 		} catch (error) {
 			console.error("Error al consultar cuenta cliente:", error);
-            return { message: "Ocurrió un error interno al intentar consultar la cuenta. Dile al usuario que lo intente nuevamente más tarde." };
+			return {
+				message:
+					"Ocurrió un error interno al intentar consultar la cuenta. Dile al usuario que lo intente nuevamente más tarde.",
+			};
 		}
 	}
 
 	private async derivarHumano(conversacionId?: string) {
-		if (!conversacionId) return { message: "No se pudo marcar la conversación para asistencia humana porque no se proporcionó un ID de conversación válido." };
+		if (!conversacionId)
+			return {
+				message:
+					"No se pudo marcar la conversación para asistencia humana porque no se proporcionó un ID de conversación válido.",
+			};
 		const conversacion = await this.prisma.conversaciones.update({
 			where: { id: conversacionId },
 			data: {
-				estado: "ESPERANDO_ASESOR"
+				estado: "ESPERANDO_ASESOR",
 			},
 			include: {
-				cliente: {
+				persona: {
 					select: {
 						nombres: true,
 						apellidos: true,
-						telefonos: true
-					}
+						telefonos: true,
+					},
 				},
 				mensajes: {
 					orderBy: { created_at: "desc" },
@@ -263,33 +333,52 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					select: {
 						contenido: true,
 						created_at: true,
-					}
-				}
-			}
+					},
+				},
+			},
 		});
 		const info = {
 			canal: conversacion.canal,
 			ultimo_mensaje: conversacion.mensajes[0]?.contenido || "",
-			hora_ultimo_mensaje: conversacion.mensajes[0]?.created_at || new Date(),
-			cliente: conversacion.cliente ? {
-				nombres: conversacion.cliente.nombres,
-				apellidos: conversacion.cliente.apellidos,
-				telefonos: conversacion.cliente.telefonos.map(t => t.numero)
-			} : null
-		}
+			hora_ultimo_mensaje:
+				conversacion.mensajes[0]?.created_at || new Date(),
+			cliente: conversacion.persona
+				? {
+						nombres: conversacion.persona.nombres,
+						apellidos: conversacion.persona.apellidos,
+						telefonos: conversacion.persona.telefonos.map(
+							(t) => t.numero,
+						),
+					}
+				: null,
+		};
 		this.notifier.notifyHumanAssistanceRequired(conversacionId, info);
 		return {
-			prompt_result: "Transfiriendo a un asesor humano. Dile al cliente que un ejecutivo leerá la conversación y le responderá en breve. Despídete amablemente, tu labor ha terminado aquí."
-		}
+			prompt_result:
+				"Transfiriendo a un asesor humano. Dile al cliente que un ejecutivo leerá la conversación y le responderá en breve. Despídete amablemente, tu labor ha terminado aquí.",
+		};
 	}
 
-	private async buscarLotesDisponibles(args: { nombre_proyecto?: string, area_aproximada_m2?: number }) {
-		let whereCondition: LotesWhereInput = { estado: "Disponible" }
-		if (args.nombre_proyecto) whereCondition.manzana = { etapa: { proyecto: { nombre: { contains: args.nombre_proyecto, mode: "insensitive" } } } }
+	private async buscarLotesDisponibles(args: {
+		nombre_proyecto?: string;
+		area_aproximada_m2?: number;
+	}) {
+		let whereCondition: LotesWhereInput = { estado: "Disponible" };
+		if (args.nombre_proyecto)
+			whereCondition.manzana = {
+				etapa: {
+					proyecto: {
+						nombre: {
+							contains: args.nombre_proyecto,
+							mode: "insensitive",
+						},
+					},
+				},
+			};
 		if (args.area_aproximada_m2) {
 			const min = args.area_aproximada_m2 * 0.8; // 20% menos
 			const max = args.area_aproximada_m2 * 1.2; // 20% más
-			whereCondition.area_m2 = { gte: min, lte: max }
+			whereCondition.area_m2 = { gte: min, lte: max };
 		}
 		const lotes = await this.prisma.lotes.findMany({
 			where: whereCondition,
@@ -302,37 +391,44 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					select: {
 						codigo: true,
 						etapa: {
-							select: { 
-								proyecto: { 
-									select: { 
+							select: {
+								proyecto: {
+									select: {
 										nombre: true,
 										porcentaje_descuento: true,
-									} 
-								} 
+									},
+								},
 							},
 						},
 					},
 				},
 			},
 			take: 8,
-            orderBy: args.area_aproximada_m2 ? { area_m2: "asc" } : { precio_total: "asc" }
+			orderBy: args.area_aproximada_m2
+				? { area_m2: "asc" }
+				: { precio_total: "asc" },
 		});
-		return lotes.map(lt => {
+		return lotes.map((lt) => {
 			const normalizedNumber = lt.numero_lote.replace(/^LT-/i, "");
 			const manzanaCode = lt.manzana?.codigo || "N/A";
 			const proyectoName = lt.manzana?.etapa?.proyecto?.nombre || "N/A";
-            const descuentoActivo = Number(lt.manzana?.etapa?.proyecto?.porcentaje_descuento || 0);
-			const cuotaInicialCredito = Number(lt.precio_total) * 0.10;
+			const descuentoActivo = Number(
+				lt.manzana?.etapa?.proyecto?.porcentaje_descuento || 0,
+			);
+			const cuotaInicialCredito = Number(lt.precio_total) * 0.1;
 			return {
 				identificador: `Lote ${manzanaCode}-${normalizedNumber}`,
 				area_m2: lt.area_m2,
 				precio_total_sin_descuento: lt.precio_total,
 				porcentaje_descuento: descuentoActivo,
 				proyecto: proyectoName,
-				ubicacion_referencial: lt.ubicacion_referencial ? lt.ubicacion_referencial : null,
+				ubicacion_referencial: lt.ubicacion_referencial
+					? lt.ubicacion_referencial
+					: null,
 				cuota_inicial_estimada_credito: cuotaInicialCredito,
-				nota_interna: "Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas."
-			}
+				nota_interna:
+					"Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas.",
+			};
 		});
 	}
 
@@ -341,18 +437,18 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		precio_total: number;
 		meses: number;
 	}) {
-		const cuotaInicialPorcentaje = 0.10;
+		const cuotaInicialPorcentaje = 0.1;
 		const inicialPorcentaje = args.precio_total * cuotaInicialPorcentaje;
 		const saldo = args.precio_total - inicialPorcentaje;
 
 		const tasa = 0; // no se aplica interes por ahora
 
-		const cuotaMensual = tasa === 0 
-            ? saldo / args.meses 
-            : (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
+		const cuotaMensual =
+			tasa === 0
+				? saldo / args.meses
+				: (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
 
 		const primerPago = inicialPorcentaje + cuotaMensual;
-
 
 		return {
 			precio_total: args.precio_total,
@@ -362,78 +458,110 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			saldo_a_financiar: Math.round(saldo),
 			meses_a_pagar: args.meses,
 			cuota_mensual_estimada: Math.round(cuotaMensual),
-            instruccion_para_bot: `IMPORTANTE: Al mostrar esta cotización, ACLÁRALE amablemente al cliente que los descuentos publicados o mencionados anteriormente solo aplican para pagos AL CONTADO, por lo que esta cotización se basa en el precio de lista original (${args.precio_total} soles). EXPLÍCALE que para iniciar el financiamiento, el 'Monto Inicial a pagar en su primer mes' es de ${Math.round(primerPago)} soles, compuesto por el 10% del lote (${Math.round(inicialPorcentaje)} soles) MÁS su primera cuota (${Math.round(cuotaMensual)} soles). Luego restarán ${args.meses - 1} cuotas.`
-		}
+			instruccion_para_bot: `IMPORTANTE: Al mostrar esta cotización, ACLÁRALE amablemente al cliente que los descuentos publicados o mencionados anteriormente solo aplican para pagos AL CONTADO, por lo que esta cotización se basa en el precio de lista original (${args.precio_total} soles). EXPLÍCALE que para iniciar el financiamiento, el 'Monto Inicial a pagar en su primer mes' es de ${Math.round(primerPago)} soles, compuesto por el 10% del lote (${Math.round(inicialPorcentaje)} soles) MÁS su primera cuota (${Math.round(cuotaMensual)} soles). Luego restarán ${args.meses - 1} cuotas.`,
+		};
 	}
 
-	private async agendarCita(args: {
-		nombres: string;
-		apellidos: string;
-		sexo: "M" | "F";
-		telefono: string;
-		email?: string;
-		fecha_esperada: string;
-		hora_esperada: string;
-		nombre_proyecto?: string;
-	}, conversacionId?: string) {
+	private async agendarCita(
+		args: {
+			nombres: string;
+			apellidos: string;
+			sexo: "M" | "F";
+			telefono: string;
+			email?: string;
+			fecha_esperada: string;
+			hora_esperada: string;
+			nombre_proyecto?: string;
+		},
+		conversacionId?: string,
+	) {
 		try {
 			let safeDate = args.fecha_esperada.trim();
 			if (safeDate.includes("/")) {
 				const parts = safeDate.split("/");
-				if (parts[2]?.length === 4 && parts[1] && parts[0]) safeDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+				if (parts[2]?.length === 4 && parts[1] && parts[0])
+					safeDate = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
 			}
 			let safeTime = args.hora_esperada.trim();
 			if (safeTime.length > 5) safeTime = safeTime.substring(0, 5);
 			const inputDateStr = `${safeDate}T${safeTime}:00.000-05:00`;
 			const targetDate = new Date(inputDateStr);
-			if (isNaN(targetDate.getTime()) || targetDate < new Date()) return {
-				error_humano: "Has intentado agendar en una fecha u hora que ya pasó. Por favor, pide al cliente que te indique una fecha y hora futuras para agendar la cita."
-			};
+			if (isNaN(targetDate.getTime()) || targetDate < new Date())
+				return {
+					error_humano:
+						"Has intentado agendar en una fecha u hora que ya pasó. Por favor, pide al cliente que te indique una fecha y hora futuras para agendar la cita.",
+				};
 			const asesor = await this.prisma.usuarios.findFirst({
-				where: { estado: "ACTIVO", rol: { is: { nombre: "VENDEDOR" } } },
-			})
-			if (!asesor) throw new Error("No hay asesores disponibles para asignar la cita.");
+				where: {
+					estado: "ACTIVO",
+					rol: { is: { nombre: "VENDEDOR" } },
+				},
+			});
+			if (!asesor)
+				throw new Error(
+					"No hay asesores disponibles para asignar la cita.",
+				);
 			const parsedCitaFecha = new Date(safeDate + "T00:00:00.000Z");
-			const parsedCitaHora = new Date("1970-01-01T" + safeTime + ":00.000Z");
+			const parsedCitaHora = new Date(
+				"1970-01-01T" + safeTime + ":00.000Z",
+			);
 			const colision = await this.prisma.citas.findFirst({
 				where: {
 					id_usuario_responsable: asesor.id,
 					fecha_cita: parsedCitaFecha,
 					hora_cita: parsedCitaHora,
-					estado_cita:{ not:"CANCELADA" }
-				}
+					estado_cita: { not: "CANCELADA" },
+				},
 			});
-			if (colision) return { error_humano: "El asesor ya tiene una cita ocupada a esa hora exacta. Pídele al usuario que elija un horario distinto, por ejemplo 30 mins o 1 hora más tarde."};
+			if (colision)
+				return {
+					error_humano:
+						"El asesor ya tiene una cita ocupada a esa hora exacta. Pídele al usuario que elija un horario distinto, por ejemplo 30 mins o 1 hora más tarde.",
+				};
 
-			let clienteId: number | undefined;
-			const telefonoExistente = await this.prisma.telefonosCliente.findUnique({
-				where: { numero: args.telefono },
-				include: { cliente: true },
-			})
-			if (telefonoExistente) clienteId = telefonoExistente.id_cliente;
-			else {
+			let personaId: number | undefined;
+			let leadId: number | undefined;
+			const telefonoExistente =
+				await this.prisma.telefonosPersona.findUnique({
+					where: { numero: args.telefono },
+					include: { persona: { include: { leads: true } } },
+				});
+			if (telefonoExistente) {
+				personaId = telefonoExistente.id_persona;
+				if (telefonoExistente.persona.leads.length > 0)
+					leadId = telefonoExistente.persona.leads[0]?.id;
+			} else {
 				const tipoDoc = await this.prisma.tipoDocIdentidad.findFirst();
-				const nuevoCliente = await this.prisma.clientes.create({
+				const nuevaPersona = await this.prisma.personas.create({
 					data: {
-						id_tipo_doc_identidad: tipoDoc?.id || 1,
+						id_tipo_doc: tipoDoc?.id || 1,
 						numero: `LD-${Date.now().toString().slice(-8)}`,
-						tipo_persona: "LEAD",
 						nombres: args.nombres,
 						apellidos: args.apellidos,
 						sexo: args.sexo,
 						email: args.email ?? null,
 						telefonos: {
 							create: { numero: args.telefono, tipo: "PERSONAL" },
-						}
-					}
+						},
+						leads: {
+							create: { estado: "NUEVO" },
+						},
+					},
+					include: { leads: true },
 				});
-				clienteId = nuevoCliente.id;
+				personaId = nuevaPersona.id;
+				leadId = nuevaPersona.leads[0]?.id;
 			}
-			if (conversacionId && clienteId) {
+			if (conversacionId && personaId) {
 				await this.prisma.conversaciones.update({
 					where: { id: conversacionId },
-					data: { id_cliente: clienteId },
-				})
+					data: {
+						id_persona: personaId,
+						...(leadId !== undefined
+							? { id_lead: leadId ?? null }
+							: {}),
+					},
+				});
 			}
 			let proyectoId: number | undefined;
 			if (args.nombre_proyecto) {
@@ -442,28 +570,38 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						nombre: {
 							contains: args.nombre_proyecto,
 							mode: "insensitive",
-						}
-					}
-				})
+						},
+					},
+				});
 				if (proyecto) proyectoId = proyecto.id;
 			}
-			if (asesor && proyectoId && args.fecha_esperada) {
+			if (asesor && proyectoId && args.fecha_esperada && personaId) {
 				await this.prisma.citas.create({
 					data: {
-						id_cliente: clienteId,
+						id_persona: personaId,
+						...(leadId !== undefined
+							? { id_lead: leadId ?? null }
+							: {}),
 						id_proyecto: proyectoId,
 						id_usuario_responsable: asesor.id,
 						fecha_cita: parsedCitaFecha,
 						hora_cita: parsedCitaHora,
-						observaciones_visita: "Agendada vía chatbot, pendiente confirmar detalles con el cliente.",
-						estado_cita: "PROGRAMADA"
-					}
+						observaciones_visita:
+							"Agendada vía chatbot, pendiente confirmar detalles con el cliente.",
+						estado_cita: "PROGRAMADA",
+					},
 				});
 			}
-			return { prompt_result: "Prospecto registrado y cita separada con éxito. Agradécele utilizando su nombre, e indícale la fecha y hora que ha quedado reservada." };
+			return {
+				prompt_result:
+					"Prospecto registrado y cita separada con éxito. Agradécele utilizando su nombre, e indícale la fecha y hora que ha quedado reservada.",
+			};
 		} catch (error) {
 			console.error("Error al agendar cita:", error);
-            return { prompt_result: "Hubo un error del sistema al agendar. Dile al usuario que lo intente nuevamente o pida hablar con un asesor." };
+			return {
+				prompt_result:
+					"Hubo un error del sistema al agendar. Dile al usuario que lo intente nuevamente o pida hablar con un asesor.",
+			};
 		}
 	}
 
@@ -484,66 +622,94 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		return proyectos;
 	}
 
-	private async enviarPlanoProyecto(args: { nombre_proyecto: string }, conversacionId?: string) {
-		if (!conversacionId) return { message: "No se pudo enviar el plano porque no se proporcionó un ID de conversación válido." };
+	private async enviarPlanoProyecto(
+		args: { nombre_proyecto: string },
+		conversacionId?: string,
+	) {
+		if (!conversacionId)
+			return {
+				message:
+					"No se pudo enviar el plano porque no se proporcionó un ID de conversación válido.",
+			};
 		const conversacion = await this.prisma.conversaciones.findUnique({
 			where: { id: conversacionId },
 			include: {
-				cliente: {
+				persona: {
 					include: {
 						telefonos: true,
-					}
-				}
-			}
+					},
+				},
+			},
 		});
-		if (!conversacion) return { message: "No se encontró la conversación para enviar el plano." };
-		if (conversacion.canal !== "WHATSAPP") return {
-			instruccion_para_bot: "Dile al cliente amablemente que, debido a que los planos son PDFs muy pesados, están limitados tecnológicamente y por políticas solo pueden enviarse al canal oficial de WhatsApp. No inventes excusas adicionales." 
-		}
+		if (!conversacion)
+			return {
+				message: "No se encontró la conversación para enviar el plano.",
+			};
+		if (conversacion.canal !== "WHATSAPP")
+			return {
+				instruccion_para_bot:
+					"Dile al cliente amablemente que, debido a que los planos son PDFs muy pesados, están limitados tecnológicamente y por políticas solo pueden enviarse al canal oficial de WhatsApp. No inventes excusas adicionales.",
+			};
 		const proyecto = await this.prisma.proyectos.findFirst({
 			where: {
 				nombre: {
 					contains: args.nombre_proyecto,
 					mode: "insensitive",
-				}
+				},
 			},
 			select: {
 				nombre: true,
 				plano_url: true,
-			}
+			},
 		});
 
-		if (!proyecto) return {
-			message: `No se encontró ningún proyecto que coincida con el nombre "${args.nombre_proyecto}". Por favor, pídele al cliente que verifique el nombre del proyecto e inténtalo nuevamente.`
-		}
-		if (!proyecto.plano_url) return {
-			instruccion_para_bot: `Dile al cliente que el plano del proyecto ${proyecto.nombre} está en fase de rediseño y aún no está disponible digitalmente, e invítalo a agendar una cita.`
-		}
+		if (!proyecto)
+			return {
+				message: `No se encontró ningún proyecto que coincida con el nombre "${args.nombre_proyecto}". Por favor, pídele al cliente que verifique el nombre del proyecto e inténtalo nuevamente.`,
+			};
+		if (!proyecto.plano_url)
+			return {
+				instruccion_para_bot: `Dile al cliente que el plano del proyecto ${proyecto.nombre} está en fase de rediseño y aún no está disponible digitalmente, e invítalo a agendar una cita.`,
+			};
 
-		const telefono = conversacion.session_id || conversacion.cliente?.telefonos[0]?.numero;
-		if (!telefono) return { message: "No se encontró un número de teléfono asociado a la conversación para enviar el plano." };
+		const telefono =
+			conversacion.session_id ||
+			conversacion.persona?.telefonos[0]?.numero;
+		if (!telefono)
+			return {
+				message:
+					"No se encontró un número de teléfono asociado a la conversación para enviar el plano.",
+			};
 
 		const fullDocumentUrl = `${env.API_URL}/uploads/planos/${proyecto.plano_url}`;
 
-        if (!this.whatsappService.sendDocumentTemplate) {
-            console.warn(`[Reminder] whatsappService.sendDocumentTemplate no implementado`);
-            throw new Error("El servicio de WhatsApp no soporta documentos template"); 
-        }
+		if (!this.whatsappService.sendDocumentTemplate) {
+			console.warn(
+				`[Reminder] whatsappService.sendDocumentTemplate no implementado`,
+			);
+			throw new Error(
+				"El servicio de WhatsApp no soporta documentos template",
+			);
+		}
 
-        try {
-            await this.whatsappService.sendDocumentTemplate.call(
-                this.whatsappService,
-                telefono,
-                "envio_plano_proyecto",
-                fullDocumentUrl,
-                `Plano_Lotizacion_${proyecto.nombre.replace(/\s+/g, "_")}.pdf`,
-                [proyecto.nombre]
-            );
-            return {
-                instruccion_para_bot: "¡Éxito! El sistema ya mandó el PDF, acaba de vibrarle el celular al cliente. Confírmale al cliente en tu respuesta de chat que se lo acabas de mandar de manera automática en un documento adjunto aparte y pregúntale qué le parece."
-            }
-        } catch (e) {
-            return { instruccion_para_bot: "Hubo un error técnico al intentar enviar el PDF por debajo. Pídele disculpas al cliente." };
-        }
+		try {
+			await this.whatsappService.sendDocumentTemplate.call(
+				this.whatsappService,
+				telefono,
+				"envio_plano_proyecto",
+				fullDocumentUrl,
+				`Plano_Lotizacion_${proyecto.nombre.replace(/\s+/g, "_")}.pdf`,
+				[proyecto.nombre],
+			);
+			return {
+				instruccion_para_bot:
+					"¡Éxito! El sistema ya mandó el PDF, acaba de vibrarle el celular al cliente. Confírmale al cliente en tu respuesta de chat que se lo acabas de mandar de manera automática en un documento adjunto aparte y pregúntale qué le parece.",
+			};
+		} catch (e) {
+			return {
+				instruccion_para_bot:
+					"Hubo un error técnico al intentar enviar el PDF por debajo. Pídele disculpas al cliente.",
+			};
+		}
 	}
 }
