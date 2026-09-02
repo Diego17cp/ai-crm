@@ -1,18 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { LeadsUseCases } from "../../application/use-cases/LeadsUseCases";
-import {
-	ActitudCliente,
-	EstadoCivil,
-	SexoPersona,
-	SolvenciaEconomica,
-} from "generated/prisma/client";
+import { EstadoCivil, SexoPersona } from "generated/prisma/client";
 
 export class LeadsController {
 	constructor(private readonly leadsUseCases: LeadsUseCases) {}
 
 	getAll = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const q = req.query.q as string | undefined;
+			const q = req.query.q ? String(req.query.q) : undefined;
 			const page = parseInt(req.query.page as string) || 1;
 			const limit = parseInt(req.query.limit as string) || 10;
 
@@ -20,24 +15,18 @@ export class LeadsController {
 			const estado_civil = req.query.estado_civil as
 				| EstadoCivil
 				| undefined;
-			const solvencia = req.query.solvencia as
-				| SolvenciaEconomica
-				| undefined;
-			const actitud = req.query.actitud as ActitudCliente | undefined;
 
 			let es_peruano: boolean | undefined = undefined;
 			if (req.query.es_peruano === "true") es_peruano = true;
 			if (req.query.es_peruano === "false") es_peruano = false;
 
 			const result = await this.leadsUseCases.getAllLeads({
-				q,
+				...(q ? { q } : {}),
 				page,
 				limit,
-				sexo,
-				es_peruano,
-				estado_civil,
-				solvencia,
-				actitud,
+				...(sexo ? { sexo } : {}),
+				...(es_peruano !== undefined ? { es_peruano } : {}),
+				...(estado_civil ? { estado_civil } : {}),
 			});
 
 			res.status(200).json({
@@ -79,13 +68,13 @@ export class LeadsController {
 		}
 	};
 
-    delete = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const id = Number(req.params.id);
-            const lead = await this.leadsUseCases.deleteLead(id);
-            res.status(200).json({ success: true, data: lead });
-        } catch (error) {
-            next(error);
-        }
-    };
+	delete = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const id = Number(req.params.id);
+			const lead = await this.leadsUseCases.deleteLead(id);
+			res.status(200).json({ success: true, data: lead });
+		} catch (error) {
+			next(error);
+		}
+	};
 }

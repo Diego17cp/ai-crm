@@ -1,31 +1,40 @@
 import {
 	Clientes,
-	TelefonosCliente,
+	Personas,
+	TelefonosPersona,
 	TipoDocIdentidad,
 	Ubigeos,
 } from "generated/prisma/client";
 import {
-	CreateLeadDTO,
-	GetLeadsQueryDTO,
-	PaginatedLeadsResult,
-	UpdateLeadDTO,
-} from "@/modules/leads/domain/dtos";
+	CreateClientDTO,
+	GetClientsQueryDTO,
+	PaginatedClientsResult,
+	UpdateClientDTO,
+} from "../../domain/dtos";
 
 export type ClientWithRelationsDTO = Clientes & {
-	telefonos: TelefonosCliente[];
-	tipo_doc: TipoDocIdentidad;
-	ubigeo: Ubigeos | null;
+	persona: Personas & {
+		telefonos: TelefonosPersona[];
+		tipo_doc: TipoDocIdentidad;
+		ubigeo: Ubigeos | null;
+	};
 };
 
 export interface IClientsRepository {
 	findPaginated(
-		query: GetLeadsQueryDTO,
-	): Promise<PaginatedLeadsResult<ClientWithRelationsDTO>>;
+		query: GetClientsQueryDTO,
+	): Promise<PaginatedClientsResult<ClientWithRelationsDTO>>;
 	findById(id: number): Promise<ClientWithRelationsDTO | null>;
-	create(data: CreateLeadDTO): Promise<Clientes>;
-	update(id: number, data: UpdateLeadDTO): Promise<Clientes>;
+	create(data: CreateClientDTO): Promise<Clientes>;
+	update(id: number, data: UpdateClientDTO): Promise<Clientes>;
 	delete(id: number): Promise<Clientes>;
-	findByDocument(idTipoDoc: number, numero: string): Promise<ClientWithRelationsDTO | null>;
-	findPhonesInUse(numeros: string[], excludeLeadId?: number): Promise<string[]>;
+	findByDocument(
+		idTipoDoc: number,
+		numero: string,
+	): Promise<ClientWithRelationsDTO | null>;
+	findPhonesInUse(
+		numeros: string[],
+		excludePersonaId?: number,
+	): Promise<string[]>;
 	hasSalesOrDebts(id: number): Promise<boolean>;
 }

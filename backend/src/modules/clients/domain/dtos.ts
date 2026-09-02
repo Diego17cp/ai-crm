@@ -1,8 +1,9 @@
 import {
+	ActitudCliente,
 	EstadoCivil,
 	SexoPersona,
+	SolvenciaEconomica,
 	TipoTelefono,
-	EstadoLead,
 } from "generated/prisma/client";
 
 export interface TelefonoDTO {
@@ -10,7 +11,7 @@ export interface TelefonoDTO {
 	tipo: TipoTelefono;
 }
 
-export interface CreateLeadDTO {
+export interface CreateClientDTO {
 	// Identity fields
 	id_tipo_doc_identidad: number;
 	numero: string;
@@ -27,11 +28,9 @@ export interface CreateLeadDTO {
 	id_ubigeo?: string | null;
 	telefonos?: TelefonoDTO[];
 
-	// Lead fields
-	id_asesor?: string | null;
-	id_proyecto?: number | null;
-	estado?: EstadoLead;
-	origen?: string | null;
+	// Client fields
+	solvencia?: SolvenciaEconomica | null;
+	actitud?: ActitudCliente | null;
 }
 
 export interface UpdateTelefonosPayload {
@@ -44,29 +43,24 @@ export interface UpdateTelefonosPayload {
 	}[];
 }
 
-export interface UpdateLeadDTO extends Partial<
-	Omit<CreateLeadDTO, "telefonos">
+export interface UpdateClientDTO extends Partial<
+	Omit<CreateClientDTO, "telefonos">
 > {
 	telefonos?: UpdateTelefonosPayload;
-	motivo_perdida?: string | null;
-	fecha_contact?: Date | null;
-	fecha_calificacion?: Date | null;
-	fecha_cierre?: Date | null;
 }
 
-export interface GetLeadsQueryDTO {
+export interface GetClientsQueryDTO {
 	q?: string;
 	page: number;
 	limit: number;
 	sexo?: SexoPersona;
 	es_peruano?: boolean;
 	estado_civil?: EstadoCivil;
-	estado?: EstadoLead;
-	id_asesor?: string;
-	id_proyecto?: number;
+	solvencia?: SolvenciaEconomica;
+	actitud?: ActitudCliente;
 }
 
-export interface PaginatedLeadsResult<T> {
+export interface PaginatedClientsResult<T> {
 	data: T[];
 	meta: {
 		total: number;

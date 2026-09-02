@@ -12,7 +12,7 @@ export class ClientsController {
 
 	getAll = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const q = req.query.q as string | undefined;
+			const q = req.query.q ? String(req.query.q) : undefined;
 			const page = parseInt(req.query.page as string) || 1;
 			const limit = parseInt(req.query.limit as string) || 10;
 
@@ -30,14 +30,14 @@ export class ClientsController {
 			if (req.query.es_peruano === "false") es_peruano = false;
 
 			const result = await this.clientsUseCases.getAllClients({
-				q,
+				...(q ? { q } : {}),
 				page,
 				limit,
-				sexo,
-				es_peruano,
-				estado_civil,
-				solvencia,
-				actitud,
+				...(sexo ? { sexo } : {}),
+				...(es_peruano !== undefined ? { es_peruano } : {}),
+				...(estado_civil ? { estado_civil } : {}),
+				...(solvencia ? { solvencia } : {}),
+				...(actitud ? { actitud } : {}),
 			});
 
 			res.status(200).json({
@@ -72,20 +72,23 @@ export class ClientsController {
 	update = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const id = Number(req.params.id);
-			const client = await this.clientsUseCases.updateClient(id, req.body);
+			const client = await this.clientsUseCases.updateClient(
+				id,
+				req.body,
+			);
 			res.status(200).json({ success: true, data: client });
 		} catch (error) {
 			next(error);
 		}
 	};
 
-    delete = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const id = Number(req.params.id);
-            const client = await this.clientsUseCases.deleteClient(id);
-            res.status(200).json({ success: true, data: client });
-        } catch (error) {
-            next(error);
-        }
-    };
+	delete = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const id = Number(req.params.id);
+			const client = await this.clientsUseCases.deleteClient(id);
+			res.status(200).json({ success: true, data: client });
+		} catch (error) {
+			next(error);
+		}
+	};
 }
