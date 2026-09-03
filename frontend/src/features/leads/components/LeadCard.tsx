@@ -248,7 +248,7 @@ export const LeadCard = ({ lead, onEdit, onDelete }: LeadCardProps) => {
 							href={`mailto:${persona.email}`}
 							className="
                 flex min-w-0 items-center gap-2.5
-                rounded-lg px-2 py-1.5 -mx-2
+                rounded-lg px-2 py-1.5
                 text-sm
 								border border-gray-200 dark:border-gray-700
                 text-gray-700 dark:text-gray-300

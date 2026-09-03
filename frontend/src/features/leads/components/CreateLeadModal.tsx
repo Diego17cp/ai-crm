@@ -13,10 +13,9 @@ import { SearchableSelect } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
-import type {
-	CreateLeadPayload,
-} from "../types";
+import type { CreateLeadPayload } from "../types";
 import { classes, options } from "@/shared/constants";
+import { useDocTypes } from "@/core/hooks";
 
 interface Props {
 	isOpen: boolean;
@@ -29,15 +28,16 @@ interface PhoneUI {
 	tipo: TipoTelefono;
 }
 
-const selectClasses = classes.searchableSelect
+const selectClasses = classes.searchableSelect;
 
 const sexoOptions = options.sexo;
-const booleanOptions = options.boolean
+const booleanOptions = options.boolean;
 const estadoCivilOptions = options.estadoCivil;
 const phoneTypeOptions = options.phoneType;
 
 export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 	const [numeroDoc, setNumeroDoc] = useState("");
+	const [idTipoDoc, setIdTipoDoc] = useState("");
 	const [nombres, setNombres] = useState("");
 	const [apellidos, setApellidos] = useState("");
 	const [email, setEmail] = useState("");
@@ -55,6 +55,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const { ubigeosQuery } = useUbigeos();
+	const { docTypesQuery } = useDocTypes();
 	const { useCreateLeadMutation } = useLeads();
 
 	useEffect(() => {
@@ -78,7 +79,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 
 	const createPayload = useMemo((): CreateLeadPayload => {
 		return {
-			id_tipo_doc_identidad: 1,
+			id_tipo_doc_identidad: Number(idTipoDoc),
 			nombres: nombres.trim() || undefined,
 			apellidos: apellidos.trim() || undefined,
 			numero: numeroDoc.trim(),
@@ -108,7 +109,8 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 		estadoCivil,
 		idUbigeo,
 		phones,
-		nacionalidad
+		nacionalidad,
+		idTipoDoc,
 	]);
 
 	const createLeadMutation = useCreateLeadMutation(createPayload);
@@ -147,6 +149,12 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 		ubigeosQuery.data?.map((u: { id: string; nombre: string }) => ({
 			value: String(u.id),
 			label: `${u.id} - ${u.nombre}`,
+		})) || [];
+
+	const docTypeOptions =
+		docTypesQuery.data?.map((d) => ({
+			value: String(d.id),
+			label: `${d.id} - ${d.nombre}`,
 		})) || [];
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -274,6 +282,22 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													disabled={isSubmitting}
 													placeholder="Ej: Pérez Gomez"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+												/>
+											</div>
+											<div className="flex flex-col gap-1.5 focus-within:z-10">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
+													Tipo de documento
+													<span className="text-red-500">*</span>
+												</label>
+												<SearchableSelect
+													value={idTipoDoc}
+													onChange={(val) =>
+														setIdTipoDoc(val)
+													}
+													options={docTypeOptions}
+													placeholder="Seleccione..."
+													classes={selectClasses}
+													disabled={isSubmitting}
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">

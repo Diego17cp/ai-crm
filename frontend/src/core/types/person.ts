@@ -7,7 +7,7 @@ export type EstadoCivil = "SOLTERO" | "CASADO" | "DIVORCIADO" | "CONVIVIENTE";
 
 export interface Person {
 	id: number;
-	id_tipo_doc_identidad: number;
+	id_tipo_doc: number;
 	id_ubigeo: string | null;
 	numero: string;
 	nombres: string | null;

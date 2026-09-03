@@ -11,7 +11,7 @@ import {
 import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
-import { useUbigeos } from "@/core/hooks/useUbigeos";
+import { useDocTypes, useUbigeos } from "@/core/hooks";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import type { Lead, UpdateLeadPayload } from "../types";
 import { classes, options } from "@/shared/constants";
@@ -50,6 +50,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
+	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
 	const [deletedPhoneIds, setDeletedPhoneIds] = useState<number[]>([]);
@@ -57,6 +58,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const { ubigeosQuery } = useUbigeos();
+	const { docTypesQuery } = useDocTypes();
+
 	const { useEditLeadMutation } = useLeads();
 
 	useEffect(() => {
@@ -82,6 +85,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 			setSexo(lead.persona.sexo || "");
 			setEstadoCivil(lead.persona.estado_civil || "");
 			setIdUbigeo(lead.persona.id_ubigeo || "");
+			setIdTipoDoc(String(lead.persona.id_tipo_doc) || "");
 
 			if (lead.persona.telefonos) {
 				setPhones(
@@ -116,7 +120,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		};
 
 		return {
-			id_tipo_doc_identidad: lead?.persona.id_tipo_doc_identidad || 1,
+			id_tipo_doc_identidad: Number(idTipoDoc),
 			nombres: nombres.trim() || undefined,
 			apellidos: apellidos.trim() || undefined,
 			numero: numeroDoc.trim(),
@@ -145,8 +149,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		idUbigeo,
 		phones,
 		deletedPhoneIds,
-		lead,
 		nacionalidad,
+		idTipoDoc,
 	]);
 
 	const editLeadMutation = useEditLeadMutation(lead?.id || 0, updatePayload);
@@ -186,6 +190,12 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		ubigeosQuery.data?.map((u: { id: string; nombre: string }) => ({
 			value: String(u.id),
 			label: `${u.id} - ${u.nombre}`,
+		})) || [];
+
+	const docTypeOptions =
+		docTypesQuery.data?.map(d => ({
+			value: String(d.id),
+			label: `${d.id} - ${d.nombre}`,
 		})) || [];
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -320,6 +330,22 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													disabled={isSubmitting}
 													placeholder="Ej: Pérez Gomez"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+												/>
+											</div>
+											<div className="flex flex-col gap-1.5 focus-within:z-10">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
+													Tipo de documento{" "}
+													<span className="text-red-500">
+														*
+													</span>
+												</label>
+												<SearchableSelect
+													value={idTipoDoc}
+													onChange={(v) => setIdTipoDoc(v)}
+													options={docTypeOptions}
+													disabled={isSubmitting}
+													placeholder="Seleccionar tipo de documento"
+													classes={selectClasses}
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
