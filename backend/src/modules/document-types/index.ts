@@ -1,0 +1,1 @@
+export { docTypesRoutes } from "./infrastructure/routes/docTypesRoutes";

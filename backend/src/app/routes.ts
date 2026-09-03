@@ -12,6 +12,7 @@ import { salesRoutes } from "@/modules/sales";
 import { clientsRoutes } from "@/modules/clients";
 import { rolesRoutes } from "@/modules/roles";
 import { chatRoutes } from "@/modules/chats";
+import { docTypesRoutes } from "@/modules/document-types";
 
 const router: Router = Router();
 
@@ -27,14 +28,15 @@ router.use("/clientes", clientsRoutes());
 router.use("/citas", appointmentsRoutes());
 router.use("/ventas", salesRoutes());
 router.use("/roles", rolesRoutes());
-router.use("/chats", chatRoutes())
+router.use("/chats", chatRoutes());
+router.use("/document-types", docTypesRoutes());
 
 router.use("/", (_, res) => {
-    res.json({
-        message: "API",
-        status: "running",
-        timestamp: new Date().toISOString()
-    });
-})
+	res.json({
+		message: "API",
+		status: "running",
+		timestamp: new Date().toISOString(),
+	});
+});
 
 export default router;
