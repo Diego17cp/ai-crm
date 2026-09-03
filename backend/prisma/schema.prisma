@@ -339,7 +339,7 @@ model Leads {
   origen         String?    @db.VarChar(50)
   motivo_perdida String?    @db.VarChar(255)
 
-  fecha_contact      DateTime?
+  fecha_contacto      DateTime?
   fecha_calificacion DateTime?
   fecha_cierre       DateTime?
 

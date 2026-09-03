@@ -234,7 +234,7 @@ export class PrismaLeadsRepository implements ILeadsRepository {
 				estado,
 				origen,
 				motivo_perdida,
-				fecha_contact,
+				fecha_contacto,
 				fecha_calificacion,
 				fecha_cierre,
 			} = data;
@@ -308,8 +308,8 @@ export class PrismaLeadsRepository implements ILeadsRepository {
 			if (origen !== undefined) updateLeadPayload.origen = origen;
 			if (motivo_perdida !== undefined)
 				updateLeadPayload.motivo_perdida = motivo_perdida;
-			if (fecha_contact !== undefined)
-				updateLeadPayload.fecha_contact = fecha_contact;
+			if (fecha_contacto !== undefined)
+				updateLeadPayload.fecha_contacto = fecha_contacto;
 			if (fecha_calificacion !== undefined)
 				updateLeadPayload.fecha_calificacion = fecha_calificacion;
 			if (fecha_cierre !== undefined)

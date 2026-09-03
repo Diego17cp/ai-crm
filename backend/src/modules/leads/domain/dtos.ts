@@ -49,7 +49,7 @@ export interface UpdateLeadDTO extends Partial<
 > {
 	telefonos?: UpdateTelefonosPayload;
 	motivo_perdida?: string | null;
-	fecha_contact?: Date | null;
+	fecha_contacto?: Date | null;
 	fecha_calificacion?: Date | null;
 	fecha_cierre?: Date | null;
 }
