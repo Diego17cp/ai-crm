@@ -12,16 +12,8 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
-import type { ApiError } from "@/core/types";
-import type {
-	Actitud,
-	EstadoCivil,
-	Lead,
-	Sexo,
-	Solvencia,
-	TipoTelefono,
-	UpdateLeadPayload,
-} from "../types";
+import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
+import type { Lead, UpdateLeadPayload } from "../types";
 import { classes, options } from "@/shared/constants";
 
 interface Props {
@@ -37,13 +29,11 @@ interface PhoneUI {
 	tipo: TipoTelefono;
 }
 
-const selectClasses = classes.searchableSelect
+const selectClasses = classes.searchableSelect;
 
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean;
 const estadoCivilOptions = options.estadoCivil;
-const solvenciaOptions = options.solvencia;
-const actitudOptions = options.actitud;
 const phoneTypeOptions = options.phoneType;
 
 export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
@@ -59,8 +49,6 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 	const [nacionalidad, setNacionalidad] = useState<string>("");
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [solvencia, setSolvencia] = useState<string>("");
-	const [actitud, setActitud] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
@@ -73,31 +61,31 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 
 	useEffect(() => {
 		if (isOpen && lead) {
-			setNumeroDoc(lead.numero || "");
-			setNombres(lead.nombres || "");
-			setApellidos(lead.apellidos || "");
-			setEmail(lead.email || "");
-			setDireccion(lead.direccion || "");
-			setOcupacion(lead.ocupacion || "");
+			setNumeroDoc(lead.persona.numero || "");
+			setNombres(lead.persona.nombres || "");
+			setApellidos(lead.persona.apellidos || "");
+			setEmail(lead.persona.email || "");
+			setDireccion(lead.persona.direccion || "");
+			setOcupacion(lead.persona.ocupacion || "");
 			setFechaNacimiento(
-				lead.fecha_nacimiento
-					? lead.fecha_nacimiento.split("T")[0]
+				lead.persona.fecha_nacimiento
+					? lead.persona.fecha_nacimiento.split("T")[0]
 					: "",
 			);
 
 			setEsPeruano(
-				lead.es_peruano !== null ? String(lead.es_peruano) : "true",
+				lead.persona.es_peruano !== null
+					? String(lead.persona.es_peruano)
+					: "true",
 			);
-			setNacionalidad(lead.nacionalidad || "");
-			setSexo(lead.sexo || "");
-			setEstadoCivil(lead.estado_civil || "");
-			setSolvencia(lead.solvencia || "");
-			setActitud(lead.actitud || "");
-			setIdUbigeo(lead.id_ubigeo || "");
+			setNacionalidad(lead.persona.nacionalidad || "");
+			setSexo(lead.persona.sexo || "");
+			setEstadoCivil(lead.persona.estado_civil || "");
+			setIdUbigeo(lead.persona.id_ubigeo || "");
 
-			if (lead.telefonos) {
+			if (lead.persona.telefonos) {
 				setPhones(
-					lead.telefonos.map((t) => ({
+					lead.persona.telefonos.map((t) => ({
 						uiId: crypto.randomUUID(),
 						id: t.id,
 						numero: t.numero,
@@ -128,7 +116,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		};
 
 		return {
-			id_tipo_doc_identidad: lead?.id_tipo_doc_identidad || 1,
+			id_tipo_doc_identidad: lead?.persona.id_tipo_doc_identidad || 1,
 			nombres: nombres.trim() || undefined,
 			apellidos: apellidos.trim() || undefined,
 			numero: numeroDoc.trim(),
@@ -140,8 +128,6 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 			ocupacion: ocupacion.trim() || undefined,
 			sexo: (sexo as Sexo) || undefined,
 			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			solvencia: (solvencia as Solvencia) || undefined,
-			actitud: (actitud as Actitud) || undefined,
 			id_ubigeo: idUbigeo || undefined,
 			telefonos: payloadPhones,
 		};
@@ -156,13 +142,11 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		ocupacion,
 		sexo,
 		estadoCivil,
-		solvencia,
-		actitud,
 		idUbigeo,
 		phones,
 		deletedPhoneIds,
 		lead,
-		nacionalidad
+		nacionalidad,
 	]);
 
 	const editLeadMutation = useEditLeadMutation(lead?.id || 0, updatePayload);
@@ -208,7 +192,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!numeroDoc.trim()) return setError("El número de documento es requerido.");
+		if (!numeroDoc.trim())
+			return setError("El número de documento es requerido.");
 
 		try {
 			editLeadMutation.mutate(undefined, {
@@ -260,7 +245,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 										</h2>
 										<p className="text-xs text-gray-500 dark:text-gray-400">
 											Actualiza la información de{" "}
-											{lead.nombres || lead.numero}
+											{lead.persona.nombres ||
+												lead.persona.numero}
 										</p>
 									</div>
 								</div>
@@ -434,18 +420,41 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 															</div>
 															<input
 																type="text"
-																value={phone.numero}
-																onChange={(e) => handleUpdatePhone(phone.uiId,"numero",e.target.value)}
-																disabled={isSubmitting}
+																value={
+																	phone.numero
+																}
+																onChange={(e) =>
+																	handleUpdatePhone(
+																		phone.uiId,
+																		"numero",
+																		e.target
+																			.value,
+																	)
+																}
+																disabled={
+																	isSubmitting
+																}
 																minLength={9}
-                                                                maxLength={11}
+																maxLength={11}
 																placeholder="Número telefónico"
 																className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all flex-1"
 															/>
 															<div className="w-36 shrink-0">
 																<select
-																	value={phone.tipo}
-																	onChange={(e) => handleUpdatePhone(phone.uiId,"tipo",e.target.value)}																
+																	value={
+																		phone.tipo
+																	}
+																	onChange={(
+																		e,
+																	) =>
+																		handleUpdatePhone(
+																			phone.uiId,
+																			"tipo",
+																			e
+																				.target
+																				.value,
+																		)
+																	}
 																	disabled={
 																		isSubmitting
 																	}
@@ -547,7 +556,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													value={esPeruano}
 													onChange={(val) => {
 														setEsPeruano(val);
-														if (val === "true") setNacionalidad("");
+														if (val === "true")
+															setNacionalidad("");
 													}}
 													placeholder="Seleccionar"
 													classes={selectClasses}
@@ -618,30 +628,6 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													disabled={isSubmitting}
 													placeholder="Ej: Ingeniero, Comerciante..."
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
-												/>
-											</div>
-											<div className="z-10">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Solvencia (Status Pagos)
-												</label>
-												<SearchableSelect
-													options={solvenciaOptions}
-													value={solvencia}
-													onChange={setSolvencia}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
-												/>
-											</div>
-											<div className="z-5">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Actitud Comprador
-												</label>
-												<SearchableSelect
-													options={actitudOptions}
-													value={actitud}
-													onChange={setActitud}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
 												/>
 											</div>
 										</div>

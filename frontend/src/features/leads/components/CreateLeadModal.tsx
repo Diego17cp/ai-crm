@@ -12,14 +12,9 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
-import type { ApiError } from "@/core/types";
+import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import type {
-	Actitud,
-	EstadoCivil,
-	Sexo,
-	Solvencia,
 	CreateLeadPayload,
-	TipoTelefono,
 } from "../types";
 import { classes, options } from "@/shared/constants";
 
@@ -39,8 +34,6 @@ const selectClasses = classes.searchableSelect
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean
 const estadoCivilOptions = options.estadoCivil;
-const solvenciaOptions = options.solvencia;
-const actitudOptions = options.actitud;
 const phoneTypeOptions = options.phoneType;
 
 export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
@@ -56,8 +49,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 	const [nacionalidad, setNacionalidad] = useState<string>("");
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [solvencia, setSolvencia] = useState<string>("");
-	const [actitud, setActitud] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
@@ -79,8 +70,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 			setNacionalidad("");
 			setSexo("");
 			setEstadoCivil("");
-			setSolvencia("");
-			setActitud("");
 			setIdUbigeo("");
 			setPhones([]);
 			setError(null);
@@ -101,8 +90,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 			ocupacion: ocupacion.trim() || undefined,
 			sexo: (sexo as Sexo) || undefined,
 			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			solvencia: (solvencia as Solvencia) || undefined,
-			actitud: (actitud as Actitud) || undefined,
 			id_ubigeo: idUbigeo || undefined,
 			telefonos: phones
 				.filter((p) => p.numero.trim())
@@ -119,8 +106,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 		ocupacion,
 		sexo,
 		estadoCivil,
-		solvencia,
-		actitud,
 		idUbigeo,
 		phones,
 		nacionalidad
@@ -584,30 +569,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													disabled={isSubmitting}
 													placeholder="Ej: Ingeniero, Comerciante..."
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
-												/>
-											</div>
-											<div className="z-10">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Solvencia (Status Pagos)
-												</label>
-												<SearchableSelect
-													options={solvenciaOptions}
-													value={solvencia}
-													onChange={setSolvencia}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
-												/>
-											</div>
-											<div className="z-5">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Actitud Comprador
-												</label>
-												<SearchableSelect
-													options={actitudOptions}
-													value={actitud}
-													onChange={setActitud}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
 												/>
 											</div>
 										</div>
