@@ -3,6 +3,7 @@ import {
 	ChatMessage,
 	IChatbotRepository,
 } from "../../application/ports/IChatbotRepository";
+import { normalizePhone } from "@/core/utils/normalizePhone";
 
 export class PrismaChatbotRepository implements IChatbotRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -66,25 +67,12 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 	): Promise<{ id: string }> {
 		let idPersonaEncontrado: number | null = null;
 		if (canal === "WHATSAPP") {
-			const personaRelacion =
-				await this.prisma.telefonosPersona.findFirst({
-					where: {
-						numero: { endsWith: sessionId.slice(-9) },
-					},
-					select: { id_persona: true },
-				});
-			if (personaRelacion)
-				idPersonaEncontrado = personaRelacion.id_persona;
-		}
-		if (!idPersonaEncontrado) {
-			const anon = await this.prisma.personas.create({
-				data: {
-					id_tipo_doc: 1,
-					numero: `AN-${Date.now().toString().slice(-8)}`,
-					nombres: canal === "WHATSAPP" ? sessionId : "Anónimo",
-				},
+			const numeroNormalizado = normalizePhone(sessionId);
+			const telefono = await this.prisma.telefonosPersona.findUnique({
+				where: { numero: numeroNormalizado },
+				select: { id_persona: true },
 			});
-			idPersonaEncontrado = anon.id;
+			if (telefono) idPersonaEncontrado = telefono.id_persona;
 		}
 
 		const nueva = await this.prisma.conversaciones.create({
