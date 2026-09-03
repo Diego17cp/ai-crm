@@ -1,4 +1,15 @@
-import { Ventas, Cuotas, Prisma, Clientes, TelefonosCliente, Lotes, Manzanas, Etapas, Proyectos } from "generated/prisma/client";
+import {
+	Ventas,
+	Cuotas,
+	Prisma,
+	Clientes,
+	TelefonosPersona,
+	Lotes,
+	Manzanas,
+	Etapas,
+	Proyectos,
+	Personas,
+} from "generated/prisma/client";
 import {
 	GetSalesQueryDTO,
 	PaginatedResult,
@@ -9,17 +20,19 @@ import {
 export type CuotaWithRelations = Cuotas & {
 	venta: Ventas & {
 		cliente: Clientes & {
-			telefonos: TelefonosCliente[];
-		},
+			persona: Personas & {
+				telefonos: TelefonosPersona[];
+			};
+		};
 		lote: Lotes & {
 			manzana: Manzanas & {
 				etapa: Etapas & {
 					proyecto: Proyectos;
-				}
-			}
-		}
-	}
-}
+				};
+			};
+		};
+	};
+};
 
 export interface ISalesRepository {
 	findPaginated(query: GetSalesQueryDTO): Promise<PaginatedResult<any>>;
@@ -28,7 +41,7 @@ export interface ISalesRepository {
 		data: Prisma.VentasCreateInput,
 		cuotas: Prisma.CuotasCreateManyVentaInput[],
 		loteId: number,
-        clienteId: number,
+		clienteId: number,
 	): Promise<Ventas>;
 	payQuota(cuotaId: number, data: Prisma.CuotasUpdateInput): Promise<Cuotas>;
 	findCollections(
@@ -36,7 +49,7 @@ export interface ISalesRepository {
 	): Promise<PaginatedResult<any>>;
 	getOverdueQuotas(): Promise<CuotaWithRelations[]>;
 	findCuotaById(id: number): Promise<CuotaWithRelations | null>;
-	logReminder(data:{
+	logReminder(data: {
 		id_cuota: number;
 		id_usuario: string | null;
 		template: string;

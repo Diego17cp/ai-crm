@@ -8,6 +8,7 @@ import {
 export interface CreateSaleDTO {
 	id_lote: number;
 	id_cliente: number;
+	id_asesor: string;
 	fecha_venta?: Date | string;
 	monto_total: number;
 	tipo_pago: TipoPago;
@@ -16,7 +17,7 @@ export interface CreateSaleDTO {
 	dia_pago?: number;
 	meses_gracia?: number;
 	estado_contrato?: EstadoContrato;
-    tasa_interes?: number;
+	tasa_interes?: number;
 }
 
 export interface PayQuotaDTO {
@@ -49,8 +50,8 @@ export interface PaginatedResult<T> {
 		page: number;
 		limit: number;
 		totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
 	};
 }
 export type ReminderLevel = "today" | "soon" | "overdue";

@@ -127,6 +127,7 @@ export class SalesUseCases {
 			estado_contrato: data.estado_contrato || EstadoContrato.FIRMADO,
 			lote: { connect: { id: data.id_lote } },
 			cliente: { connect: { id: data.id_cliente } },
+			asesor: { connect: { id: data.id_asesor } },
 		};
 
 		try {
@@ -163,8 +164,8 @@ export class SalesUseCases {
 	}
 
 	async sendDebtRemind(idCuota: number, userId: string) {
-        const cuota = await this.repo.findCuotaById(idCuota);
-        if (!cuota) throw new AppError("Cuota no encontrada", 404);        
-        await this.reminderSender.send(cuota, { isManual: true, userId });
-    }
+		const cuota = await this.repo.findCuotaById(idCuota);
+		if (!cuota) throw new AppError("Cuota no encontrada", 404);
+		await this.reminderSender.send(cuota, { isManual: true, userId });
+	}
 }

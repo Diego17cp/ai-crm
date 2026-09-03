@@ -3,9 +3,11 @@ import {
 	Prisma,
 	EstadoLote,
 	EstadoCuota,
-    TipoPersona,
 } from "generated/prisma/client";
-import { CuotaWithRelations, ISalesRepository } from "../../application/ports/ISalesRepository";
+import {
+	CuotaWithRelations,
+	ISalesRepository,
+} from "../../application/ports/ISalesRepository";
 import {
 	GetSalesQueryDTO,
 	GetCollectionsQueryDTO,
@@ -16,7 +18,9 @@ import {
 export class PrismaSalesRepository implements ISalesRepository {
 	constructor(private readonly prisma: PrismaClient) {}
 
-	async findPaginated(query: GetSalesQueryDTO): Promise<PaginatedResult<any>> {
+	async findPaginated(
+		query: GetSalesQueryDTO,
+	): Promise<PaginatedResult<any>> {
 		const {
 			page,
 			limit,
@@ -43,18 +47,37 @@ export class PrismaSalesRepository implements ISalesRepository {
 
 		if (q && q.trim() !== "") {
 			where.OR = [
-				{ cliente: { nombres: { contains: q, mode: "insensitive" } } },
 				{
 					cliente: {
-						apellidos: { contains: q, mode: "insensitive" },
+						persona: {
+							nombres: { contains: q, mode: "insensitive" },
+						},
 					},
 				},
-				{ cliente: { numero: { contains: q, mode: "insensitive" } } },
 				{
 					cliente: {
-						telefonos: {
-							some: {
-								numero: { contains: q, mode: "insensitive" },
+						persona: {
+							apellidos: { contains: q, mode: "insensitive" },
+						},
+					},
+				},
+				{
+					cliente: {
+						persona: {
+							numero: { contains: q, mode: "insensitive" },
+						},
+					},
+				},
+				{
+					cliente: {
+						persona: {
+							telefonos: {
+								some: {
+									numero: {
+										contains: q,
+										mode: "insensitive",
+									},
+								},
 							},
 						},
 					},
@@ -94,9 +117,13 @@ export class PrismaSalesRepository implements ISalesRepository {
 				include: {
 					cliente: {
 						select: {
-							nombres: true,
-							apellidos: true,
-							numero: true,
+							persona: {
+								select: {
+									nombres: true,
+									apellidos: true,
+									numero: true,
+								},
+							},
 						},
 					},
 					lote: {
@@ -119,11 +146,18 @@ export class PrismaSalesRepository implements ISalesRepository {
 			}),
 		]);
 
-        const totalPages = Math.ceil(total / limit);
+		const totalPages = Math.ceil(total / limit);
 
 		return {
 			data,
-			meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPreviousPage: page > 1,
+			},
 		};
 	}
 
@@ -131,7 +165,15 @@ export class PrismaSalesRepository implements ISalesRepository {
 		return this.prisma.ventas.findUnique({
 			where: { id },
 			include: {
-				cliente: true,
+				cliente: {
+					include: {
+						persona: {
+							include: {
+								telefonos: true,
+							},
+						},
+					},
+				},
 				lote: {
 					include: {
 						manzana: {
@@ -139,7 +181,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 						},
 					},
 				},
-				cuotas: { 
+				cuotas: {
 					orderBy: { numero_cuota: "asc" },
 					include: {
 						notificaciones: {
@@ -155,32 +197,31 @@ export class PrismaSalesRepository implements ISalesRepository {
 									select: {
 										nombres: true,
 										apellidos: true,
-									}
-								}
-							}
-						}
-					}
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		});
-	};
+	}
 
 	async createSaleWithQuotas(
 		createPayload: Prisma.VentasCreateInput,
 		cuotas: Prisma.CuotasCreateManyVentaInput[],
 		loteId: number,
-        clienteId: number,
+		clienteId: number,
 	) {
 		return this.prisma.$transaction(async (tx) => {
 			const res = await tx.lotes.updateMany({
 				where: { id: loteId, estado: { not: EstadoLote.Vendido } },
 				data: { estado: EstadoLote.Vendido },
 			});
-			if (res.count === 0) throw new Error("RACE_CONDITION: El lote ya fue reservado o vendido por otra transacción simultánea.");
-            await tx.clientes.update({
-                where: { id: clienteId },
-                data: { tipo_persona: TipoPersona.CLIENTE }
-            })
+			if (res.count === 0)
+				throw new Error(
+					"RACE_CONDITION: El lote ya fue reservado o vendido por otra transacción simultánea.",
+				);
 			return tx.ventas.create({
 				data: {
 					...createPayload,
@@ -238,14 +279,18 @@ export class PrismaSalesRepository implements ISalesRepository {
 									},
 								},
 							},
-							cliente: { include: { telefonos: true } },
+							cliente: {
+								include: {
+									persona: { include: { telefonos: true } },
+								},
+							},
 						},
 					},
 					_count: {
 						select: {
 							notificaciones: true,
-						}
-					}
+						},
+					},
 				},
 			}),
 		]);
@@ -256,13 +301,20 @@ export class PrismaSalesRepository implements ISalesRepository {
 				...cuota,
 				numero_de_notificaciones: _count.notificaciones,
 			};
-		})
+		});
 
-        const totalPages = Math.ceil(total / limit);
+		const totalPages = Math.ceil(total / limit);
 
 		return {
 			data: formattedData,
-			meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage: page < totalPages,
+				hasPreviousPage: page > 1,
+			},
 		};
 	}
 	async getOverdueQuotas(): Promise<CuotaWithRelations[]> {
@@ -282,27 +334,36 @@ export class PrismaSalesRepository implements ISalesRepository {
 				OR: [
 					{ fecha_vencimiento: { lt: todayStart } }, // Vencidas
 					{ fecha_vencimiento: { gte: todayStart, lt: todayEnd } }, // Vencen hoy
-					{ fecha_vencimiento: { gte: reminderStart, lt: reminderEnd } }, // Próximas a vencer en 5 días
-				]
+					{
+						fecha_vencimiento: {
+							gte: reminderStart,
+							lt: reminderEnd,
+						},
+					}, // Próximas a vencer en 5 días
+				],
 			},
 			include: {
 				venta: {
 					include: {
-						cliente: { include: { telefonos: true } },
+						cliente: {
+							include: {
+								persona: { include: { telefonos: true } },
+							},
+						},
 						lote: {
 							include: {
 								manzana: {
 									include: {
 										etapa: {
 											include: { proyecto: true },
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		});
 	}
 	async findCuotaById(id: number): Promise<CuotaWithRelations | null> {
@@ -311,30 +372,34 @@ export class PrismaSalesRepository implements ISalesRepository {
 			include: {
 				venta: {
 					include: {
-						cliente: { include: { telefonos: true } },
+						cliente: {
+							include: {
+								persona: { include: { telefonos: true } },
+							},
+						},
 						lote: {
 							include: {
 								manzana: {
 									include: {
 										etapa: {
 											include: { proyecto: true },
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		});
 	}
-	async logReminder(data: { 
-		id_cuota: number; 
-		id_usuario: string | null; 
-		template: string; 
-		telefono_destino: string; 
-		nivel_urgencia: ReminderLevel; 
-		es_automatica: boolean; 
+	async logReminder(data: {
+		id_cuota: number;
+		id_usuario: string | null;
+		template: string;
+		telefono_destino: string;
+		nivel_urgencia: ReminderLevel;
+		es_automatica: boolean;
 	}): Promise<void> {
 		await this.prisma.notificacionesCuota.create({
 			data: {
@@ -344,7 +409,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 				telefono_destino: data.telefono_destino,
 				nivel_urgencia: data.nivel_urgencia,
 				es_automatica: data.es_automatica,
-			}
-		})
+			},
+		});
 	}
 }

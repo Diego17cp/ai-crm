@@ -33,7 +33,7 @@ export class ReminderSenderService {
 				400,
 			);
 
-		const phone = cuota.venta.cliente.telefonos.find(
+		const phone = cuota.venta.cliente.persona.telefonos.find(
 			(t) => t.tipo?.toUpperCase() === "WHATSAPP",
 		)?.numero;
 		if (!phone) {
@@ -58,14 +58,14 @@ export class ReminderSenderService {
 		}).format(cuota.fecha_vencimiento);
 
 		const templateName = await this.dispatchTemplate(phone, {
-			clientName: cliente.nombres?.trim() || "Cliente",
+			clientName: cliente.persona.nombres?.trim() || "Cliente",
 			project: proyecto.nombre,
 			block: lote.manzana.codigo,
 			lot: lote.numero_lote.replace(/^\D+/g, ""),
 			amount: Number(cuota.monto_cuota),
 			dueDate: dueDateUtc,
 			daysOverdue,
-			paymentCode: cliente.numero,
+			paymentCode: cliente.persona.numero,
 			level,
 		});
 		await this.salesRepo.logReminder({
