@@ -4,13 +4,18 @@ import { LotesWhereInput } from "generated/prisma/models";
 import { IEventNotifier } from "../../application/ports/IEventNotifier";
 import { IWhatsappService } from "../../application/ports/IWhatsappService";
 import { env } from "@/config";
+import { IdentityResolverService } from "@/core/identity/IdentityResolverService";
 
 export class ChatToolsRegistry implements IToolsRegistry {
+	private readonly identityResolver: IdentityResolverService;
+
 	constructor(
 		private readonly prisma: PrismaClient,
 		private readonly notifier: IEventNotifier,
 		private readonly whatsappService: IWhatsappService,
-	) {}
+	) {
+		this.identityResolver = new IdentityResolverService(this.prisma);
+	}
 
 	getToolsDefinition() {
 		return [
@@ -519,39 +524,26 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						"El asesor ya tiene una cita ocupada a esa hora exacta. Pídele al usuario que elija un horario distinto, por ejemplo 30 mins o 1 hora más tarde.",
 				};
 
-			let personaId: number | undefined;
-			let leadId: number | undefined;
-			const telefonoExistente =
-				await this.prisma.telefonosPersona.findUnique({
-					where: { numero: args.telefono },
-					include: { persona: { include: { leads: true } } },
+			const persona = await this.identityResolver.resolveOrCreateByPhone({
+				telefono: args.telefono,
+				nombres: args.nombres,
+				apellidos: args.apellidos,
+				sexo: args.sexo,
+				email: args.email,
+			});
+			const personaId = persona.id;
+			let lead = await this.prisma.leads.findFirst({
+				where: {
+					id_persona: personaId,
+					estado: { notIn: ["GANADO", "PERDIDO"] },
+				},
+			});
+			if (!lead) {
+				lead = await this.prisma.leads.create({
+					data: { id_persona: personaId, estado: "NUEVO" },
 				});
-			if (telefonoExistente) {
-				personaId = telefonoExistente.id_persona;
-				if (telefonoExistente.persona.leads.length > 0)
-					leadId = telefonoExistente.persona.leads[0]?.id;
-			} else {
-				const tipoDoc = await this.prisma.tipoDocIdentidad.findFirst();
-				const nuevaPersona = await this.prisma.personas.create({
-					data: {
-						id_tipo_doc: tipoDoc?.id || 1,
-						numero: `LD-${Date.now().toString().slice(-8)}`,
-						nombres: args.nombres,
-						apellidos: args.apellidos,
-						sexo: args.sexo,
-						email: args.email ?? null,
-						telefonos: {
-							create: { numero: args.telefono, tipo: "PERSONAL" },
-						},
-						leads: {
-							create: { estado: "NUEVO" },
-						},
-					},
-					include: { leads: true },
-				});
-				personaId = nuevaPersona.id;
-				leadId = nuevaPersona.leads[0]?.id;
 			}
+			const leadId = lead.id;
 			if (conversacionId && personaId) {
 				await this.prisma.conversaciones.update({
 					where: { id: conversacionId },

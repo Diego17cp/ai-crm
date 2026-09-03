@@ -170,4 +170,37 @@ export class IdentityResolverService {
 			},
 		});
 	}
+	async resolveOrCreateByPhone(
+		data: {
+			telefono: string;
+			nombres?: string | undefined;
+			apellidos?: string | undefined;
+			sexo?: SexoPersona | undefined;
+			email?: string | undefined;
+		},
+		tx?: Prisma.TransactionClient,
+	): Promise<Personas> {
+		const client = tx || this.prisma;
+		const telefonoExistente = await client.telefonosPersona.findUnique({
+			where: { numero: data.telefono },
+			include: { persona: true },
+		});
+		if (telefonoExistente) return telefonoExistente.persona
+
+		const persona = await client.personas.create({
+			data: {
+				nombres: data.nombres ?? null,
+				apellidos: data.apellidos ?? null,
+				sexo: data.sexo ?? null,
+				email: data.email ?? null,
+				telefonos: {
+					create: {
+						numero: data.telefono,
+						tipo: TipoTelefono.PERSONAL,
+					},
+				},
+			},
+		});
+		return persona;
+	}
 }
