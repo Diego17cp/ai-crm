@@ -292,13 +292,13 @@ model TipoDocIdentidad {
 }
 model Personas {
   id          Int              @id @default(autoincrement())
-  id_tipo_doc Int
-  tipo_doc    TipoDocIdentidad @relation(fields: [id_tipo_doc], references: [id])
+  id_tipo_doc Int?
+  tipo_doc    TipoDocIdentidad? @relation(fields: [id_tipo_doc], references: [id])
 
   id_ubigeo String?  @db.Char(6)
   ubigeo    Ubigeos? @relation(fields: [id_ubigeo], references: [id])
 
-  numero           String       @db.VarChar(12)
+  numero           String?       @db.VarChar(12)
   nombres          String?      @db.VarChar(50)
   apellidos        String?      @db.VarChar(50)
   fecha_nacimiento DateTime?    @db.Date
@@ -392,8 +392,8 @@ model TelefonosPersona {
 model Conversaciones {
   id                             String                   @id @default(uuid()) @db.Uuid
 
-  id_persona                     Int
-  persona                        Personas                 @relation(fields: [id_persona], references: [id])
+  id_persona                     Int?
+  persona                        Personas?                 @relation(fields: [id_persona], references: [id])
   id_lead                        Int?
   lead                           Leads?                   @relation(fields: [id_lead], references: [id])
 
