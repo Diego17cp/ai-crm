@@ -132,7 +132,7 @@ enum TipoEvaluacion {
 enum TipoEventoConversacion {
   INICIADA
   MENSAJE_RECIBIDO
-  MENSAGE_ENVIADO
+  MENSAJE_ENVIADO
   BOT_RESPONDE
   TRANSFERIDA_A_HUMANO
   ASESOR_ASIGNADO
@@ -193,6 +193,7 @@ model Usuarios {
   cotizaciones_creadas    Cotizaciones[]           @relation("CotizacionCreador")
   cotizaciones_revision   Cotizaciones[]           @relation("CotizacionRevisor")
   metricasAsesorDiarias   MetricasAsesorDiarias[]
+  historialEstadoLeads    HistorialEstadoLead[]
 
   @@index([id_rol])
   @@map("usuarios")
@@ -290,15 +291,16 @@ model TipoDocIdentidad {
 
   @@map("tipo_doc_identidad")
 }
+
 model Personas {
-  id          Int              @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   id_tipo_doc Int?
   tipo_doc    TipoDocIdentidad? @relation(fields: [id_tipo_doc], references: [id])
 
   id_ubigeo String?  @db.Char(6)
   ubigeo    Ubigeos? @relation(fields: [id_ubigeo], references: [id])
 
-  numero           String?       @db.VarChar(12)
+  numero           String?      @db.VarChar(12)
   nombres          String?      @db.VarChar(50)
   apellidos        String?      @db.VarChar(50)
   fecha_nacimiento DateTime?    @db.Date
@@ -339,22 +341,38 @@ model Leads {
   origen         String?    @db.VarChar(50)
   motivo_perdida String?    @db.VarChar(255)
 
-  fecha_contacto      DateTime?
+  fecha_contacto     DateTime?
   fecha_calificacion DateTime?
   fecha_cierre       DateTime?
 
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
-  conversaciones Conversaciones[]
-  citas          Citas[]
-  cotizaciones   Cotizaciones[]
-  ventas         Ventas[]
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @updatedAt
+  conversaciones       Conversaciones[]
+  citas                Citas[]
+  cotizaciones         Cotizaciones[]
+  ventas               Ventas[]
+  historialEstadoLeads HistorialEstadoLead[]
 
   @@index([id_persona])
   @@index([id_asesor])
   @@index([id_proyecto])
   @@index([estado])
   @@map("leads")
+}
+
+model HistorialEstadoLead {
+  id              Int         @id @default(autoincrement())
+  id_lead         Int
+  lead            Leads       @relation(fields: [id_lead], references: [id])
+  estado_anterior EstadoLead?
+  estado_nuevo    EstadoLead
+  id_usuario      String?     @db.Uuid
+  usuario         Usuarios?   @relation(fields: [id_usuario], references: [id])
+  motivo          String?     @db.VarChar(255)
+  created_at      DateTime    @default(now())
+
+  @@index([id_lead])
+  @@map("historial_estado_lead")
 }
 
 model Clientes {
@@ -390,35 +408,35 @@ model TelefonosPersona {
 }
 
 model Conversaciones {
-  id                             String                   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  id_persona                     Int?
-  persona                        Personas?                 @relation(fields: [id_persona], references: [id])
-  id_lead                        Int?
-  lead                           Leads?                   @relation(fields: [id_lead], references: [id])
+  id_persona Int?
+  persona    Personas? @relation(fields: [id_persona], references: [id])
+  id_lead    Int?
+  lead       Leads?    @relation(fields: [id_lead], references: [id])
 
-  session_id                     String?                  @unique @db.VarChar(100)
-  canal                          CanalContacto?
-  estado                         EstadoChat               @default(BOT)
+  session_id String?        @unique @db.VarChar(100)
+  canal      CanalContacto?
+  estado     EstadoChat     @default(BOT)
 
-  id_usuario_asignado            String?                  @db.Uuid
-  asesor                         Usuarios?                @relation("AsignacionAsesor", fields: [id_usuario_asignado], references: [id])
+  id_usuario_asignado String?   @db.Uuid
+  asesor              Usuarios? @relation("AsignacionAsesor", fields: [id_usuario_asignado], references: [id])
 
   fecha_primer_mensaje           DateTime?
-  fecha_primera_respuesta_bot        DateTime?
+  fecha_primera_respuesta_bot    DateTime?
   fecha_transferencia            DateTime?
   fecha_asignacion               DateTime?
   fecha_primera_respuesta_humana DateTime?
   fecha_finalizacion             DateTime?
 
-  created_at                     DateTime                 @default(now())
-  updated_at                     DateTime                 @updatedAt
-  mensajes                       Mensajes[]
-  conversacionAsignacions        ConversacionAsignacion[]
-  evaluacionesAtencions          EvaluacionesAtencion[]
-  eventosConversacions           EventosConversacion[]
-  clientes                       Clientes?                @relation(fields: [clientesId], references: [id])
-  clientesId                     Int?
+  created_at              DateTime                 @default(now())
+  updated_at              DateTime                 @updatedAt
+  mensajes                Mensajes[]
+  conversacionAsignacions ConversacionAsignacion[]
+  evaluacionesAtencions   EvaluacionesAtencion[]
+  eventosConversacions    EventosConversacion[]
+  clientes                Clientes?                @relation(fields: [clientesId], references: [id])
+  clientesId              Int?
 
   @@index([id_persona])
   @@index([id_lead])
@@ -433,7 +451,7 @@ model ConversacionAsignacion {
   id_usuario      String         @db.Uuid
   usuario         Usuarios       @relation(fields: [id_usuario], references: [id])
   fecha_inicio    DateTime       @default(now())
-  fecha_fin       DateTime
+  fecha_fin       DateTime?
 
   motivo String? @db.VarChar(100)
 
