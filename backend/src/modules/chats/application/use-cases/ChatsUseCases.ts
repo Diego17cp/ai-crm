@@ -50,10 +50,10 @@ export class ChatUseCases {
             throw new AppError("Error al guardar el mensaje en vivo: " + error.message, 500);
         }
     }
-    async updateChatStatus(chatId: string, newStatus: EstadoChat) {
+    async updateChatStatus(chatId: string, newStatus: EstadoChat, userId?: string) {
         if (!chatId || chatId.trim() === "") throw new AppError("ID de chat es requerido", 400);
         try {
-            await this.chatsRepository.updateChatStatus(chatId, newStatus);
+            await this.chatsRepository.updateChatStatus(chatId, newStatus, userId);
         } catch (error: any) {
             throw new AppError("Error al actualizar el estado del chat: " + error.message, 500);
         }

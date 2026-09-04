@@ -288,21 +288,39 @@ export class PrismaChatsRepository implements IChatsRepository {
 		}));
 	}
 	async takeChatFromQueue(chatId: string, asesorId: string): Promise<any> {
-		const res = await this.prisma.conversaciones.updateMany({
-			where: { id: chatId, estado: "ESPERANDO_ASESOR" },
-			data: {
-				estado: "ATENDIDO_HUMANO",
-				id_usuario_asignado: asesorId,
-				fecha_asignacion: new Date(),
-			},
-		});
-		if (res.count === 0)
-			throw new Error(
-				"[RACE_CONDITION]: 12No se pudo tomar el chat. Es posible que ya haya sido tomado por otro asesor.",
-			);
-		return this.prisma.conversaciones.findUnique({
-			where: { id: chatId },
-			select: { persona: { select: { nombres: true, apellidos: true } } },
+		return this.prisma.$transaction(async (tx) => {
+			const res = await tx.conversaciones.updateMany({
+				where: { id: chatId, estado: "ESPERANDO_ASESOR" },
+				data: {
+					estado: "ATENDIDO_HUMANO",
+					id_usuario_asignado: asesorId,
+					fecha_asignacion: new Date(),
+				},
+			});
+			if (res.count === 0)
+				throw new Error(
+					"[RACE_CONDITION]: 12No se pudo tomar el chat. Es posible que ya haya sido tomado por otro asesor.",
+				);
+			await tx.conversacionAsignacion.create({
+				data: {
+					id_conversacion: chatId,
+					id_usuario: asesorId,
+					fecha_inicio: new Date(),
+				},
+			});
+			await tx.eventosConversacion.create({
+				data: {
+					id_conversacion: chatId,
+					tipo: "ASESOR_ASIGNADO",
+					id_usuario: asesorId,
+				},
+			});
+			return this.prisma.conversaciones.findUnique({
+				where: { id: chatId },
+				select: {
+					persona: { select: { nombres: true, apellidos: true } },
+				},
+			});
 		});
 	}
 	async saveMessage(
@@ -315,28 +333,72 @@ export class PrismaChatsRepository implements IChatsRepository {
 			select: {
 				session_id: true,
 				id_usuario_asignado: true,
+				fecha_primera_respuesta_humana: true,
 			},
 		});
 		if (!chat) throw new Error("Chat no encontrado");
-		const newMessage = await this.prisma.mensajes.create({
-			data: {
-				id_conversacion: chatId,
-				contenido: content,
-				remitente: "HUMANO",
-				...(senderRole === "ASESOR" && chat.id_usuario_asignado
-					? { id_usuario: chat.id_usuario_asignado }
-					: {}),
-			},
+		const eventType =
+			senderRole === "CLIENTE" ? "MENSAJE_RECIBIDO" : "MENSAJE_ENVIADO";
+		return await this.prisma.$transaction(async (tx) => {
+			const newMessage = await this.prisma.mensajes.create({
+				data: {
+					id_conversacion: chatId,
+					contenido: content,
+					remitente: "HUMANO",
+					...(senderRole === "ASESOR" && chat.id_usuario_asignado
+						? { id_usuario: chat.id_usuario_asignado }
+						: {}),
+				},
+			});
+			await tx.eventosConversacion.create({
+				data: {
+					id_conversacion: chatId,
+					tipo: eventType,
+					...(senderRole === "ASESOR" && chat.id_usuario_asignado
+						? { id_usuario: chat.id_usuario_asignado }
+						: {}),
+				},
+			});
+			if (
+				senderRole === "ASESOR" &&
+				!chat.fecha_primera_respuesta_humana
+			) {
+				await tx.conversaciones.update({
+					where: { id: chatId },
+					data: { fecha_primera_respuesta_humana: new Date() },
+				});
+			}
+			return newMessage;
 		});
-		return newMessage;
 	}
 	async updateChatStatus(
 		chatId: string,
 		newStatus: EstadoChat,
+		usuarioId?: string,
 	): Promise<void> {
-		await this.prisma.conversaciones.update({
-			where: { id: chatId },
-			data: { estado: newStatus },
+		await this.prisma.$transaction(async (tx) => {
+			await tx.conversaciones.update({
+				where: { id: chatId },
+				data: {
+					estado: newStatus,
+					...(newStatus === "FINALIZADO"
+						? { fecha_finalizacion: new Date() }
+						: {}),
+				},
+			});
+			if (newStatus === "FINALIZADO") {
+				await tx.eventosConversacion.create({
+					data: {
+						id_conversacion: chatId,
+						tipo: "FINALIZADA",
+						id_usuario: usuarioId ?? null,
+					},
+				});
+				await tx.conversacionAsignacion.updateMany({
+					where: { id_conversacion: chatId, fecha_fin: null },
+					data: { fecha_fin: new Date() },
+				});
+			}
 		});
 	}
 }

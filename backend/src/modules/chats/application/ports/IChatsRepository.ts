@@ -16,5 +16,5 @@ export interface IChatsRepository {
 	findLiveActiveChats(idUsuario: string): Promise<LiveChatQueueItemDTO[]>;
 	takeChatFromQueue(chatId: string, asesorId: string): Promise<any>;
 	saveMessage(chatId: string, content: string, senderRole: "CLIENTE" | "ASESOR" | "BOT"): Promise<any>;
-	updateChatStatus(chatId: string, newStatus: EstadoChat): Promise<void>;
+	updateChatStatus(chatId: string, newStatus: EstadoChat, idUsuario?: string): Promise<void>;
 }
