@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const saveQuotePdf = (buffer: Buffer, code: string): string => {
-	const dir = join(process.cwd(), "uploads", "cotizaciones");
+	const dir = join(process.cwd(), "public", "uploads", "cotizaciones");
 	if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
 	const fileName = `${code}.pdf`;

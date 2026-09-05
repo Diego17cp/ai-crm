@@ -20,6 +20,7 @@ export class LeadTransitionService {
 
 		const lead = await tx.leads.findUnique({ where: { id: leadId } });
 		if (!lead) throw new AppError("Lead no encontrado", 404);
+		if (lead.estado === nuevoEstado) return;
 		const permitido = LEAD_TRANSITIONS[lead.estado].includes(nuevoEstado);
 		if (!permitido)
 			throw new AppError(
