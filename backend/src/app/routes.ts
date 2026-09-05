@@ -13,6 +13,7 @@ import { clientsRoutes } from "@/modules/clients";
 import { rolesRoutes } from "@/modules/roles";
 import { chatRoutes } from "@/modules/chats";
 import { docTypesRoutes } from "@/modules/document-types";
+import { quotesRoutes } from "@/modules/quotes/infrastructure/routes/quotesRoutes";
 
 const router: Router = Router();
 
@@ -30,6 +31,7 @@ router.use("/ventas", salesRoutes());
 router.use("/roles", rolesRoutes());
 router.use("/chats", chatRoutes());
 router.use("/document-types", docTypesRoutes());
+router.use("/cotizaciones", quotesRoutes())
 
 router.use("/", (_, res) => {
 	res.json({
