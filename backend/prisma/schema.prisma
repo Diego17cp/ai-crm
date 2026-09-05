@@ -484,6 +484,7 @@ model Mensajes {
   conversacion    Conversaciones @relation(fields: [id_conversacion], references: [id])
   remitente       TipoRemitente?
   contenido       String?        @db.Text
+  adjunto         Json?
   created_at      DateTime       @default(now())
 
   @@index([id_usuario])
