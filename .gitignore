@@ -6,3 +6,9 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 bun.lock
+
+# vscode
+.vscode
+
+# temp
+.temp

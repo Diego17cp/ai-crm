@@ -1,34 +1,43 @@
-import express, { Application } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
-import { env } from '@/config'
-import { errorHandler } from './middlewares';
-import router from './routes';
-import path from 'node:path';
-
+import express, { Application } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import { env } from "@/config";
+import { errorHandler } from "./middlewares";
+import router from "./routes";
+import path from "node:path";
 
 export const app: Application = express();
 
-app.use(cors({
-    origin: env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', "X-Client-Platform"],
-    credentials: true,
-}))
-app.use(helmet());
+app.use(
+	cors({
+		origin: env.FRONTEND_URL,
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "X-Client-Platform"],
+		credentials: true,
+	}),
+);
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				"frame-ancestors": ["'self'", env.FRONTEND_URL],
+			},
+		},
+	}),
+);
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
 
-app.get('/', (_, res) => {
-    res.json({
-        message: "API",
-        status: "running",
-        timestamp: new Date().toISOString()
-    });
-})
+app.get("/", (_, res) => {
+	res.json({
+		message: "API",
+		status: "running",
+		timestamp: new Date().toISOString(),
+	});
+});
 
 app.use("/api", router);
 // app.use(staticMiddleware);
