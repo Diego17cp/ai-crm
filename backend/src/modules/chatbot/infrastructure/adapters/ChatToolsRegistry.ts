@@ -847,7 +847,8 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				lote.manzana.etapa.proyecto.porcentaje_descuento ?? 0,
 			);
 
-			let requiereRevision = false;
+			const motivos: string[] = [];
+
 			let descuentoAplicado = 0;
 			let cuotaInicial: number | undefined;
 			let numeroCuotas: number | undefined;
@@ -861,12 +862,19 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					descuentoAplicado >
 					descuentoOficial +
 						COTIZACION_THRESHOLDS.DESCUENTO_EXTRA_MAX_SIN_REVISION
-				)
-					requiereRevision = true;
+				) {
+					motivos.push("Descuento fuera de política");
+				}
 				precioFinal = precioLista * (1 - descuentoAplicado / 100);
 			} else {
-				if (args.descuento_solicitado && args.descuento_solicitado > 0)
-					requiereRevision = true;
+				if (
+					args.descuento_solicitado &&
+					args.descuento_solicitado > 0
+				) {
+					motivos.push(
+						"Descuento solicitado en compra a crédito (no aplica)",
+					);
+				}
 				if (!args.meses)
 					return {
 						message:
@@ -883,16 +891,20 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					precioLista *
 						COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE
 				)
-					requiereRevision = true;
+					motivos.push("Cuota inicial menor al mínimo del 10%");
 				if (
 					numeroCuotas >
 					COTIZACION_THRESHOLDS.PLAZO_MESES_MAX_SIN_REVISION
 				)
-					requiereRevision = true;
+					motivos.push(
+						`Plazo de ${numeroCuotas} meses excede el máximo auto-aprobado (36)`,
+					);
 
 				montoCuota = (precioLista - cuotaInicial) / numeroCuotas;
 				precioFinal = precioLista;
 			}
+			const requiereRevision = motivos.length > 0
+			const motivosRevisionTexto = requiereRevision ? motivos.join(", ") : null
 			if (!conversacionId)
 				return {
 					message:
@@ -924,8 +936,10 @@ export class ChatToolsRegistry implements IToolsRegistry {
 						id_persona: lead.id_persona,
 						id_lead: lead.id,
 						id_lote: lote.id,
+						id_conversacion: conversacionId,
 						generado_por: "BOT",
 						requiere_revision: requiereRevision,
+						motivo_revision: motivosRevisionTexto,
 						area_m2: lote.area_m2,
 						precio_m2: lote.precio_m2,
 						precio_lista: precioLista,
@@ -963,26 +977,6 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				return nueva;
 			});
 			if (requiereRevision) {
-				const motivos: string[] = [];
-				if (
-					args.tipo_pago === "CONTADO" &&
-					descuentoAplicado > descuentoOficial
-				)
-					motivos.push("Descuento fuera de política");
-				if (
-					cuotaInicial !== undefined &&
-					cuotaInicial <
-						precioLista *
-							COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE
-				)
-					motivos.push("Cuota inicial menor al mínimo legal del 10%");
-				if (
-					numeroCuotas !== undefined &&
-					numeroCuotas >
-						COTIZACION_THRESHOLDS.PLAZO_MESES_MAX_SIN_REVISION
-				)
-					motivos.push("Plazo mayor a 36 meses");
-
 				this.notifier.notifyQuoteReviewRequired({
 					id_cotizacion: cotizacion.id,
 					codigo,
