@@ -1,3 +1,4 @@
+import { ToolAttachment } from "@/core/chat/ToolAttachment";
 import { CanalContacto, EstadoChat, TipoRemitente } from "generated/prisma/enums";
 
 export interface ChatMessageDTO {
@@ -14,6 +15,7 @@ export interface ChatMessageDTO {
     remitente: TipoRemitente | null;
     created_at: Date;
     contenido: string | null;
+    adjunto?: ToolAttachment[] | null
 };
 export interface ChatDTO {
     id: string;
@@ -37,6 +39,7 @@ export interface ChatDTO {
     last_message_at: Date | null;
     estado: EstadoChat;
     canal: CanalContacto | null;
+    adjunto?: ToolAttachment[] | null
 }
 export interface GetChatsQueryDTO {
     q?: string | undefined;

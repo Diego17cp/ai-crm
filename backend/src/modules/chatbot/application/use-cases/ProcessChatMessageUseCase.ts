@@ -1,6 +1,7 @@
 import { ILLMService, LLMMessage } from "../ports/ILLMService";
 import { IToolsRegistry } from "../ports/IToolsRegistry";
 import { IChatbotRepository, ChatMessage } from "../ports/IChatbotRepository";
+import { ToolAttachment } from "@/core/chat/ToolAttachment";
 
 export class ProcessChatMessageUseCase {
 	constructor(
@@ -9,11 +10,17 @@ export class ProcessChatMessageUseCase {
 		private readonly chatRepo: IChatbotRepository,
 	) {}
 
-	async execute(conversacionId: string, userInput: string): Promise<string> {
+	async execute(
+		conversacionId: string,
+		userInput: string,
+	): Promise<{ respuesta: string; adjuntos?: ToolAttachment[] | undefined }> {
 		const history =
 			await this.chatRepo.getMessagesByConversation(conversacionId);
 		const messages: LLMMessage[] = [
-			{ role: "system", content: this.getSystemPrompt(history.length === 0) },
+			{
+				role: "system",
+				content: this.getSystemPrompt(history.length === 0),
+			},
 			...history.map((msg: ChatMessage) => ({
 				role: (msg.remitente === "HUMANO" ? "user" : "assistant") as
 					| "user"
@@ -24,6 +31,8 @@ export class ProcessChatMessageUseCase {
 		];
 
 		await this.chatRepo.saveMessage(conversacionId, "HUMANO", userInput);
+
+		const attachmentsThisTurn: ToolAttachment[] = [];
 
 		while (true) {
 			const llmResponse = await this.llmService.chat(messages);
@@ -36,10 +45,13 @@ export class ProcessChatMessageUseCase {
 						toolCall.arguments,
 						conversacionId,
 					);
+					const { _attachment, ...toolResultForLLm } =
+						toolResult as any;
+					if (_attachment) attachmentsThisTurn.push(_attachment);
 					messages.push({
 						role: "tool",
 						tool_call_id: toolCall.id,
-						content: JSON.stringify(toolResult),
+						content: JSON.stringify(toolResultForLLm),
 					});
 				}
 				continue;
@@ -52,15 +64,32 @@ export class ProcessChatMessageUseCase {
 				conversacionId,
 				"BOT",
 				finalResponse,
+				attachmentsThisTurn.length > 0
+					? attachmentsThisTurn
+					: undefined,
 			);
-			return finalResponse;
+			return {
+				respuesta: finalResponse,
+				adjuntos:
+					attachmentsThisTurn.length > 0
+						? attachmentsThisTurn
+						: undefined,
+			};
 		}
 	}
 
 	private getSystemPrompt(isFirstInteraction: boolean): string {
 		const now = new Date();
-		const currentDate = now.toLocaleDateString("es-PE", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-		const currentTime = now.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+		const currentDate = now.toLocaleDateString("es-PE", {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		});
+		const currentTime = now.toLocaleTimeString("es-PE", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
 		return `Eres Botsito, el Asesor Dinámico de Ayllu Kaypi.
 HOY ES: ${currentDate}. LA HORA ACTUAL ES: ${currentTime}. Usa un contexto temporal para entender solicitudes relativas como "mañana al mediodía", "en 3 días", "el próximo lunes", etc.
 

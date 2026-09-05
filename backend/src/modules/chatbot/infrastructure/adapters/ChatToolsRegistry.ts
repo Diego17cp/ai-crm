@@ -2,23 +2,42 @@ import { PrismaClient } from "generated/prisma/client";
 import { IToolsRegistry } from "../../application/ports/IToolsRegistry";
 import { LotesWhereInput } from "generated/prisma/models";
 import { IEventNotifier } from "../../application/ports/IEventNotifier";
-import { IWhatsappService } from "../../application/ports/IWhatsappService";
 import { env } from "@/config";
 import { IdentityResolverService } from "@/core/identity/IdentityResolverService";
+import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
+import { ConversationLeadResolver } from "@/core/crm/ConversationLeadResolver";
+import { MetricsService } from "@/core/crm/MetricsService";
+import { COTIZACION_THRESHOLDS } from "@/core/crm/quote-thresholds";
+import { IQuotePdfService } from "@/core/pdf/IQuotePdfService";
+import { saveQuotePdf } from "@/infrastructure/pdf/savePdf";
+import { IDocumentDeliveryService } from "@/core/documents/IDocumentDeliveryService";
 
 export class ChatToolsRegistry implements IToolsRegistry {
 	private readonly identityResolver: IdentityResolverService;
+	private readonly leadTransitionService: LeadTransitionService;
+	private readonly leadResolver: ConversationLeadResolver;
+	private readonly metricsService: MetricsService;
 
 	constructor(
 		private readonly prisma: PrismaClient,
 		private readonly notifier: IEventNotifier,
-		private readonly whatsappService: IWhatsappService,
+		private readonly quotePdfService: IQuotePdfService,
+		private readonly documentDelivery: IDocumentDeliveryService,
 	) {
+		this.metricsService = new MetricsService();
 		this.identityResolver = new IdentityResolverService(this.prisma);
+		this.leadTransitionService = new LeadTransitionService(
+			this.metricsService,
+		);
+		this.leadResolver = new ConversationLeadResolver(
+			this.prisma,
+			this.identityResolver,
+		);
 	}
 
 	getToolsDefinition() {
 		return [
+			// Buscar proyectos
 			{
 				type: "function",
 				function: {
@@ -31,6 +50,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Buscar lotes disponibles
 			{
 				type: "function",
 				function: {
@@ -54,6 +74,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Calcular financiamiento de un lote
 			{
 				type: "function",
 				function: {
@@ -83,6 +104,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Agendar cita y registrar prospecto
 			{
 				type: "function",
 				function: {
@@ -136,6 +158,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Solicitar asistencia humana
 			{
 				type: "function",
 				function: {
@@ -145,6 +168,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					parameters: { type: "object", properties: {} },
 				},
 			},
+			// Consultar estado de cuenta y cronograma de pagos de un cliente
 			{
 				type: "function",
 				function: {
@@ -164,6 +188,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Enviar plano de proyecto
 			{
 				type: "function",
 				function: {
@@ -183,6 +208,45 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Generar cotización de lote
+			{
+				type: "function",
+				function: {
+					name: "generar_cotizacion",
+					description:
+						"Genera el documento formal de cotización (PDF) para un lote específico. Úsalo cuando el cliente pida algo concreto como 'mándame la cotización', 'quiero el documento', o confirme que quiere proceder con un lote en particular. NO lo uses solo para simulaciones rápidas de precio (para eso usa calcular_financiamiento_lote). Los campos descuento_solicitado y cuota_inicial_deseada son OPCIONALES: solo inclúyelos si el cliente pidió explícitamente algo distinto al descuento oficial o al 10% de inicial estándar. Si el cliente no negoció nada especial, NO los envíes y el sistema usará los valores por defecto.",
+					parameters: {
+						type: "object",
+						properties: {
+							id_lote: {
+								type: "number",
+								description:
+									"El id_lote interno obtenido de una llamada previa a buscar_lotes_disponibles.",
+							},
+							tipo_pago: {
+								type: "string",
+								enum: ["CONTADO", "CREDITO"],
+							},
+							meses: {
+								type: "number",
+								description:
+									"Obligatorio solo si tipo_pago es CREDITO. Máximo 48.",
+							},
+							cuota_inicial_deseada: {
+								type: "number",
+								description:
+									"Monto en soles. Solo inclúyelo si el cliente pidió una inicial distinta al 10% estándar.",
+							},
+							descuento_solicitado: {
+								type: "number",
+								description:
+									"Porcentaje. Solo inclúyelo si el cliente negoció un descuento distinto al oficial del proyecto.",
+							},
+						},
+						required: ["id_lote", "tipo_pago"],
+					},
+				},
+			},
 		];
 	}
 
@@ -197,7 +261,10 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			case "buscar_lotes_disponibles":
 				return await this.buscarLotesDisponibles(args);
 			case "calcular_financiamiento_lote":
-				return await this.calcularFinanciamientoLote(args);
+				return await this.calcularFinanciamientoLote(
+					args,
+					conversacionId,
+				);
 			case "agendar_cita_y_registrar_prospecto":
 				return await this.agendarCita(args, conversacionId);
 			case "solicitar_asistencia_humana":
@@ -206,6 +273,8 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				return await this.consultarCuentaCliente(args);
 			case "enviar_plano_proyecto":
 				return await this.enviarPlanoProyecto(args, conversacionId);
+			case "generar_cotizacion":
+				return await this.generarCotizacion(args, conversacionId);
 			default:
 				throw new Error(`Tool ${name} no existe`);
 		}
@@ -319,28 +388,39 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				message:
 					"No se pudo marcar la conversación para asistencia humana porque no se proporcionó un ID de conversación válido.",
 			};
-		const conversacion = await this.prisma.conversaciones.update({
-			where: { id: conversacionId },
-			data: {
-				estado: "ESPERANDO_ASESOR",
-			},
-			include: {
-				persona: {
-					select: {
-						nombres: true,
-						apellidos: true,
-						telefonos: true,
+		const conversacion = await this.prisma.$transaction(async (tx) => {
+			const conv = await this.prisma.conversaciones.update({
+				where: { id: conversacionId },
+				data: {
+					estado: "ESPERANDO_ASESOR",
+					fecha_transferencia: new Date(),
+				},
+				include: {
+					persona: {
+						select: {
+							nombres: true,
+							apellidos: true,
+							telefonos: true,
+						},
+					},
+					mensajes: {
+						orderBy: { created_at: "desc" },
+						take: 1,
+						select: {
+							contenido: true,
+							created_at: true,
+						},
 					},
 				},
-				mensajes: {
-					orderBy: { created_at: "desc" },
-					take: 1,
-					select: {
-						contenido: true,
-						created_at: true,
-					},
+			});
+			await tx.eventosConversacion.create({
+				data: {
+					id_conversacion: conversacionId,
+					tipo: "TRANSFERIDA_A_HUMANO",
+					id_usuario: null,
 				},
-			},
+			});
+			return conv;
 		});
 		const info = {
 			canal: conversacion.canal,
@@ -388,6 +468,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		const lotes = await this.prisma.lotes.findMany({
 			where: whereCondition,
 			select: {
+				id: true,
 				numero_lote: true,
 				area_m2: true,
 				precio_total: true,
@@ -422,6 +503,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			);
 			const cuotaInicialCredito = Number(lt.precio_total) * 0.1;
 			return {
+				id_lote: lt.id,
 				identificador: `Lote ${manzanaCode}-${normalizedNumber}`,
 				area_m2: lt.area_m2,
 				precio_total_sin_descuento: lt.precio_total,
@@ -432,16 +514,19 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					: null,
 				cuota_inicial_estimada_credito: cuotaInicialCredito,
 				nota_interna:
-					"Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas.",
+					"Menciona la cuota inicial SOLO si el usuario está interesado en pagar a crédito o en cuotas. El campo id_lote es interno: guárdalo para usarlo si luego llamas a generar_cotizacion, nunca lo menciones al usuario.",
 			};
 		});
 	}
 
-	private async calcularFinanciamientoLote(args: {
-		nombre_proyecto?: string;
-		precio_total: number;
-		meses: number;
-	}) {
+	private async calcularFinanciamientoLote(
+		args: {
+			nombre_proyecto?: string;
+			precio_total: number;
+			meses: number;
+		},
+		conversacionId?: string,
+	) {
 		const cuotaInicialPorcentaje = 0.1;
 		const inicialPorcentaje = args.precio_total * cuotaInicialPorcentaje;
 		const saldo = args.precio_total - inicialPorcentaje;
@@ -454,6 +539,24 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				: (saldo * tasa) / (1 - Math.pow(1 + tasa, -args.meses));
 
 		const primerPago = inicialPorcentaje + cuotaMensual;
+
+		if (conversacionId) {
+			const resultado =
+				await this.leadResolver.resolveForInterestSignal(
+					conversacionId,
+				);
+			if (resultado) {
+				await this.prisma.$transaction(async (tx) => {
+					await this.leadTransitionService.transition({
+						leadId: resultado.leadId,
+						nuevoEstado: "INTERESADO",
+						idUsuario: undefined, // bot
+						motivo: "Solicitó simulación de financiamiento",
+						tx,
+					});
+				});
+			}
+		}
 
 		return {
 			precio_total: args.precio_total,
@@ -532,29 +635,32 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				email: args.email,
 			});
 			const personaId = persona.id;
-			let lead = await this.prisma.leads.findFirst({
-				where: {
-					id_persona: personaId,
-					estado: { notIn: ["GANADO", "PERDIDO"] },
-				},
-			});
+			let lead: { id: number } | null = null;
+			if (conversacionId) {
+				const existente = await this.prisma.conversaciones.findUnique({
+					where: { id: conversacionId },
+					select: { id_lead: true },
+				});
+				if (existente?.id_lead) {
+					lead = await this.prisma.leads.findUnique({
+						where: { id: existente.id_lead },
+					});
+				}
+			}
+			if (!lead) {
+				lead = await this.prisma.leads.findFirst({
+					where: {
+						id_persona: personaId,
+						estado: { notIn: ["GANADO", "PERDIDO"] },
+					},
+				});
+			}
 			if (!lead) {
 				lead = await this.prisma.leads.create({
 					data: { id_persona: personaId, estado: "NUEVO" },
 				});
 			}
 			const leadId = lead.id;
-			if (conversacionId && personaId) {
-				await this.prisma.conversaciones.update({
-					where: { id: conversacionId },
-					data: {
-						id_persona: personaId,
-						...(leadId !== undefined
-							? { id_lead: leadId ?? null }
-							: {}),
-					},
-				});
-			}
 			let proyectoId: number | undefined;
 			if (args.nombre_proyecto) {
 				const proyecto = await this.prisma.proyectos.findFirst({
@@ -567,23 +673,52 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				});
 				if (proyecto) proyectoId = proyecto.id;
 			}
-			if (asesor && proyectoId && args.fecha_esperada && personaId) {
-				await this.prisma.citas.create({
-					data: {
-						id_persona: personaId,
-						...(leadId !== undefined
-							? { id_lead: leadId ?? null }
-							: {}),
-						id_proyecto: proyectoId,
-						id_usuario_responsable: asesor.id,
-						fecha_cita: parsedCitaFecha,
-						hora_cita: parsedCitaHora,
-						observaciones_visita:
-							"Agendada vía chatbot, pendiente confirmar detalles con el cliente.",
-						estado_cita: "PROGRAMADA",
-					},
+			await this.prisma.$transaction(async (tx) => {
+				if (conversacionId) {
+					await tx.conversaciones.update({
+						where: { id: conversacionId },
+						data: {
+							id_persona: personaId,
+							id_lead: leadId,
+						},
+					});
+				}
+				if (asesor && proyectoId && args.fecha_esperada) {
+					const cita = await tx.citas.create({
+						data: {
+							id_persona: personaId,
+							id_lead: leadId,
+							id_proyecto: proyectoId,
+							id_usuario_responsable: asesor.id,
+							fecha_cita: parsedCitaFecha,
+							hora_cita: parsedCitaHora,
+							observaciones_visita:
+								"Agendada vía chatbot, pendiente confirmar detalles con el cliente.",
+							estado_cita: "PROGRAMADA",
+						},
+					});
+					if (conversacionId) {
+						await tx.eventosConversacion.create({
+							data: {
+								id_conversacion: conversacionId,
+								tipo: "CITA_CREADA",
+								metadata: {
+									id_cita: cita.id,
+									id_proyecto: proyectoId,
+								},
+							},
+						});
+					}
+				}
+				await this.leadTransitionService.transition({
+					leadId,
+					nuevoEstado: "CITA_AGENDADA",
+					idUsuario: undefined,
+					motivo: "Cita agendada vía chatbot",
+					tx,
 				});
-			}
+			});
+
 			return {
 				prompt_result:
 					"Prospecto registrado y cita separada con éxito. Agradécele utilizando su nombre, e indícale la fecha y hora que ha quedado reservada.",
@@ -623,25 +758,6 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				message:
 					"No se pudo enviar el plano porque no se proporcionó un ID de conversación válido.",
 			};
-		const conversacion = await this.prisma.conversaciones.findUnique({
-			where: { id: conversacionId },
-			include: {
-				persona: {
-					include: {
-						telefonos: true,
-					},
-				},
-			},
-		});
-		if (!conversacion)
-			return {
-				message: "No se encontró la conversación para enviar el plano.",
-			};
-		if (conversacion.canal !== "WHATSAPP")
-			return {
-				instruccion_para_bot:
-					"Dile al cliente amablemente que, debido a que los planos son PDFs muy pesados, están limitados tecnológicamente y por políticas solo pueden enviarse al canal oficial de WhatsApp. No inventes excusas adicionales.",
-			};
 		const proyecto = await this.prisma.proyectos.findFirst({
 			where: {
 				nombre: {
@@ -664,44 +780,278 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				instruccion_para_bot: `Dile al cliente que el plano del proyecto ${proyecto.nombre} está en fase de rediseño y aún no está disponible digitalmente, e invítalo a agendar una cita.`,
 			};
 
-		const telefono =
-			conversacion.session_id ||
-			conversacion.persona?.telefonos[0]?.numero;
-		if (!telefono)
-			return {
-				message:
-					"No se encontró un número de teléfono asociado a la conversación para enviar el plano.",
-			};
-
 		const fullDocumentUrl = `${env.API_URL}/uploads/planos/${proyecto.plano_url}`;
 
-		if (!this.whatsappService.sendDocumentTemplate) {
-			console.warn(
-				`[Reminder] whatsappService.sendDocumentTemplate no implementado`,
-			);
-			throw new Error(
-				"El servicio de WhatsApp no soporta documentos template",
-			);
-		}
+		const result = await this.documentDelivery.deliver({
+			conversationId: conversacionId,
+			title: `Plano - ${proyecto.nombre}`,
+			url: fullDocumentUrl,
+			filename: `Plano_Lotizacion_${proyecto.nombre.replace(
+				/\s+/g,
+				"_",
+			)}.pdf`,
+			whatsappTemplateName: "envio_plano_proyecto",
+			whatsappTemplateParams: [proyecto.nombre],
+		});
 
-		try {
-			await this.whatsappService.sendDocumentTemplate.call(
-				this.whatsappService,
-				telefono,
-				"envio_plano_proyecto",
-				fullDocumentUrl,
-				`Plano_Lotizacion_${proyecto.nombre.replace(/\s+/g, "_")}.pdf`,
-				[proyecto.nombre],
-			);
+		if (result.deliveredByWhatsapp) {
 			return {
 				instruccion_para_bot:
 					"¡Éxito! El sistema ya mandó el PDF, acaba de vibrarle el celular al cliente. Confírmale al cliente en tu respuesta de chat que se lo acabas de mandar de manera automática en un documento adjunto aparte y pregúntale qué le parece.",
 			};
-		} catch (e) {
+		}
+		if (result.error) {
 			return {
 				instruccion_para_bot:
 					"Hubo un error técnico al intentar enviar el PDF por debajo. Pídele disculpas al cliente.",
 			};
+		}
+		return {
+			prompt_result: `El plano del proyecto ${proyecto.nombre} está listo para ver.`,
+			_attachment: result.attachment,
+		};
+	}
+
+	private async generarCotizacion(
+		args: {
+			id_lote: number;
+			tipo_pago: "CONTADO" | "CREDITO";
+			meses?: number;
+			cuota_inicial_deseada?: number;
+			descuento_solicitado?: number;
+		},
+		conversacionId?: string,
+	) {
+		try {
+			const lote = await this.prisma.lotes.findUnique({
+				where: { id: args.id_lote },
+				include: {
+					manzana: {
+						include: {
+							etapa: {
+								include: {
+									proyecto: true,
+								},
+							},
+						},
+					},
+				},
+			});
+			if (!lote)
+				return {
+					message:
+						"No se encontró el lote indicado. Verifica el id_lote usado.",
+				};
+			const precioLista = Number(lote.precio_total);
+			const descuentoOficial = Number(
+				lote.manzana.etapa.proyecto.porcentaje_descuento ?? 0,
+			);
+
+			let requiereRevision = false;
+			let descuentoAplicado = 0;
+			let cuotaInicial: number | undefined;
+			let numeroCuotas: number | undefined;
+			let montoCuota: number | undefined;
+			let precioFinal = precioLista;
+
+			if (args.tipo_pago === "CONTADO") {
+				descuentoAplicado =
+					args.descuento_solicitado ?? descuentoOficial;
+				if (
+					descuentoAplicado >
+					descuentoOficial +
+						COTIZACION_THRESHOLDS.DESCUENTO_EXTRA_MAX_SIN_REVISION
+				)
+					requiereRevision = true;
+				precioFinal = precioLista * (1 - descuentoAplicado / 100);
+			} else {
+				if (args.descuento_solicitado && args.descuento_solicitado > 0)
+					requiereRevision = true;
+				if (!args.meses)
+					return {
+						message:
+							"Falta el plazo en meses para cotizar a crédito.",
+					};
+				numeroCuotas = args.meses;
+				cuotaInicial =
+					args.cuota_inicial_deseada ??
+					precioLista *
+						COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE;
+
+				if (
+					cuotaInicial <
+					precioLista *
+						COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE
+				)
+					requiereRevision = true;
+				if (
+					numeroCuotas >
+					COTIZACION_THRESHOLDS.PLAZO_MESES_MAX_SIN_REVISION
+				)
+					requiereRevision = true;
+
+				montoCuota = (precioLista - cuotaInicial) / numeroCuotas;
+				precioFinal = precioLista;
+			}
+			if (!conversacionId)
+				return {
+					message:
+						"No se pudo generar la cotización: falta el contexto de la conversación.",
+				};
+			const resultado =
+				await this.leadResolver.resolveForInterestSignal(
+					conversacionId,
+				);
+			if (!resultado)
+				return {
+					message:
+						"No se pudo resolver la conversación para generar la cotización.",
+				};
+			const lead = await this.prisma.leads.findUnique({
+				where: { id: resultado.leadId },
+				include: { persona: true },
+			});
+			if (!lead)
+				return {
+					message:
+						"No se pudo resolver el prospecto asociado a esta conversación.",
+				};
+			const codigo = `COT-${lote.manzana.etapa.proyecto.abreviatura ?? "GEN"}-${Date.now().toString().slice(-6)}`;
+			const cotizacion = await this.prisma.$transaction(async (tx) => {
+				const nueva = await tx.cotizaciones.create({
+					data: {
+						codigo,
+						id_persona: lead.id_persona,
+						id_lead: lead.id,
+						id_lote: lote.id,
+						generado_por: "BOT",
+						requiere_revision: requiereRevision,
+						area_m2: lote.area_m2,
+						precio_m2: lote.precio_m2,
+						precio_lista: precioLista,
+						descuento: descuentoAplicado,
+						precio_final: precioFinal,
+						...(cuotaInicial !== undefined && {
+							cuota_inicial: cuotaInicial,
+						}),
+						...(numeroCuotas !== undefined && {
+							numero_cuotas: numeroCuotas,
+						}),
+						...(montoCuota !== undefined && {
+							monto_cuota: montoCuota,
+						}),
+						estado: requiereRevision ? "BORRADOR" : "EMITIDA",
+					},
+				});
+				await tx.eventosConversacion.create({
+					data: {
+						id_conversacion: conversacionId,
+						tipo: "COTIZACION_CREADA",
+						metadata: {
+							id_cotizacion: nueva.id,
+							requiere_revision: requiereRevision,
+						},
+					},
+				});
+				await this.leadTransitionService.transition({
+					leadId: lead.id,
+					nuevoEstado: "INTERESADO",
+					idUsuario: undefined,
+					motivo: "Cotización generada por bot.",
+					tx,
+				});
+				return nueva;
+			});
+			if (requiereRevision) {
+				const motivos: string[] = [];
+				if (
+					args.tipo_pago === "CONTADO" &&
+					descuentoAplicado > descuentoOficial
+				)
+					motivos.push("Descuento fuera de política");
+				if (
+					cuotaInicial !== undefined &&
+					cuotaInicial <
+						precioLista *
+							COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE
+				)
+					motivos.push("Cuota inicial menor al mínimo legal del 10%");
+				if (
+					numeroCuotas !== undefined &&
+					numeroCuotas >
+						COTIZACION_THRESHOLDS.PLAZO_MESES_MAX_SIN_REVISION
+				)
+					motivos.push("Plazo mayor a 36 meses");
+
+				this.notifier.notifyQuoteReviewRequired({
+					id_cotizacion: cotizacion.id,
+					codigo,
+					cliente: {
+						nombres: lead.persona.nombres,
+						apellidos: lead.persona.apellidos,
+					},
+					proyecto: lote.manzana.etapa.proyecto.nombre,
+					lote: `${lote.manzana.codigo}-${lote.numero_lote.replace(/^LT-/i, "")}`,
+					motivo_revision: motivos.join(", "),
+					precio_final: precioFinal,
+				});
+
+				return {
+					prompt_result: `Cotización registrada (código ${codigo}), pero requiere revisión de un asesor antes de enviarse porque las condiciones solicitadas se salen de los parámetros estándar. Dile al cliente que un asesor la revisará y se la enviará en breve.`,
+				};
+			}
+			const proyectoNombre = lote.manzana.etapa.proyecto.nombre;
+			const loteIdentificador = `${lote.manzana.codigo}-${lote.numero_lote.replace(/^LT-/i, "")}`;
+
+			const pdfBuffer = await this.quotePdfService.generate({
+				codigo,
+				clienteNombre:
+					`${lead.persona.nombres ?? ""} ${lead.persona.apellidos ?? ""}`.trim() ||
+					"Cliente",
+				proyectoNombre,
+				loteIdentificador,
+				areaM2: Number(lote.area_m2),
+				precioLista,
+				descuentoPorcentaje: descuentoAplicado,
+				precioFinal,
+				tipoPago: args.tipo_pago,
+				cuotaInicial,
+				numeroCuotas,
+				montoCuota,
+			});
+
+			const pdfUrl = saveQuotePdf(pdfBuffer, codigo);
+			await this.prisma.cotizaciones.update({
+				where: { id: cotizacion.id },
+				data: { pdf_url: pdfUrl },
+			});
+			const docResult = await this.documentDelivery.deliver({
+				conversationId: conversacionId,
+				title: `Cotización ${codigo}`,
+				url: pdfUrl,
+				filename: `Cotizacion_${codigo}.pdf`,
+				whatsappTemplateName: "envio_cotizacion",
+				whatsappTemplateParams: [proyectoNombre],
+			});
+
+			if (docResult.deliveredByWhatsapp)
+				return {
+					prompt_result:
+						"¡Éxito! La cotización se generó y se acaba de enviar al cliente por WhatsApp en un documento adjunto. Confírmaselo con entusiasmo y pregúntale si tiene dudas.",
+				};
+			if (docResult.error) {
+				return {
+					prompt_result:
+						"La cotización se generó, pero hubo un problema técnico al enviarla. Informa al cliente que un asesor se pondrá en contacto para hacérsela llegar.",
+				};
+			}
+			return {
+				prompt_result: `La cotización (código ${codigo}) se generó correctamente. Informa al cliente que está lista y que en breve podrá descargarla.`,
+				_attachment: docResult.attachment,
+			};
+		} catch (error) {
+			console.error("Error al generar cotización:", error);
+			return { message: "Ocurrió un error al generar la cotización." };
 		}
 	}
 }

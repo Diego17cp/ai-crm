@@ -12,6 +12,8 @@ import { KapsoWhatsAppService } from "../adapters/KapsoWhatsAppService";
 import { WhatsappWebhookController } from "../controllers/WhatsappWebhookController";
 import { OpenAILLMService } from "../adapters/OpenAILLMService";
 import { MetaWhatsappService } from "../adapters/MetaWhatsappService";
+import { PdfKitQuotePdfService } from "@/infrastructure/pdf/PdfKitQuotePdfService";
+import { DocumentDeliveryService } from "@/infrastructure/documents/DocumentDeliveryService";
 
 export function createChatbotRouter(): Router {
 	const router = Router();
@@ -19,6 +21,8 @@ export function createChatbotRouter(): Router {
 	const chatbotRepo = new PrismaChatbotRepository(prisma);
 
 	const eventNotifier = new SocketEventNotifier();
+
+	const quotePdfService = new PdfKitQuotePdfService();
 
 	let whatsappService = null;
 	switch (env.WHATSAPP_PROVIDER?.toLowerCase()) {
@@ -29,10 +33,21 @@ export function createChatbotRouter(): Router {
 			whatsappService = new KapsoWhatsAppService();
 			break;
 		default:
-			throw new Error(`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`);
+			throw new Error(
+				`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`,
+			);
 	}
 
-	const toolsRegistry = new ChatToolsRegistry(prisma, eventNotifier, whatsappService);
+	const documentDeliveryService = new DocumentDeliveryService(
+		prisma,
+		whatsappService,
+	);
+	const toolsRegistry = new ChatToolsRegistry(
+		prisma,
+		eventNotifier,
+		quotePdfService,
+		documentDeliveryService,
+	);
 
 	let llmService = null;
 
@@ -46,11 +61,13 @@ export function createChatbotRouter(): Router {
 		case "openai":
 			llmService = new OpenAILLMService(
 				env.OPENAI_API_KEY,
-				toolsRegistry
+				toolsRegistry,
 			);
 			break;
 		default:
-			throw new Error(`Proveedor de modelo AI no soportado: ${env.AI_MODEL_PROVIDER}`);
+			throw new Error(
+				`Proveedor de modelo AI no soportado: ${env.AI_MODEL_PROVIDER}`,
+			);
 	}
 
 	console.log(`Usando proveedor de modelo AI: ${env.AI_MODEL_PROVIDER}`);
@@ -60,18 +77,26 @@ export function createChatbotRouter(): Router {
 		toolsRegistry,
 		chatbotRepo,
 	);
-	
-    const resolveChatSessionUseCase = new ResolveChatSessionUseCase(chatbotRepo);
-	const chatbotController = new ChatbotController(processChatMessage, resolveChatSessionUseCase);
-	
+
+	const resolveChatSessionUseCase = new ResolveChatSessionUseCase(
+		chatbotRepo,
+	);
+	const chatbotController = new ChatbotController(
+		processChatMessage,
+		resolveChatSessionUseCase,
+	);
+
 	const whatsappWebhookController = new WhatsappWebhookController(
 		whatsappService,
 		processChatMessage,
 		resolveChatSessionUseCase,
-		chatbotRepo
-	)
+		chatbotRepo,
+	);
 	router.post("/message", chatbotController.handleMessage);
-	router.post("/webhook/whatsapp", whatsappWebhookController.handleWebhookEvent);
+	router.post(
+		"/webhook/whatsapp",
+		whatsappWebhookController.handleWebhookEvent,
+	);
 	router.get("/webhook/whatsapp", whatsappWebhookController.verifyWebook);
 	return router;
 }
