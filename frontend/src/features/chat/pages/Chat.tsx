@@ -19,21 +19,23 @@ export const Chat = () => {
 		isFatalError,
 		isInitialLoading,
 		isLiveMode,
-		chatHistory
+		chatHistory,
 	} = useChatbot();
 
-	if (isFatalError) return (
-		<div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
-			<div className="text-center bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
-				<h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-					Servicio no disponible
-				</h2>
-				<p className="text-gray-500 dark:text-gray-400">
-					No pudimos conectar con los sistemas de asistencia. Por favor, intenta más tarde.
-				</p>
+	if (isFatalError)
+		return (
+			<div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+				<div className="text-center bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
+					<h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+						Servicio no disponible
+					</h2>
+					<p className="text-gray-500 dark:text-gray-400">
+						No pudimos conectar con los sistemas de asistencia. Por
+						favor, intenta más tarde.
+					</p>
+				</div>
 			</div>
-		</div>
-	);
+		);
 
 	return (
 		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950">
@@ -41,15 +43,25 @@ export const Chat = () => {
 				<div className="max-w-4xl mx-auto flex items-center justify-between">
 					<div>
 						<h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                            {isLiveMode ? "Asesor en línea" : `Asistente Comercial ${NOMBRE_EMPRESA}`}
+							{isLiveMode
+								? "Asesor en línea"
+								: `Asistente Comercial ${NOMBRE_EMPRESA}`}
 						</h1>
-						<p className={`text-sm font-medium flex items-center gap-1.5 ${isLiveMode ? 'text-blue-500 dark:text-blue-400' : 'text-teal-500 dark:text-teal-400'}`}>
-                            <span className="relative flex h-2 w-2">
-                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? 'bg-blue-400' : 'bg-teal-400'}`}></span>
-                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? 'bg-blue-500' : 'bg-teal-500'}`}></span>
-                            </span>
-                            {isLiveMode ? "Atendiendo tu consulta" : "Siempre en línea para ayudarte"}
-                        </p>
+						<p
+							className={`text-sm font-medium flex items-center gap-1.5 ${isLiveMode ? "text-blue-500 dark:text-blue-400" : "text-teal-500 dark:text-teal-400"}`}
+						>
+							<span className="relative flex h-2 w-2">
+								<span
+									className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? "bg-blue-400" : "bg-teal-400"}`}
+								></span>
+								<span
+									className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? "bg-blue-500" : "bg-teal-500"}`}
+								></span>
+							</span>
+							{isLiveMode
+								? "Atendiendo tu consulta"
+								: "Siempre en línea para ayudarte"}
+						</p>
 					</div>
 				</div>
 			</header>
@@ -57,22 +69,41 @@ export const Chat = () => {
 				<div className="max-w-4xl mx-auto">
 					{isInitialLoading ? (
 						<div className="flex w-full mb-6">
-                            <div className="shrink-0 mr-4 mt-1">
-                                <div className="size-10 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
-                            </div>
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-none w-3/4 h-20 animate-pulse" />
-                        </div>
-					): (
+							<div className="shrink-0 mr-4 mt-1">
+								<div className="size-10 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+							</div>
+							<div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-none w-3/4 h-20 animate-pulse" />
+						</div>
+					) : (
 						<>
 							{messages.map((msg) => {
 								if (msg.role === "asesor") {
-									return <AsesorMessage key={msg.id} content={msg.content} asesor={chatHistory?.data.asesor ?? null} />;
+									return (
+										<AsesorMessage
+											key={msg.id}
+											content={msg.content}
+											asesor={
+												chatHistory?.data.asesor ?? null
+											}
+										/>
+									);
 								}
-                                if (msg.role === "bot") {
-                                    return <BotMessage key={msg.id} content={msg.content} />;
-                                }
-                                return <UserMessage key={msg.id} content={msg.content} />;
-                            })}
+								if (msg.role === "bot") {
+									return (
+										<BotMessage
+											key={msg.id}
+											content={msg.content}
+											attachments={msg.attachments}
+										/>
+									);
+								}
+								return (
+									<UserMessage
+										key={msg.id}
+										content={msg.content}
+									/>
+								);
+							})}
 						</>
 					)}
 					{isLoading && (
@@ -155,7 +186,9 @@ export const Chat = () => {
 						</button>
 					</form>
 					<div className="text-center mt-2 text-xs text-gray-400 dark:text-gray-500">
-						{isLiveMode ? "Estás hablando con un representante de soporte." : "La IA puede cometer errores. Verifica la información importante."}
+						{isLiveMode
+							? "Estás hablando con un representante de soporte."
+							: "La IA puede cometer errores. Verifica la información importante."}
 					</div>
 				</div>
 			</footer>
