@@ -144,6 +144,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 						remitente: true,
 						created_at: true,
 						contenido: true,
+						adjunto: true
 					},
 				},
 			},
@@ -204,6 +205,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 						remitente: true,
 						created_at: true,
 						contenido: true,
+						adjunto: true,
 					},
 				},
 			},
