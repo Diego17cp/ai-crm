@@ -1,3 +1,5 @@
+import { ToolAttachment } from "@/core/chat/ToolAttachment";
+
 export interface QuoteReviewRequiredInfo {
 	id_cotizacion: number;
 	codigo: string;
@@ -14,4 +16,9 @@ export interface QuoteReviewRequiredInfo {
 export interface IEventNotifier {
 	notifyHumanAssistanceRequired(conversacionId: string, info?: any): void;
 	notifyQuoteReviewRequired(info: QuoteReviewRequiredInfo): void;
+	notifyQuoteApprovedForClient(
+		conversacionId: string,
+		mensaje: string,
+		attachment?: ToolAttachment,
+	): void;
 }
