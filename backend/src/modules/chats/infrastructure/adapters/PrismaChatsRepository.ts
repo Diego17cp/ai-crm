@@ -126,6 +126,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 					},
 				},
 				mensajes: {
+					orderBy: { created_at: "asc" },
 					select: {
 						id: true,
 						usuario: {
@@ -187,6 +188,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 					},
 				},
 				mensajes: {
+					orderBy: { created_at: "asc" },
 					select: {
 						id: true,
 						usuario: {
