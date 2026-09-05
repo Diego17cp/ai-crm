@@ -1,3 +1,5 @@
+import type { ToolAttachment } from "@/shared/types";
+
 export type EstadoChat = "BOT" | "ESPERANDO_ASESOR" | "ATENDIDO_HUMANO" | "FINALIZADO"
 export type CanalContacto = "WHATSAPP" | "WEB"
 export type TipoRemitente = "HUMANO" | "BOT"
@@ -29,6 +31,7 @@ export interface ChatMessage {
     remitente: TipoRemitente | null;
     created_at: string;
     contenido: string;
+    adjunto?: ToolAttachment[] | null
 }
 export interface ChatDetails extends Chat {
     mensajes: ChatMessage[];

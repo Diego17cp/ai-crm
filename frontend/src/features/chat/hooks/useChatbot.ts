@@ -7,6 +7,7 @@ import { NOMBRE_EMPRESA } from "@/shared/constants";
 import type { ApiError } from "@/core/types";
 import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
+import type { ToolAttachment } from "@/shared/types";
 
 export type UserRole = "user" | "bot" | "asesor";
 
@@ -14,6 +15,7 @@ export interface Message {
 	id: string;
 	role: UserRole;
 	content: string;
+	attachments?: ToolAttachment[]
 }
 
 export const useChatbot = () => {
@@ -98,6 +100,7 @@ export const useChatbot = () => {
                 ? "bot" 
                 : (msg.usuario ? "asesor" : "user"),
 			content: msg.contenido,
+			attachments: msg.adjunto ?? undefined
 		})) || [];
 		return [welcomeMessage, ...history, ...localMessages];
 	}, [chatHistory, localMessages]);
@@ -108,7 +111,8 @@ export const useChatbot = () => {
 			const newBotMsg: Message = {
 				id: `bot-${Date.now().toString()}`,
 				role: "bot",
-				content: data,
+				content: data.respuesta,
+				attachments: data.adjuntos
 			};
 			setLocalMessages((prev) => [...prev, newBotMsg]);
 			queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
