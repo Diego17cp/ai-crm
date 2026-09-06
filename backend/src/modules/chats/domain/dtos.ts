@@ -1,5 +1,5 @@
 import { ToolAttachment } from "@/core/chat/ToolAttachment";
-import { CanalContacto, EstadoChat, TipoRemitente } from "generated/prisma/enums";
+import { CanalContacto, EstadoChat, TipoEventoConversacion, TipoRemitente } from "generated/prisma/enums";
 
 export interface ChatMessageDTO {
     id: number;
@@ -66,4 +66,20 @@ export interface LiveChatQueueItemDTO {
     canal: CanalContacto | null;
     lastMessage: string | null;
     createdAt: Date;
+}
+
+export interface EventDTO {
+	id: number;
+	tipo: TipoEventoConversacion;
+	usuario: { id: string; nombres: string | null; apellidos: string | null } | null;
+	metadata: Record<string, unknown> | null;
+	created_at: Date;
+}
+
+export interface AsignacionDTO {
+	id: number;
+	usuario: { id: string; nombres: string | null; apellidos: string | null };
+	fecha_inicio: Date;
+	fecha_fin: Date | null;
+	motivo: string | null;
 }

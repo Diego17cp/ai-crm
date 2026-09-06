@@ -117,4 +117,31 @@ export class ChatsController {
 			next(error);
 		}
 	};
+	getChatEvents = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { chatId } = req.params;
+			const eventos = await this.chatUseCases.getEventsByChatId(
+				String(chatId),
+			);
+			res.json({ success: true, data: eventos });
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	getChatAssignments = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
+		try {
+			const { chatId } = req.params;
+			const asignaciones = await this.chatUseCases.getAssignmentsByChatId(
+				String(chatId),
+			);
+			res.json({ success: true, data: asignaciones });
+		} catch (error) {
+			next(error);
+		}
+	};
 }

@@ -5,6 +5,8 @@ import {
 	PaginatedChatResults,
 	ChatDTO,
 	LiveChatQueueItemDTO,
+	EventDTO,
+	AsignacionDTO,
 } from "../../domain/dtos";
 import { ConversacionesWhereInput } from "generated/prisma/models";
 
@@ -145,7 +147,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 						remitente: true,
 						created_at: true,
 						contenido: true,
-						adjunto: true
+						adjunto: true,
 					},
 				},
 			},
@@ -403,6 +405,44 @@ export class PrismaChatsRepository implements IChatsRepository {
 					data: { fecha_fin: new Date() },
 				});
 			}
+		});
+	}
+	async findEventsByChatId(chatId: string): Promise<EventDTO[]> {
+		const eventos = await this.prisma.eventosConversacion.findMany({
+			where: { id_conversacion: chatId },
+			orderBy: { created_at: "asc" },
+			select: {
+				id: true,
+				tipo: true,
+				metadata: true,
+				created_at: true,
+				usuario: {
+					select: { id: true, nombres: true, apellidos: true },
+				},
+			},
+		});
+		return eventos.map((e) => ({
+			id: e.id,
+			tipo: e.tipo,
+			usuario: e.usuario,
+			metadata: e.metadata as Record<string, unknown> | null,
+			created_at: e.created_at,
+		}));
+	}
+
+	async findAssignmentsByChatId(chatId: string): Promise<AsignacionDTO[]> {
+		return this.prisma.conversacionAsignacion.findMany({
+			where: { id_conversacion: chatId },
+			orderBy: { fecha_inicio: "asc" },
+			select: {
+				id: true,
+				fecha_inicio: true,
+				fecha_fin: true,
+				motivo: true,
+				usuario: {
+					select: { id: true, nombres: true, apellidos: true },
+				},
+			},
 		});
 	}
 }
