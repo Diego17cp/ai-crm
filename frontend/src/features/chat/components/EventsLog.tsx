@@ -5,7 +5,7 @@ import type { EventChat } from "../types";
 const EVENTO_LABELS: Record<string, string> = {
 	INICIADA: "Conversación iniciada",
 	MENSAJE_RECIBIDO: "Mensaje del cliente",
-	MENSAGE_ENVIADO: "Mensaje del asesor",
+	MENSAJE_ENVIADO: "Mensaje del asesor",
 	BOT_RESPONDE: "Respuesta del bot",
 	TRANSFERIDA_A_HUMANO: "Transferida a asesor humano",
 	ASESOR_ASIGNADO: "Asesor asignado",
