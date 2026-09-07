@@ -1,5 +1,11 @@
 import { Prisma } from "generated/prisma/client";
-import { QuoteQueueItemDTO, QuoteWithRelations } from "../../domain/dtos";
+import {
+	GetQuotesQueryDTO,
+	PaginatedResult,
+	QuoteDTO,
+	QuoteQueueItemDTO,
+	QuoteWithRelations,
+} from "../../domain/dtos";
 
 export interface IQuoteRepository {
 	claimReview(quoteId: number, asesorId: string): Promise<boolean>;
@@ -18,4 +24,5 @@ export interface IQuoteRepository {
 	): Promise<boolean>;
 	findPendingQueue(): Promise<QuoteQueueItemDTO[]>;
 	findMyReviews(idUsuario: string): Promise<QuoteQueueItemDTO[]>;
+	findQuotes(query: GetQuotesQueryDTO): Promise<PaginatedResult<QuoteDTO>>;
 }

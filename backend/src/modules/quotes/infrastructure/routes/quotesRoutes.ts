@@ -11,6 +11,8 @@ import { MetaWhatsappService } from "@/modules/chatbot/infrastructure/adapters/M
 import { PrismaChatbotRepository } from "@/modules/chatbot/infrastructure/adapters/PrismaChatbotRepository";
 import { MetricsService } from "@/core/crm/MetricsService";
 import { SocketEventNotifier } from "@/modules/chatbot/infrastructure/adapters/SocketEventNotifier";
+import { authGuard } from "@/app/middlewares/authGuard";
+import { IdentityResolverService } from "@/core/identity/IdentityResolverService";
 
 export function quotesRoutes(): Router {
 	const repo = new PrismaQuoteRepository(prisma);
@@ -18,6 +20,7 @@ export function quotesRoutes(): Router {
 	const pdfService = new PdfKitQuotePdfService();
 	const metrics = new MetricsService();
 	const notifier = new SocketEventNotifier();
+	const identityService = new IdentityResolverService(prisma)
 	let whatsappService;
 	switch (env.WHATSAPP_PROVIDER?.toLowerCase()) {
 		case "meta":
@@ -40,9 +43,13 @@ export function quotesRoutes(): Router {
 		chatbotRepo,
 		metrics,
 		notifier,
+		identityService,
+		whatsappService
 	);
 	const controller = new QuotesController(useCases);
 	const router = Router();
+	router.get("/", controller.getQuotes);
+	router.post("/", authGuard, controller.createManualQuote);
 	router.get("/queue", controller.getPendingQueue);
 	router.get("/mine", controller.getMyReviews);
 	router.get("/:quoteId", controller.getQuoteById);

@@ -7,7 +7,14 @@ import { IEventNotifier } from "@/modules/chatbot/application/ports/IEventNotifi
 import { AppError } from "@/core/errors/AppError";
 import { saveQuotePdf } from "@/infrastructure/pdf/savePdf";
 import { PrismaClient } from "generated/prisma/client";
-import { QuoteDetailDTO } from "../../domain/dtos";
+import {
+	CreateManualQuoteDTO,
+	GetQuotesQueryDTO,
+	QuoteDetailDTO,
+} from "../../domain/dtos";
+import { IdentityResolverService } from "@/core/identity/IdentityResolverService";
+import { IWhatsappService } from "@/modules/chatbot/application/ports/IWhatsappService";
+import { COTIZACION_THRESHOLDS } from "@/core/crm/quote-thresholds";
 
 export class QuoteUseCases {
 	constructor(
@@ -18,6 +25,8 @@ export class QuoteUseCases {
 		private chatbotRepo: IChatbotRepository,
 		private metrics: MetricsService,
 		private notifier: IEventNotifier,
+		private identityResolver: IdentityResolverService,
+		private whatsappService: IWhatsappService,
 	) {}
 
 	async takeReview(quoteId: number, asesorId: string) {
@@ -177,7 +186,162 @@ export class QuoteUseCases {
 			estado: quote.estado,
 			requiere_revision: quote.requiere_revision,
 			id_revisor: quote.id_revisor,
+			revisor: quote.revisor
+				? {
+						nombres: quote.revisor.nombres,
+						apellidos: quote.revisor.apellidos,
+					}
+				: null,
+			asesor: quote.asesor
+				? {
+						nombres: quote.asesor.nombres,
+						apellidos: quote.asesor.apellidos,
+					}
+				: null,
+			pdf_url: quote.pdf_url,
+			generado_por: quote.generado_por,
 			created_at: quote.created_at,
 		};
+	}
+	async getQuotes(query: GetQuotesQueryDTO) {
+		return this.repo.findQuotes(query);
+	}
+	async createManualQuote(
+		data: CreateManualQuoteDTO,
+		idAsesor: string,
+	): Promise<{ quote: QuoteDetailDTO; deliveredByWhatsapp: boolean }> {
+		const lote = await this.prisma.lotes.findUnique({
+			where: { id: data.id_lote },
+			include: {
+				manzana: {
+					include: {
+						etapa: {
+							include: {
+								proyecto: true,
+							},
+						},
+					},
+				},
+			},
+		});
+
+		if (!lote) throw new AppError("Lote no encontrado", 404);
+		if (lote.estado !== "Disponible")
+			throw new AppError("Lote no disponible", 400);
+
+		const persona = await this.identityResolver.resolveIdentity({
+			id_tipo_doc: data.id_tipo_doc,
+			numero: data.documento_identidad,
+			nombres: data.nombres ?? null,
+			apellidos: data.apellidos ?? null,
+			email: data.email ?? null,
+			telefonos: data.telefono
+				? [{ numero: data.telefono, tipo: "PERSONAL" }]
+				: [],
+		});
+
+		const precioLista = Number(lote.precio_total);
+		const descuentoOficial = Number(
+			lote.manzana.etapa.proyecto.porcentaje_descuento ?? 0,
+		);
+
+		let descuentoAplicado = 0;
+		let cuotaInicial: number | undefined;
+		let numeroCuotas: number | undefined;
+		let montoCuota: number | undefined;
+		let precioFinal = precioLista;
+
+		if (data.tipo_pago === "CONTADO") {
+			descuentoAplicado = data.descuento_solicitado ?? descuentoOficial;
+			precioFinal = precioLista * (1 - descuentoAplicado / 100);
+		} else {
+			if (!data.meses)
+				throw new AppError(
+					"Falta el plazo en meses para cotizar a crédito",
+					400,
+				);
+			numeroCuotas = data.meses;
+			cuotaInicial =
+				data.cuota_inicial_deseada ??
+				precioLista *
+					COTIZACION_THRESHOLDS.CUOTA_INICIAL_MIN_PORCENTAJE;
+			montoCuota = (precioLista - cuotaInicial) / numeroCuotas;
+			precioFinal = precioLista;
+		}
+
+		const codigo = `COT-${lote.manzana.etapa.proyecto.abreviatura ?? "GEN"}-${Date.now().toString().slice(-6)}`;
+
+		const cotizacion = await this.prisma.cotizaciones.create({
+			data: {
+				codigo,
+				id_persona: persona.id,
+				id_lead: data.id_lead ?? null,
+				id_lote: lote.id,
+				id_conversacion: null,
+				id_asesor: idAsesor,
+				generado_por: "ASESOR",
+				requiere_revision: false,
+				area_m2: lote.area_m2,
+				precio_m2: lote.precio_m2,
+				precio_lista: precioLista,
+				descuento: descuentoAplicado,
+				precio_final: precioFinal,
+				...(cuotaInicial !== undefined && {
+					cuota_inicial: cuotaInicial,
+				}),
+				...(numeroCuotas !== undefined && {
+					numero_cuotas: numeroCuotas,
+				}),
+				...(montoCuota !== undefined && { monto_cuota: montoCuota }),
+				estado: "EMITIDA",
+			},
+		});
+		const pdfBuffer = await this.quotePdfService.generate({
+			codigo,
+			clienteNombre:
+				`${persona.nombres ?? ""} ${persona.apellidos ?? ""}`.trim() ||
+				"Cliente",
+			proyectoNombre: lote.manzana.etapa.proyecto.nombre,
+			loteIdentificador: `${lote.manzana.codigo}-${lote.numero_lote.replace(/^LT-/i, "")}`,
+			areaM2: Number(lote.area_m2),
+			precioLista,
+			descuentoPorcentaje: descuentoAplicado,
+			precioFinal,
+			tipoPago: data.tipo_pago,
+			cuotaInicial,
+			numeroCuotas,
+			montoCuota,
+		});
+		const pdfUrl = saveQuotePdf(pdfBuffer, codigo);
+		let entregadaPorWhatsapp = false;
+		if (data.telefono && this.whatsappService.sendDocumentTemplate) {
+			try {
+				await this.whatsappService.sendDocumentTemplate.call(
+					this.whatsappService,
+					data.telefono,
+					"envio_cotizacion",
+					pdfUrl,
+					`Cotizacion_${codigo}.pdf`,
+					[lote.manzana.etapa.proyecto.nombre],
+				);
+				entregadaPorWhatsapp = true;
+			} catch (e) {
+				console.error(
+					"[QuoteUseCases] Error al enviar cotización manual por WhatsApp:",
+					e,
+				);
+			}
+		}
+
+		await this.prisma.$transaction(async (tx) => {
+			await tx.cotizaciones.update({
+				where: { id: cotizacion.id },
+				data: { pdf_url: pdfUrl },
+			});
+			await this.metrics.incrementCotizacionGenerada(idAsesor, tx);
+		});
+
+		const quote = await this.getQuoteById(cotizacion.id);
+		return { quote, deliveredByWhatsapp: entregadaPorWhatsapp };
 	}
 }
