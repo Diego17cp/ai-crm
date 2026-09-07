@@ -30,7 +30,7 @@ router.use("/citas", appointmentsRoutes());
 router.use("/ventas", salesRoutes());
 router.use("/roles", rolesRoutes());
 router.use("/chats", chatRoutes());
-router.use("/document-types", docTypesRoutes());
+router.use("/tipos-documento", docTypesRoutes());
 router.use("/cotizaciones", quotesRoutes())
 
 router.use("/", (_, res) => {
