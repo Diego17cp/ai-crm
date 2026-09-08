@@ -12,7 +12,7 @@ export const options = {
 	solvencia: [
 		{ value: "EXCELENTE", label: "Excelente" },
 		{ value: "BUEN_PAGADOR", label: "Buen Pagador" },
-		{ value: "PAGA ATRASADO", label: "Paga Atrasado" },
+		{ value: "PAGA_ATRASADO", label: "Paga Atrasado" },
 		{ value: "MOROSO", label: "Moroso" },
 		{ value: "DESCARTADO", label: "Descartado" },
 	],

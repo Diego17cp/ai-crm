@@ -4,7 +4,7 @@ import type { CreateLeadPayload } from "@/features/leads/types";
 export type Solvencia =
 	| "DESCARTADO"
 	| "MOROSO"
-	| "PAGA ATRASADO"
+	| "PAGA_ATRASADO"
 	| "BUEN_PAGADOR"
 	| "EXCELENTE";
 export type Actitud = "QUEJOSO" | "ENOJADO" | "DESCONFIADO" | "AMABLE";

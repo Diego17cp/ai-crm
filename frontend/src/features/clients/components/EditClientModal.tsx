@@ -15,6 +15,7 @@ import { useUbigeos } from "@/core/hooks/useUbigeos";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import { classes, options } from "@/shared/constants";
 import type { Actitud, Client, Solvencia, UpdateClientPayload } from "../types";
+import { useDocTypes } from "@/core/hooks";
 
 interface Props {
 	isOpen: boolean;
@@ -54,6 +55,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 	const [solvencia, setSolvencia] = useState<string>("");
 	const [actitud, setActitud] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
+	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
 	const [deletedPhoneIds, setDeletedPhoneIds] = useState<number[]>([]);
@@ -61,6 +63,8 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const { ubigeosQuery } = useUbigeos();
+	const { docTypesQuery } = useDocTypes();
+
 	const { useEditClientMutation } = useClients();
 
 	useEffect(() => {
@@ -79,13 +83,16 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 			);
 
 			setEsPeruano(
-				client.persona.es_peruano !== null ? String(client.persona.es_peruano) : "true",
+				client.persona.es_peruano !== null
+					? String(client.persona.es_peruano)
+					: "true",
 			);
 			setSexo(client.persona.sexo || "");
 			setEstadoCivil(client.persona.estado_civil || "");
 			setSolvencia(client.solvencia || "");
 			setActitud(client.actitud || "");
 			setIdUbigeo(client.persona.id_ubigeo || "");
+			setIdTipoDoc(String(client.persona.id_tipo_doc) || "");
 
 			if (client.persona.telefonos) {
 				setPhones(
@@ -120,7 +127,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 		};
 
 		return {
-			id_tipo_doc_identidad: client?.persona.id_tipo_doc || 1,
+			id_tipo_doc_identidad: Number(idTipoDoc),
 			nombres: nombres.trim() || undefined,
 			apellidos: apellidos.trim() || undefined,
 			numero: numeroDoc.trim(),
@@ -153,11 +160,14 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 		idUbigeo,
 		phones,
 		deletedPhoneIds,
-		client,
-		nacionalidad
+		nacionalidad,
+		idTipoDoc,
 	]);
 
-	const editClientMutation = useEditClientMutation(client?.id || 0, updatePayload);
+	const editClientMutation = useEditClientMutation(
+		client?.id || 0,
+		updatePayload,
+	);
 	const isSubmitting = editClientMutation.isPending;
 
 	const handleAddPhone = () => {
@@ -196,11 +206,18 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 			label: `${u.id} - ${u.nombre}`,
 		})) || [];
 
+	const docTypeOptions =
+		docTypesQuery.data?.map((d) => ({
+			value: String(d.id),
+			label: `${d.id} - ${d.nombre}`,
+		})) || [];
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!numeroDoc.trim()) return setError("El número de documento es requerido.");
+		if (!numeroDoc.trim())
+			return setError("El número de documento es requerido.");
 
 		try {
 			editClientMutation.mutate(undefined, {
@@ -252,7 +269,8 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 										</h2>
 										<p className="text-xs text-gray-500 dark:text-gray-400">
 											Actualiza la información de{" "}
-											{client.persona.nombres || client.persona.numero}
+											{client.persona.nombres ||
+												client.persona.numero}
 										</p>
 									</div>
 								</div>
@@ -330,6 +348,24 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
+													Tipo de documento{" "}
+													<span className="text-red-500">
+														*
+													</span>
+												</label>
+												<SearchableSelect
+													value={idTipoDoc}
+													onChange={(v) =>
+														setIdTipoDoc(v)
+													}
+													options={docTypeOptions}
+													disabled={isSubmitting}
+													placeholder="Seleccionar tipo de documento"
+													classes={selectClasses}
+												/>
+											</div>
+											<div className="flex flex-col gap-1.5 focus-within:z-10">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
 													Documento{" "}
 													<span className="text-red-500">
 														*
@@ -343,8 +379,8 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 															e.target.value,
 														)
 													}
-                                                    maxLength={11}
-                                                    minLength={8}
+													maxLength={11}
+													minLength={8}
 													placeholder="Ej: 12345678"
 													disabled={isSubmitting}
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
@@ -426,18 +462,41 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 															</div>
 															<input
 																type="text"
-																value={phone.numero}
-																onChange={(e) => handleUpdatePhone(phone.uiId,"numero",e.target.value)}
-																disabled={isSubmitting}
+																value={
+																	phone.numero
+																}
+																onChange={(e) =>
+																	handleUpdatePhone(
+																		phone.uiId,
+																		"numero",
+																		e.target
+																			.value,
+																	)
+																}
+																disabled={
+																	isSubmitting
+																}
 																minLength={9}
-                                                                maxLength={11}
+																maxLength={11}
 																placeholder="Número telefónico"
 																className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all flex-1"
 															/>
 															<div className="w-36 shrink-0">
 																<select
-																	value={phone.tipo}
-																	onChange={(e) => handleUpdatePhone(phone.uiId,"tipo",e.target.value)}																
+																	value={
+																		phone.tipo
+																	}
+																	onChange={(
+																		e,
+																	) =>
+																		handleUpdatePhone(
+																			phone.uiId,
+																			"tipo",
+																			e
+																				.target
+																				.value,
+																		)
+																	}
 																	disabled={
 																		isSubmitting
 																	}
@@ -539,7 +598,8 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 													value={esPeruano}
 													onChange={(val) => {
 														setEsPeruano(val);
-														if (val === "true") setNacionalidad("");
+														if (val === "true")
+															setNacionalidad("");
 													}}
 													placeholder="Seleccionar"
 													classes={selectClasses}
