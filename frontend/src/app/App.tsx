@@ -16,6 +16,8 @@ import {
 	DashboardPage,
 	LiveChatPage,
 	LoginPage,
+	QuoteReviewPage,
+	QuotesHistoryPage,
 	SaleDetailPage,
 } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
@@ -128,6 +130,22 @@ function App() {
 									<Route
 										path="live"
 										element={<LiveChatPage />}
+									/>
+								</Route>
+								<Route path="quotes">
+									<Route
+										index
+										element={
+											<Navigate replace to="history" />
+										}
+									/>
+									<Route
+										path="review"
+										element={<QuoteReviewPage />}
+									/>
+									<Route
+										path="history"
+										element={<QuotesHistoryPage />}
 									/>
 								</Route>
 							</Route>
