@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Lead } from "@/features/leads/types";
+import type { Client } from "../types";
 
 export type ClientModalType =
 	| "none"
@@ -9,9 +9,9 @@ export type ClientModalType =
 
 export const useClientModals = () => {
 	const [activeModal, setActiveModal] = useState<ClientModalType>("none");
-	const [selectedClient, setSelectedClient] = useState<Lead | null>(null);
+	const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
-	const openModal = (type: ClientModalType, client?: Lead) => {
+	const openModal = (type: ClientModalType, client?: Client) => {
 		if (client) setSelectedClient(client);
 		setActiveModal(type);
 	};

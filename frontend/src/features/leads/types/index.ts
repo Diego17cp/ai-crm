@@ -1,4 +1,5 @@
 import type { EstadoCivil, Person, Sexo, TipoTelefono } from "@/core/types";
+import type { Actitud, Solvencia } from "@/features/clients/types";
 
 export type EstadoLead =
 	| "NUEVO"
@@ -39,6 +40,8 @@ export interface FiltersState {
 	estado_civil?: EstadoCivil;
 	es_peruano?: boolean;
 	q?: string;
+	solvencia?: Solvencia;
+	actitud?: Actitud;
 	page: number;
 	limit: number;
 }

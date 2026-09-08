@@ -1,5 +1,6 @@
 import { apiClient } from "@/core/api";
-import type { CreateLeadPayload, FiltersState, LeadsResponse, UpdateLeadPayload } from "@/features/leads/types";
+import type { CreateLeadPayload, FiltersState, UpdateLeadPayload } from "@/features/leads/types";
+import type { ClientResponse } from "../types";
 
 export const clientsService = {
     findAll: async (filters: FiltersState) => {
@@ -12,7 +13,7 @@ export const clientsService = {
         if (filters.actitud) queryParams.append("actitud", filters.actitud);
         queryParams.append("page", String(filters.page));
         queryParams.append("limit", String(filters.limit));
-        const response = await apiClient.get<LeadsResponse>(`/clientes?${queryParams.toString()}`);
+        const response = await apiClient.get<ClientResponse>(`/clientes?${queryParams.toString()}`);
         return response.data;
     },
     create: async (data: CreateLeadPayload) => {
