@@ -55,61 +55,25 @@ export class IdentityResolverService {
 		if (existingPersona) {
 			const updateData: Prisma.PersonasUpdateInput = {};
 
-			const setIfDefinedAndNotNull = (
+			const setIfProvided = (
 				key: keyof Prisma.PersonasUpdateInput,
 				value: any,
-				existingValue: any,
 			) => {
-				if (
-					(value !== undefined && value !== null) ||
-					(existingValue !== null && existingValue !== undefined)
-				) {
+				if (value !== undefined && value !== null) {
 					(updateData as any)[key] = value;
 				}
 			};
 
-			setIfDefinedAndNotNull(
-				"nombres",
-				data.nombres,
-				existingPersona.nombres,
-			);
-			setIfDefinedAndNotNull(
-				"apellidos",
-				data.apellidos,
-				existingPersona.apellidos,
-			);
-			setIfDefinedAndNotNull(
-				"fecha_nacimiento",
-				data.fecha_nacimiento,
-				existingPersona.fecha_nacimiento,
-			);
-			setIfDefinedAndNotNull("sexo", data.sexo, existingPersona.sexo);
-			setIfDefinedAndNotNull(
-				"estado_civil",
-				data.estado_civil,
-				existingPersona.estado_civil,
-			);
-			setIfDefinedAndNotNull(
-				"es_peruano",
-				data.es_peruano,
-				existingPersona.es_peruano,
-			);
-			setIfDefinedAndNotNull(
-				"nacionalidad",
-				data.nacionalidad,
-				existingPersona.nacionalidad,
-			);
-			setIfDefinedAndNotNull(
-				"direccion",
-				data.direccion,
-				existingPersona.direccion,
-			);
-			setIfDefinedAndNotNull("email", data.email, existingPersona.email);
-			setIfDefinedAndNotNull(
-				"ocupacion",
-				data.ocupacion,
-				existingPersona.ocupacion,
-			);
+			setIfProvided("nombres", data.nombres);
+			setIfProvided("apellidos", data.apellidos);
+			setIfProvided("fecha_nacimiento", data.fecha_nacimiento);
+			setIfProvided("sexo", data.sexo);
+			setIfProvided("estado_civil", data.estado_civil);
+			setIfProvided("es_peruano", data.es_peruano);
+			setIfProvided("nacionalidad", data.nacionalidad);
+			setIfProvided("direccion", data.direccion);
+			setIfProvided("email", data.email);
+			setIfProvided("ocupacion", data.ocupacion);
 
 			if (data.id_ubigeo !== undefined && data.id_ubigeo !== null) {
 				updateData.ubigeo = { connect: { id: data.id_ubigeo } };
@@ -185,7 +149,7 @@ export class IdentityResolverService {
 			where: { numero: data.telefono },
 			include: { persona: true },
 		});
-		if (telefonoExistente) return telefonoExistente.persona
+		if (telefonoExistente) return telefonoExistente.persona;
 
 		const persona = await client.personas.create({
 			data: {
