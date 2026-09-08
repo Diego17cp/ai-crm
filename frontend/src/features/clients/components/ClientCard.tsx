@@ -1,0 +1,499 @@
+import { AnimatePresence, motion } from "motion/react";
+import {
+	FiMoreVertical,
+	FiPhone,
+	FiMail,
+	FiMapPin,
+	FiUser,
+	FiEdit2,
+	FiTrash2,
+	FiBriefcase,
+	FiCalendar,
+	FiChevronDown,
+	FiGlobe,
+	FiHeart,
+} from "react-icons/fi";
+import { useState } from "react";
+
+import { useClickOutside } from "@/shared/hooks";
+import { PhoneLinkBadge } from "@/shared/components";
+import type { Client } from "../types";
+import { DetailItem } from "@/features/leads/components/DetailItem";
+import {
+	getActitudIcon,
+	getActitudTextColor,
+	getSolvenciaIcon,
+	getSolvenciaTextColor,
+} from "../utils/clientFormatters";
+
+interface ClientCardProps {
+	client: Client;
+	onEdit?: () => void;
+	onDelete?: () => void;
+}
+
+const formatDate = (date: string | null) => {
+	if (!date) return null;
+
+	const parsed = new Date(date);
+
+	if (Number.isNaN(parsed.getTime())) return null;
+
+	return new Intl.DateTimeFormat("es-PE", {
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+	}).format(parsed);
+};
+
+const getInitials = (nombres: string | null, apellidos: string | null) => {
+	const firstName = nombres?.trim().charAt(0);
+	const lastName = apellidos?.trim().charAt(0);
+
+	return `${firstName ?? ""}${lastName ?? ""}`.toUpperCase() || null;
+};
+
+const getFullName = (nombres: string | null, apellidos: string | null) => {
+	return [nombres, apellidos].filter(Boolean).join(" ") || "Sin nombre";
+};
+
+const getNationality = (
+	esPeruano: boolean | null,
+	nacionalidad: string | null,
+) => {
+	if (esPeruano === true) return "Peruana";
+	if (nacionalidad) return nacionalidad;
+
+	return null;
+};
+
+export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+	const menuRef = useClickOutside(() => setIsMenuOpen(false));
+
+	const { persona } = client;
+
+	const fullName = getFullName(persona.nombres, persona.apellidos);
+
+	const initials = getInitials(persona.nombres, persona.apellidos);
+
+	const nationality = getNationality(
+		persona.es_peruano,
+		persona.nacionalidad,
+	);
+
+	const SolvenciaIcon = getSolvenciaIcon(client.solvencia);
+	const ActitudIcon = getActitudIcon(client.actitud);
+
+	return (
+		<motion.article
+			initial={{ opacity: 0, y: 8 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.2 }}
+			className="
+				group relative overflow-hidden
+				rounded-xl
+				border border-gray-200/80 dark:border-gray-800
+				bg-white dark:bg-gray-900
+				shadow-sm
+				transition-colors duration-200
+				hover:border-gray-300 dark:hover:border-gray-700
+			"
+		>
+			<div className="absolute inset-x-0 top-0 h-0.5 bg-emerald-600 dark:bg-emerald-600" />
+
+			<div className="p-5">
+				<header className="flex items-start justify-between gap-4">
+					<div className="flex min-w-0 items-center gap-3.5">
+						<div
+							className="
+								flex size-11 shrink-0
+								items-center justify-center
+								rounded-full
+								bg-emerald-600/10
+								text-sm font-semibold
+								text-emerald-600
+								dark:bg-emerald-600/10
+								dark:text-emerald-600
+							"
+						>
+							{initials ? (
+								initials
+							) : (
+								<FiUser className="text-gray-400" size={18} />
+							)}
+						</div>
+						<div className="min-w-0">
+							<div className="flex items-center gap-2">
+								<h3
+									className="
+										truncate
+										text-[15px] font-semibold
+										tracking-[-0.01em]
+										text-gray-900 dark:text-white
+									"
+									title={fullName}
+								>
+									{fullName}
+								</h3>
+
+								<span
+									className="
+										hidden sm:inline-flex
+										items-center gap-1.5
+										rounded-full
+										bg-emerald-600/10
+										px-2.5 py-1
+										text-[11px]
+										font-semibold
+										uppercase
+										tracking-wide
+										text-emerald-600
+										dark:bg-emerald-600/10
+										dark:text-emerald-600
+									"
+								>
+									<span
+										className="
+											h-1.5 w-1.5 rounded-full
+											bg-emerald-600
+											dark:bg-emerald-600
+										"
+									/>
+									Cliente
+								</span>
+							</div>
+
+							<div
+								className="
+									mt-0.5
+									flex items-center gap-1.5
+									text-xs
+									text-gray-500 dark:text-gray-400
+								"
+							>
+								<span>
+									{persona.tipo_doc?.nombre ?? "Documento"}
+								</span>
+
+								<span className="text-gray-300 dark:text-gray-700">
+									·
+								</span>
+
+								<span className="font-mono">
+									{persona.numero || "Sin documento"}
+								</span>
+							</div>
+						</div>
+					</div>
+					<div className="relative shrink-0" ref={menuRef}>
+						<button
+							type="button"
+							onClick={() => setIsMenuOpen((value) => !value)}
+							className="
+								rounded-lg p-1.5
+								text-gray-400
+								transition-colors
+								hover:bg-gray-100
+								hover:text-gray-700
+								dark:hover:bg-gray-800
+								dark:hover:text-gray-200
+								cursor-pointer
+							"
+							aria-label="Opciones del cliente"
+						>
+							<FiMoreVertical size={18} />
+						</button>
+
+						{isMenuOpen && (
+							<motion.div
+								initial={{
+									opacity: 0,
+									y: -4,
+									scale: 0.98,
+								}}
+								animate={{
+									opacity: 1,
+									y: 0,
+									scale: 1,
+								}}
+								transition={{ duration: 0.12 }}
+								className="
+									absolute right-0 top-full z-30 mt-1.5
+									w-36 overflow-hidden
+									rounded-lg
+									border border-gray-200
+									bg-white shadow-lg
+									dark:border-gray-700
+									dark:bg-gray-800
+								"
+							>
+								<button
+									type="button"
+									onClick={() => {
+										setIsMenuOpen(false);
+										onEdit?.();
+									}}
+									className="
+										flex w-full items-center gap-2
+										px-3.5 py-2.5
+										text-left text-sm
+										text-gray-700 dark:text-gray-300
+										hover:bg-gray-50
+										dark:hover:bg-gray-700/50
+										cursor-pointer
+									"
+								>
+									<FiEdit2 size={14} />
+									Editar
+								</button>
+
+								<div className="h-px bg-gray-100 dark:bg-gray-700" />
+
+								<button
+									type="button"
+									onClick={() => {
+										setIsMenuOpen(false);
+										onDelete?.();
+									}}
+									className="
+										flex w-full items-center gap-2
+										px-3.5 py-2.5
+										text-left text-sm
+										text-red-600 dark:text-red-400
+										hover:bg-red-50
+										dark:hover:bg-red-900/10
+										cursor-pointer
+									"
+								>
+									<FiTrash2 size={14} />
+									Eliminar
+								</button>
+							</motion.div>
+						)}
+					</div>
+				</header>
+				<div className="mt-6 mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+					{persona.telefonos.length > 0 ? (
+						persona.telefonos.map((tel) => (
+							<PhoneLinkBadge tel={tel} key={tel.id} />
+						))
+					) : (
+						<div className="flex items-center gap-2.5 px-2 py-1.5 text-sm text-gray-400">
+							<FiPhone size={15} />
+							<span>Sin teléfono</span>
+						</div>
+					)}
+
+					{persona.email ? (
+						<a
+							href={`mailto:${persona.email}`}
+							className="
+								flex min-w-0 items-center gap-2.5
+								rounded-lg px-2 py-1.5
+								border border-gray-200 dark:border-gray-700
+								text-sm
+								text-gray-700 dark:text-gray-300
+								transition-colors
+								hover:bg-gray-50 dark:hover:bg-gray-800
+							"
+						>
+							<FiMail
+								size={15}
+								className="shrink-0 text-gray-400"
+							/>
+
+							<span className="truncate">{persona.email}</span>
+						</a>
+					) : (
+						<div className="flex items-center gap-2.5 px-2 py-1.5 text-sm text-gray-400">
+							<FiMail size={15} />
+							<span>Sin correo</span>
+						</div>
+					)}
+				</div>
+				{persona.ubigeo && (
+					<div
+						className="
+							flex min-w-0
+							items-center gap-2.5
+							py-1.5
+							text-sm
+							text-gray-600 dark:text-gray-400
+						"
+					>
+						<FiMapPin
+							size={15}
+							className="shrink-0 text-gray-400"
+						/>
+
+						<span className="truncate">
+							{persona.ubigeo.nombre}
+						</span>
+					</div>
+				)}
+				<div
+					className="
+						mt-5
+						grid grid-cols-1 gap-3
+						border-t border-gray-100
+						pt-4
+						dark:border-gray-800
+						sm:grid-cols-2
+					"
+				>
+					<div className="flex items-center gap-2">
+						{/* eslint-disable-next-line react-hooks/static-components */}
+						<SolvenciaIcon
+							size={16}
+							className={getSolvenciaTextColor(client.solvencia)}
+						/>
+
+						<div>
+							<p className="text-[11px] uppercase tracking-wide text-gray-400">
+								Solvencia
+							</p>
+
+							<p
+								className={`text-sm font-semibold ${getSolvenciaTextColor(
+									client.solvencia,
+								)}`}
+							>
+								{client.solvencia ?? "No evaluada"}
+							</p>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-2">
+						{/* eslint-disable-next-line react-hooks/static-components */}
+						<ActitudIcon
+							size={16}
+							className={getActitudTextColor(client.actitud)}
+						/>
+
+						<div>
+							<p className="text-[11px] uppercase tracking-wide text-gray-400">
+								Actitud
+							</p>
+
+							<p
+								className={`text-sm font-semibold ${getActitudTextColor(
+									client.actitud,
+								)}`}
+							>
+								{client.actitud ?? "No evaluada"}
+							</p>
+						</div>
+					</div>
+				</div>
+				<button
+					type="button"
+					onClick={() => setIsDetailsOpen((value) => !value)}
+					className="
+						mt-4 flex w-full
+						items-center justify-between
+						border-t border-gray-100
+						pt-3
+						text-xs font-medium
+						text-gray-500
+						transition-colors
+						hover:text-gray-800
+						dark:border-gray-800
+						dark:text-gray-400
+						dark:hover:text-gray-200
+						cursor-pointer
+					"
+				>
+					<span>
+						{isDetailsOpen
+							? "Ocultar información personal"
+							: "Ver información personal"}
+					</span>
+
+					<FiChevronDown
+						size={15}
+						className={`
+							transition-transform duration-200
+							${isDetailsOpen ? "rotate-180" : ""}
+						`}
+					/>
+				</button>
+
+				<AnimatePresence>
+					{isDetailsOpen && (
+						<motion.div
+							initial={{
+								opacity: 0,
+								height: 0,
+							}}
+							animate={{
+								opacity: 1,
+								height: "auto",
+							}}
+							exit={{
+								opacity: 0,
+								height: 0,
+							}}
+							transition={{
+								duration: 0.25,
+								ease: "easeInOut",
+							}}
+							className="overflow-hidden"
+						>
+							<div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
+								<DetailItem
+									icon={<FiBriefcase size={14} />}
+									label="Ocupación"
+									value={persona.ocupacion}
+								/>
+
+								<DetailItem
+									icon={<FiGlobe size={14} />}
+									label="Nacionalidad"
+									value={nationality}
+								/>
+
+								<DetailItem
+									icon={<FiUser size={14} />}
+									label="Sexo"
+									value={
+										persona.sexo === "M"
+											? "Masculino"
+											: persona.sexo === "F"
+												? "Femenino"
+												: null
+									}
+								/>
+
+								<DetailItem
+									icon={<FiHeart size={14} />}
+									label="Estado civil"
+									value={persona.estado_civil}
+								/>
+
+								<DetailItem
+									icon={<FiCalendar size={14} />}
+									label="Nacimiento"
+									value={formatDate(persona.fecha_nacimiento)}
+								/>
+
+								<DetailItem
+									icon={<FiMapPin size={14} />}
+									label="Dirección"
+									value={persona.direccion}
+								/>
+
+								<DetailItem
+									label="Última actualización"
+									value={formatDate(client.updated_at)}
+								/>
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>
+			</div>
+		</motion.article>
+	);
+};

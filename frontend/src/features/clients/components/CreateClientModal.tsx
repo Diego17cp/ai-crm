@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	FiX,
-	FiUser,
+	FiUserPlus,
 	FiAlertCircle,
 	FiPhone,
 	FiPlus,
@@ -10,21 +10,20 @@ import {
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect } from "dialca-ui";
-import { useClients } from "../hooks/useClients";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import { classes, options } from "@/shared/constants";
-import type { Actitud, Client, Solvencia, UpdateClientPayload } from "../types";
+import { useDocTypes } from "@/core/hooks";
+import type { CreateLeadPayload } from "@/features/leads/types";
+import { useClients } from "../hooks/useClients";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
-	client: Client | null;
 }
 
 interface PhoneUI {
 	uiId: string;
-	id?: number;
 	numero: string;
 	tipo: TipoTelefono;
 }
@@ -34,12 +33,11 @@ const selectClasses = classes.searchableSelect;
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean;
 const estadoCivilOptions = options.estadoCivil;
-const solvenciaOptions = options.solvencia;
-const actitudOptions = options.actitud;
 const phoneTypeOptions = options.phoneType;
 
-export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
+export const CreateClientModal = ({ isOpen, onClose }: Props) => {
 	const [numeroDoc, setNumeroDoc] = useState("");
+	const [idTipoDoc, setIdTipoDoc] = useState("");
 	const [nombres, setNombres] = useState("");
 	const [apellidos, setApellidos] = useState("");
 	const [email, setEmail] = useState("");
@@ -51,76 +49,37 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 	const [nacionalidad, setNacionalidad] = useState<string>("");
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [solvencia, setSolvencia] = useState<string>("");
-	const [actitud, setActitud] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
-	const [deletedPhoneIds, setDeletedPhoneIds] = useState<number[]>([]);
-
 	const [error, setError] = useState<string | null>(null);
 
 	const { ubigeosQuery } = useUbigeos();
-	const { useEditClientMutation } = useClients();
+	const { docTypesQuery } = useDocTypes();
+	const { useCreateClientMutation } = useClients();
 
 	useEffect(() => {
-		if (isOpen && client) {
-			setNumeroDoc(client.persona.numero || "");
-			setNombres(client.persona.nombres || "");
-			setApellidos(client.persona.apellidos || "");
-			setEmail(client.persona.email || "");
-			setDireccion(client.persona.direccion || "");
-			setOcupacion(client.persona.ocupacion || "");
-			setNacionalidad(client.persona.nacionalidad || "");
-			setFechaNacimiento(
-				client.persona.fecha_nacimiento
-					? client.persona.fecha_nacimiento.split("T")[0]
-					: "",
-			);
-
-			setEsPeruano(
-				client.persona.es_peruano !== null ? String(client.persona.es_peruano) : "true",
-			);
-			setSexo(client.persona.sexo || "");
-			setEstadoCivil(client.persona.estado_civil || "");
-			setSolvencia(client.solvencia || "");
-			setActitud(client.actitud || "");
-			setIdUbigeo(client.persona.id_ubigeo || "");
-
-			if (client.persona.telefonos) {
-				setPhones(
-					client.persona.telefonos.map((t) => ({
-						uiId: crypto.randomUUID(),
-						id: t.id,
-						numero: t.numero,
-						tipo: t.tipo,
-					})),
-				);
-			} else {
-				setPhones([]);
-			}
-			setDeletedPhoneIds([]);
+		if (isOpen) {
+			setNumeroDoc("");
+			setNombres("");
+			setApellidos("");
+			setEmail("");
+			setFechaNacimiento("");
+			setDireccion("");
+			setOcupacion("");
+			setEsPeruano("true");
+			setNacionalidad("");
+			setSexo("");
+			setEstadoCivil("");
+			setIdUbigeo("");
+			setPhones([]);
 			setError(null);
 		}
-	}, [isOpen, client]);
+	}, [isOpen]);
 
-	const updatePayload = useMemo((): UpdateClientPayload => {
-		const payloadPhones = {
-			add: phones
-				.filter((p) => !p.id && p.numero.trim())
-				.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
-			update: phones
-				.filter((p) => p.id && p.numero.trim())
-				.map((p) => ({
-					id: p.id!,
-					numero: p.numero.trim(),
-					tipo: p.tipo,
-				})),
-			remove: deletedPhoneIds,
-		};
-
+	const createPayload = useMemo((): CreateLeadPayload => {
 		return {
-			id_tipo_doc_identidad: client?.persona.id_tipo_doc || 1,
+			id_tipo_doc_identidad: Number(idTipoDoc),
 			nombres: nombres.trim() || undefined,
 			apellidos: apellidos.trim() || undefined,
 			numero: numeroDoc.trim(),
@@ -132,10 +91,10 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 			ocupacion: ocupacion.trim() || undefined,
 			sexo: (sexo as Sexo) || undefined,
 			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			solvencia: (solvencia as Solvencia) || undefined,
-			actitud: (actitud as Actitud) || undefined,
 			id_ubigeo: idUbigeo || undefined,
-			telefonos: payloadPhones,
+			telefonos: phones
+				.filter((p) => p.numero.trim())
+				.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
 		};
 	}, [
 		nombres,
@@ -148,17 +107,14 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 		ocupacion,
 		sexo,
 		estadoCivil,
-		solvencia,
-		actitud,
 		idUbigeo,
 		phones,
-		deletedPhoneIds,
-		client,
-		nacionalidad
+		nacionalidad,
+		idTipoDoc,
 	]);
 
-	const editClientMutation = useEditClientMutation(client?.id || 0, updatePayload);
-	const isSubmitting = editClientMutation.isPending;
+	const createLeadMutation = useCreateClientMutation(createPayload);
+	const isSubmitting = createLeadMutation.isPending;
 
 	const handleAddPhone = () => {
 		setPhones([
@@ -177,8 +133,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 		);
 	};
 
-	const handleRemovePhone = (uiId: string, backId?: number) => {
-		if (backId) setDeletedPhoneIds((prev) => [...prev, backId]);
+	const handleRemovePhone = (uiId: string) => {
 		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
 	};
 
@@ -196,27 +151,28 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 			label: `${u.id} - ${u.nombre}`,
 		})) || [];
 
+	const docTypeOptions =
+		docTypesQuery.data?.map((d) => ({
+			value: String(d.id),
+			label: `${d.id} - ${d.nombre}`,
+		})) || [];
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
-
-		if (!numeroDoc.trim()) return setError("El número de documento es requerido.");
-
+		if (!numeroDoc.trim())
+			return setError("El número de documento es requerido.");
 		try {
-			editClientMutation.mutate(undefined, {
-				onSuccess: () => {
-					onClose();
-				},
+			createLeadMutation.mutate(undefined, {
+				onSuccess: () => onClose(),
 			});
 		} catch (err: unknown) {
-			const message =
+			setError(
 				(err as ApiError)?.response?.data?.message ||
-				"Error al actualizar el cliente.";
-			setError(message);
+					"Error al crear el cliente.",
+			);
 		}
 	};
-
-	if (!client) return null;
 
 	return (
 		<AnimatePresence>
@@ -244,15 +200,14 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
 									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
-										<FiUser size={20} />
+										<FiUserPlus size={20} />
 									</div>
 									<div className="flex flex-col">
 										<h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-											Editar Cliente
+											Registrar Nuevo Cliente
 										</h2>
 										<p className="text-xs text-gray-500 dark:text-gray-400">
-											Actualiza la información de{" "}
-											{client.persona.nombres || client.persona.numero}
+											Introduce la información del cliente
 										</p>
 									</div>
 								</div>
@@ -330,6 +285,24 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
+													Tipo de documento
+													<span className="text-red-500">
+														*
+													</span>
+												</label>
+												<SearchableSelect
+													value={idTipoDoc}
+													onChange={(val) =>
+														setIdTipoDoc(val)
+													}
+													options={docTypeOptions}
+													placeholder="Seleccione..."
+													classes={selectClasses}
+													disabled={isSubmitting}
+												/>
+											</div>
+											<div className="flex flex-col gap-1.5 focus-within:z-10">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
 													Documento{" "}
 													<span className="text-red-500">
 														*
@@ -343,10 +316,10 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 															e.target.value,
 														)
 													}
-                                                    maxLength={11}
-                                                    minLength={8}
-													placeholder="Ej: 12345678"
+													maxLength={11}
+													minLength={8}
 													disabled={isSubmitting}
+													placeholder="Ej: 12345678"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
@@ -426,18 +399,39 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 															</div>
 															<input
 																type="text"
-																value={phone.numero}
-																onChange={(e) => handleUpdatePhone(phone.uiId,"numero",e.target.value)}
-																disabled={isSubmitting}
-																minLength={9}
-                                                                maxLength={11}
+																value={
+																	phone.numero
+																}
+																onChange={(e) =>
+																	handleUpdatePhone(
+																		phone.uiId,
+																		"numero",
+																		e.target
+																			.value,
+																	)
+																}
+																disabled={
+																	isSubmitting
+																}
 																placeholder="Número telefónico"
 																className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all flex-1"
 															/>
 															<div className="w-36 shrink-0">
 																<select
-																	value={phone.tipo}
-																	onChange={(e) => handleUpdatePhone(phone.uiId,"tipo",e.target.value)}																
+																	value={
+																		phone.tipo
+																	}
+																	onChange={(
+																		e,
+																	) =>
+																		handleUpdatePhone(
+																			phone.uiId,
+																			"tipo",
+																			e
+																				.target
+																				.value,
+																		)
+																	}
 																	disabled={
 																		isSubmitting
 																	}
@@ -466,7 +460,6 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 																onClick={() =>
 																	handleRemovePhone(
 																		phone.uiId,
-																		phone.id,
 																	)
 																}
 																disabled={
@@ -481,12 +474,6 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														</motion.div>
 													))}
 												</AnimatePresence>
-												{phones.length === 0 && (
-													<div className="text-xs text-gray-400 italic text-center py-2 bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-														No hay teléfonos
-														registrados.
-													</div>
-												)}
 											</div>
 										</div>
 									</div>
@@ -537,22 +524,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 												<SearchableSelect
 													options={booleanOptions}
 													value={esPeruano}
-													onChange={(val) => {
-														setEsPeruano(val);
-														if (val === "true") setNacionalidad("");
-													}}
-													placeholder="Seleccionar"
-													classes={selectClasses}
-												/>
-											</div>
-											<div className="z-30">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Sexo
-												</label>
-												<SearchableSelect
-													options={sexoOptions}
-													value={sexo}
-													onChange={setSexo}
+													onChange={setEsPeruano}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
@@ -576,6 +548,18 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 													/>
 												</div>
 											)}
+											<div className="z-30">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
+													Sexo
+												</label>
+												<SearchableSelect
+													options={sexoOptions}
+													value={sexo}
+													onChange={setSexo}
+													placeholder="Seleccionar"
+													classes={selectClasses}
+												/>
+											</div>
 										</div>
 									</div>
 									<div className="flex flex-col gap-4 pb-4">
@@ -612,30 +596,6 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
-											<div className="z-10">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Solvencia (Status Pagos)
-												</label>
-												<SearchableSelect
-													options={solvenciaOptions}
-													value={solvencia}
-													onChange={setSolvencia}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
-												/>
-											</div>
-											<div className="z-5">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Actitud Comprador
-												</label>
-												<SearchableSelect
-													options={actitudOptions}
-													value={actitud}
-													onChange={setActitud}
-													placeholder="Seleccionar..."
-													classes={selectClasses}
-												/>
-											</div>
 										</div>
 									</div>
 								</div>
@@ -657,10 +617,10 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 											{isSubmitting ? (
 												<>
 													<BiLoaderAlt className="animate-spin" />{" "}
-													Guardando...
+													Creando...
 												</>
 											) : (
-												"Guardar Cambios"
+												"Crear Lead"
 											)}
 										</button>
 									</div>
