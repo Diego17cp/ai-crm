@@ -528,18 +528,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													classes={selectClasses}
 												/>
 											</div>
-											<div className="z-30">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Sexo
-												</label>
-												<SearchableSelect
-													options={sexoOptions}
-													value={sexo}
-													onChange={setSexo}
-													placeholder="Seleccionar"
-													classes={selectClasses}
-												/>
-											</div>
 											{esPeruano === "false" && (
 												<div className="flex flex-col gap-1.5 focus-within:z-20 col-span-1 md:col-span-2">
 													<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 block">
@@ -559,6 +547,19 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													/>
 												</div>
 											)}
+											<div className="z-30">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
+													Sexo
+												</label>
+												<SearchableSelect
+													options={sexoOptions}
+													value={sexo}
+													onChange={setSexo}
+													placeholder="Seleccionar"
+													classes={selectClasses}
+												/>
+											</div>
+											
 										</div>
 									</div>
 									<div className="flex flex-col gap-4 pb-4">
