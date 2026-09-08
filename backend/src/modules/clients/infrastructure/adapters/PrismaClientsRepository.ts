@@ -208,6 +208,8 @@ export class PrismaClientsRepository implements IClientsRepository {
 
 			// Extract persona update fields
 			const {
+				id_tipo_doc_identidad,
+				numero,
 				nombres,
 				apellidos,
 				fecha_nacimiento,
@@ -226,6 +228,12 @@ export class PrismaClientsRepository implements IClientsRepository {
 			} = data;
 
 			const updatePersonaPayload: Prisma.PersonasUpdateInput = {};
+
+			if (id_tipo_doc_identidad !== undefined)
+				updatePersonaPayload.tipo_doc = {
+					connect: { id: id_tipo_doc_identidad },
+				};
+			if (numero !== undefined) updatePersonaPayload.numero = numero;
 			if (nombres !== undefined) updatePersonaPayload.nombres = nombres;
 			if (apellidos !== undefined)
 				updatePersonaPayload.apellidos = apellidos;

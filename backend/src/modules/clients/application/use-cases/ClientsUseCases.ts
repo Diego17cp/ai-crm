@@ -171,7 +171,7 @@ export class ClientsUseCases {
 			if (phonesToValidate.length > 0) {
 				const phonesInUse = await this.repo.findPhonesInUse(
 					phonesToValidate,
-					id,
+					existing.persona.id,
 				);
 				if (phonesInUse.length > 0)
 					throw new AppError(
