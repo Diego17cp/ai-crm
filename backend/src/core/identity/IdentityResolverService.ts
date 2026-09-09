@@ -167,4 +167,15 @@ export class IdentityResolverService {
 		});
 		return persona;
 	}
+	async resolveOrCreateGuest(
+		data: { nombres?: string | undefined },
+		tx?: Prisma.TransactionClient,
+	): Promise<Personas> {
+		const client = tx || this.prisma;
+		return client.personas.create({
+			data: {
+				nombres: data.nombres ?? null,
+			},
+		});
+	}
 }

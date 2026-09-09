@@ -7,7 +7,7 @@ export class ConversationLeadResolver {
 		private identityResolver: IdentityResolverService,
 	) {}
 
-	async resolveForInterestSignal(conversacionId: string): Promise<{
+	async resolveForInterestSignal(conversacionId: string, nombre?: string): Promise<{
 		leadId: number;
 		esNuevo: boolean;
 	} | null> {
@@ -32,10 +32,11 @@ export class ConversationLeadResolver {
 				const persona =
 					await this.identityResolver.resolveOrCreateByPhone({
 						telefono: conversacion.session_id,
+						nombres: nombre
 					});
 				personaId = persona.id;
 			} else {
-				const anonima = await this.prisma.personas.create({ data: {} });
+				const anonima = await this.identityResolver.resolveOrCreateGuest({ nombres: nombre })
 				personaId = anonima.id;
 			}
 		}

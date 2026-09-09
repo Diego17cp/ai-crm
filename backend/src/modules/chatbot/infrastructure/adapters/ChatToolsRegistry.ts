@@ -70,6 +70,11 @@ export class ChatToolsRegistry implements IToolsRegistry {
 								description:
 									"El tamaño aproximado del lote en metros cuadrados, ej: 120. Úsalo para filtrar lotes disponibles que tengan un área similar a la indicada por el usuario. Si el usuario no da esta información, no apliques este filtro y muestra lotes de todos los tamaños.",
 							},
+							nombre_usuario: {
+								type: "string",
+								description:
+									"El nombre de pila del usuario, SOLO si ya te lo dio anteriormente en la conversación. NO se lo preguntes específicamente para esto — solo inclúyelo si ya lo tienes.",
+							},
 						},
 					},
 				},
@@ -259,7 +264,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			case "buscar_proyectos":
 				return await this.buscarProyectos();
 			case "buscar_lotes_disponibles":
-				return await this.buscarLotesDisponibles(args);
+				return await this.buscarLotesDisponibles(args, conversacionId);
 			case "calcular_financiamiento_lote":
 				return await this.calcularFinanciamientoLote(
 					args,
@@ -444,10 +449,14 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		};
 	}
 
-	private async buscarLotesDisponibles(args: {
-		nombre_proyecto?: string;
-		area_aproximada_m2?: number;
-	}) {
+	private async buscarLotesDisponibles(
+		args: {
+			nombre_proyecto?: string;
+			area_aproximada_m2?: number;
+			nombre_usuario?: string;
+		},
+		conversacionId?: string,
+	) {
 		let whereCondition: LotesWhereInput = { estado: "Disponible" };
 		if (args.nombre_proyecto)
 			whereCondition.manzana = {
@@ -494,6 +503,11 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				? { area_m2: "asc" }
 				: { precio_total: "asc" },
 		});
+		if (conversacionId)
+			await this.leadResolver.resolveForInterestSignal(
+				conversacionId,
+				args.nombre_usuario,
+			);
 		return lotes.map((lt) => {
 			const normalizedNumber = lt.numero_lote.replace(/^LT-/i, "");
 			const manzanaCode = lt.manzana?.codigo || "N/A";
@@ -903,8 +917,10 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				montoCuota = (precioLista - cuotaInicial) / numeroCuotas;
 				precioFinal = precioLista;
 			}
-			const requiereRevision = motivos.length > 0
-			const motivosRevisionTexto = requiereRevision ? motivos.join(", ") : null
+			const requiereRevision = motivos.length > 0;
+			const motivosRevisionTexto = requiereRevision
+				? motivos.join(", ")
+				: null;
 			if (!conversacionId)
 				return {
 					message:
