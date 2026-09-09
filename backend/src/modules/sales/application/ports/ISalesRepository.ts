@@ -38,6 +38,7 @@ export interface ISalesRepository {
 	findPaginated(query: GetSalesQueryDTO): Promise<PaginatedResult<any>>;
 	findById(id: number): Promise<any | null>;
 	createSaleWithQuotas(
+		tx: Prisma.TransactionClient | undefined,
 		data: Prisma.VentasCreateInput,
 		cuotas: Prisma.CuotasCreateManyVentaInput[],
 		loteId: number,

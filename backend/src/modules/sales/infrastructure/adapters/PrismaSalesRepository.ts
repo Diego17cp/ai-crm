@@ -124,7 +124,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 									nombres: true,
 									apellidos: true,
 									numero: true,
-									email: true
+									email: true,
 								},
 							},
 						},
@@ -133,7 +133,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 						select: {
 							nombres: true,
 							apellidos: true,
-						}
+						},
 					},
 					lote: {
 						include: {
@@ -217,21 +217,24 @@ export class PrismaSalesRepository implements ISalesRepository {
 	}
 
 	async createSaleWithQuotas(
+		tx: Prisma.TransactionClient | undefined,
 		createPayload: Prisma.VentasCreateInput,
 		cuotas: Prisma.CuotasCreateManyVentaInput[],
 		loteId: number,
 		clienteId: number,
 	) {
-		return this.prisma.$transaction(async (tx) => {
-			const res = await tx.lotes.updateMany({
+		const execute = async (prismaInstance: Prisma.TransactionClient) => {
+			const res = await prismaInstance.lotes.updateMany({
 				where: { id: loteId, estado: { not: EstadoLote.Vendido } },
 				data: { estado: EstadoLote.Vendido },
 			});
+
 			if (res.count === 0)
 				throw new Error(
 					"RACE_CONDITION: El lote ya fue reservado o vendido por otra transacción simultánea.",
 				);
-			return tx.ventas.create({
+
+			return prismaInstance.ventas.create({
 				data: {
 					...createPayload,
 					cuotas: {
@@ -239,7 +242,10 @@ export class PrismaSalesRepository implements ISalesRepository {
 					},
 				},
 			});
-		});
+		};
+
+		if (tx) return execute(tx);
+		return this.prisma.$transaction(async (newTx) => execute(newTx));
 	}
 
 	async payQuota(cuotaId: number, data: Prisma.CuotasUpdateInput) {

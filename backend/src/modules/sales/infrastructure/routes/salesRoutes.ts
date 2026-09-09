@@ -10,6 +10,8 @@ import { MetaWhatsappService } from "@/modules/chatbot/infrastructure/adapters/M
 import { ReminderSenderService } from "../../application/services/ReminderSenderService";
 import { PrismaClientsRepository } from "@/modules/clients/infrastructure/adapters/PrismaClientsRepository";
 import { PrismaLeadsRepository } from "@/modules/leads/infrastructure/adapters/PrismaLeadsRepository";
+import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
+import { MetricsService } from "@/core/crm/MetricsService";
 
 export function salesRoutes(): Router {
 	const router = Router();
@@ -29,6 +31,8 @@ export function salesRoutes(): Router {
 				`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`,
 			);
 	}
+	const metricsService = new MetricsService()
+	const leadTransitionService = new LeadTransitionService(metricsService)
 	const reminderSender = new ReminderSenderService(
 		whatsappService,
 		repository,
@@ -38,6 +42,8 @@ export function salesRoutes(): Router {
 		clientsRepo,
 		leadsRepo,
 		reminderSender,
+		leadTransitionService,
+		prisma
 	);
 	const controller = new SalesController(useCases);
 
