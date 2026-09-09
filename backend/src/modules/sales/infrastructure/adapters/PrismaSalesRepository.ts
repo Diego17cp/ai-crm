@@ -30,6 +30,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 			q,
 			fecha_inicio,
 			fecha_fin,
+			id_asesor,
 		} = query;
 		const skip = (page - 1) * limit;
 
@@ -37,6 +38,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 		if (estado_venta) where.estado = estado_venta;
 		if (estado_contrato) where.estado_contrato = estado_contrato;
 		if (tipo_pago) where.tipo_pago = tipo_pago;
+		if (id_asesor) where.id_asesor = id_asesor;
 
 		if (fecha_inicio && fecha_fin) {
 			where.fecha_venta = {
@@ -125,6 +127,12 @@ export class PrismaSalesRepository implements ISalesRepository {
 								},
 							},
 						},
+					},
+					asesor: {
+						select: {
+							nombres: true,
+							apellidos: true,
+						}
 					},
 					lote: {
 						include: {

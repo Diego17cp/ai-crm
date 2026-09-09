@@ -7,7 +7,8 @@ import {
 
 export interface CreateSaleDTO {
 	id_lote: number;
-	id_cliente: number;
+	id_cliente?: number;
+	id_lead?: number;
 	id_asesor: string;
 	fecha_venta?: Date | string;
 	monto_total: number;
@@ -34,6 +35,7 @@ export interface GetSalesQueryDTO {
 	q?: string;
 	fecha_inicio?: string;
 	fecha_fin?: string;
+	id_asesor?: string;
 }
 
 export interface GetCollectionsQueryDTO {

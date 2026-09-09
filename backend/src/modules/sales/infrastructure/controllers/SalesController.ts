@@ -64,9 +64,12 @@ export class SalesController {
 		}
 	};
 
-	create = async (req: Request, res: Response, next: NextFunction) => {
+	create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
-			const newSale = await this.useCases.createSale(req.body);
+			const newSale = await this.useCases.createSale({
+				...req.body,
+				id_asesor: req.user!.id,
+			});
 			res.status(201).json({
 				success: true,
 				message: "Venta procesada con éxito",
