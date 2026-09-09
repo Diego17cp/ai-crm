@@ -81,3 +81,9 @@ export interface UpdateLeadPayload extends Partial<
 		}[];
 	};
 }
+export type ManualStatus = "CALIFICADO" | "NEGOCIACION" | "PERDIDO";
+
+export interface UpdateLeadStatusPayload {
+	newState: ManualStatus;
+	motivo?: string;
+}

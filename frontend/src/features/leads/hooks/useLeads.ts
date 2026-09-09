@@ -5,6 +5,7 @@ import type {
 	CreateLeadPayload,
 	FiltersState,
 	UpdateLeadPayload,
+	UpdateLeadStatusPayload,
 } from "../types";
 import { leadsService } from "../service/leadsService";
 import { toast } from "sonner";
@@ -126,6 +127,21 @@ export const useLeads = () => {
 				toast.error(message);
 			},
 		});
+	
+	const useUpdateLeadStatusMutation = (id: number, data: UpdateLeadStatusPayload) => 
+		useMutation({
+			mutationFn: () => leadsService.updateStatus(id, data),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: ["leads"] });
+				toast.success("Lead actualizado exitosamente");
+			},
+			onError: (error: ApiError) => {
+				const message =
+					error.response?.data?.message ||
+					"Error al actualizar el lead";
+				toast.error(message);
+			},
+		});
 
 	return {
 		...query,
@@ -145,5 +161,6 @@ export const useLeads = () => {
 		useCreateLeadMutation,
 		useEditLeadMutation,
 		useDeleteLeadMutation,
+		useUpdateLeadStatusMutation,
 	};
 };

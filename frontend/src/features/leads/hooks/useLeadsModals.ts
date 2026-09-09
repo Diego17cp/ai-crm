@@ -5,7 +5,8 @@ export type LeadModalType =
 	| "none"
 	| "create_lead"
 	| "edit_lead"
-	| "delete_lead";
+	| "delete_lead"
+	| "change_status";
 
 export const useLeadModals = () => {
 	const [activeModal, setActiveModal] = useState<LeadModalType>("none");
