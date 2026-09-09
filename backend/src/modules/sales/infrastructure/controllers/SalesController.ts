@@ -16,12 +16,13 @@ export class SalesController {
 				q: req.query.q as string,
 				fecha_inicio: req.query.fecha_inicio as string,
 				fecha_fin: req.query.fecha_fin as string,
+				id_asesor: req.query.userId as string
 			});
 			res.status(200).json({
-                success: true,
-                data: result.data,
-                meta: result.meta,
-            });
+				success: true,
+				data: result.data,
+				meta: result.meta,
+			});
 		} catch (error) {
 			next(error);
 		}
@@ -29,12 +30,12 @@ export class SalesController {
 
 	getById = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-            const id = Number(req.params.id);
-            const sale = await this.useCases.getSaleById(id);
+			const id = Number(req.params.id);
+			const sale = await this.useCases.getSaleById(id);
 			res.status(200).json({
-                success: true,
-                data: sale,
-            });
+				success: true,
+				data: sale,
+			});
 		} catch (error) {
 			next(error);
 		}
@@ -96,10 +97,17 @@ export class SalesController {
 		}
 	};
 
-	sendDebtRemind = async (req: AuthRequest, res: Response, next: NextFunction) => {
+	sendDebtRemind = async (
+		req: AuthRequest,
+		res: Response,
+		next: NextFunction,
+	) => {
 		try {
 			const userId = req.user!.id;
-			await this.useCases.sendDebtRemind(Number(req.params.idCuota), userId);
+			await this.useCases.sendDebtRemind(
+				Number(req.params.idCuota),
+				userId,
+			);
 			res.status(200).json({
 				success: true,
 				message: "Recordatorio de deuda enviado",
