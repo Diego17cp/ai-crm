@@ -7,6 +7,7 @@ import {
 	FiAlertCircle,
 	FiCreditCard,
 	FiInfo,
+	FiTarget,
 } from "react-icons/fi";
 import { SearchableSelect as Select } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,8 @@ import type { ApiError } from "@/core/types";
 import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
 import { formatCurrency } from "../utils/salesFormatters";
 import { classes } from "@/shared/constants";
+import { CardCheckbox } from "@/shared/components/CardCheckbox";
+import { FaHandshake } from "react-icons/fa";
 
 const selectClasses = classes.searchableSelect;
 
@@ -46,13 +49,16 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 	);
 
 	const [fechaVenta, setFechaVenta] = useState("");
-	const [estadoContrato, setEstadoContrato] = useState<EstadoContrato>("FIRMADO");
+	const [estadoContrato, setEstadoContrato] =
+		useState<EstadoContrato>("FIRMADO");
 	const [tipoPago, setTipoPago] = useState<TipoPago>("CONTADO");
 
 	const [mesesGracia, setMesesGracia] = useState<number | "">("");
 	const [numCuotas, setNumCuotas] = useState<number | "">("");
 	const [diaPago, setDiaPago] = useState<number | "">("");
 	const [tasaInteres, setTasaInteres] = useState<number | "">("");
+
+	const [isNewLead, setIsNewLead] = useState(false);
 
 	const [error, setError] = useState<string | null>(null);
 	const { useCreateSaleMutation } = useSales();
@@ -89,7 +95,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		queryKey: ["lotes_manzana", idManzana, "disponibles"],
 		queryFn: async () => {
 			if (!idManzana) return [];
-			const res = await apiClient.get(`/lotes?id_manzana=${idManzana}&estado=Disponible&limit=50`);
+			const res = await apiClient.get(
+				`/lotes?id_manzana=${idManzana}&estado=Disponible&limit=50`,
+			);
 			return res.data.data;
 		},
 		enabled: Boolean(idManzana),
@@ -171,7 +179,8 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 	const createPayload = useMemo((): CreateSalePayload => {
 		const basePayload = {
 			id_lote: Number(idLote),
-			id_cliente: Number(selectedClientId),
+			id_cliente: !isNewLead ? Number(selectedClientId) : undefined,
+			id_lead: isNewLead ? Number(selectedClientId) : undefined,
 			monto_total: montoTotal,
 			tipo_pago: tipoPago,
 			estado_contrato: estadoContrato,
@@ -199,6 +208,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		numCuotas,
 		diaPago,
 		calculosCredito.cuotaInicial,
+		isNewLead
 	]);
 
 	const mutation = useCreateSaleMutation(createPayload);
@@ -209,12 +219,15 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		setError(null);
 
 		if (!idLote) return setError("Debes seleccionar un Lote disponible.");
-		if (!selectedClientId) return setError("Debes buscar y seleccionar un cliente.");
+		if (!selectedClientId)
+			return setError("Debes buscar y seleccionar un cliente.");
 		if (!fechaVenta) return setError("La fecha de venta es obligatoria.");
 
 		if (tipoPago === "CREDITO") {
-			if (!numCuotas || numCuotas <= 0) return setError("Especifica un número válido de cuotas.");
-			if (!diaPago || diaPago < 1 || diaPago > 28) return setError("El día de pago debe ser entre el 1 y el 28.");
+			if (!numCuotas || numCuotas <= 0)
+				return setError("Especifica un número válido de cuotas.");
+			if (!diaPago || diaPago < 1 || diaPago > 28)
+				return setError("El día de pago debe ser entre el 1 y el 28.");
 		}
 
 		try {
@@ -317,16 +330,20 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 											<div className="grid grid-cols-2 gap-3 relative">
 												<div className="z-50 col-span-2">
 													<Select
-														options={proyectoOptions}
+														options={
+															proyectoOptions
+														}
 														value={idProyecto}
 														onChange={(val) => {
-															setIdProyecto(String(val));
+															setIdProyecto(
+																String(val),
+															);
 															setIdEtapa("");
 															setIdManzana("");
 															setIdLote("");
 														}}
 														label="1. Proyecto"
-                                                        required
+														required
 														classes={selectClasses}
 													/>
 												</div>
@@ -335,12 +352,14 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														options={etapaOptions}
 														value={idEtapa}
 														onChange={(val) => {
-															setIdEtapa(String(val));
+															setIdEtapa(
+																String(val),
+															);
 															setIdManzana("");
 															setIdLote("");
 														}}
 														label="2. Etapa"
-                                                        required
+														required
 														classes={selectClasses}
 														disabled={!idProyecto}
 													/>
@@ -350,11 +369,13 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														options={manzanaOptions}
 														value={idManzana}
 														onChange={(val) => {
-															setIdManzana(String(val));
+															setIdManzana(
+																String(val),
+															);
 															setIdLote("");
 														}}
 														label="3. Mz"
-                                                        required
+														required
 														classes={selectClasses}
 														disabled={!idEtapa}
 													/>
@@ -363,9 +384,13 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 													<Select
 														options={loteOptions}
 														value={idLote}
-														onChange={(val) => setIdLote(String(val))}
+														onChange={(val) =>
+															setIdLote(
+																String(val),
+															)
+														}
 														label="4. Lote"
-                                                        required
+														required
 														classes={selectClasses}
 														disabled={!idManzana}
 													/>
@@ -381,7 +406,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 															Lote:
 														</span>
 														<span className="text-lg font-bold text-teal-800 dark:text-teal-400">
-															{formatCurrency(montoTotal)}
+															{formatCurrency(
+																montoTotal,
+															)}
 														</span>
 													</motion.div>
 												)}
@@ -391,39 +418,85 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 											<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2">
 												Comprador y Contrato
 											</h3>
-											<div className="flex flex-col gap-4 mt-0 md:mt-6.5">
-												<div className="z-10 focus-within:z-50">
-													<ClientSearchAutocomplete
-														selectedClientId={selectedClientId}
-														onSelectClient={setSelectedClientId}
+
+											{/* Tipo de comprador */}
+											<div className="flex flex-col gap-1.5">
+												<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+													Tipo de comprador
+												</label>
+
+												<div className="grid grid-cols-2 gap-2">
+													<CardCheckbox
+														value={!isNewLead}
+														onChange={() =>
+															setIsNewLead(false)
+														}
+														title="Cliente existente"
+														icon={FaHandshake}
+														className="p-3!"
+														compact
+													/>
+
+													<CardCheckbox
+														value={isNewLead}
+														onChange={() =>
+															setIsNewLead(true)
+														}
+														title="Nuevo Lead"
+														icon={FiTarget}
+														className="p-3!"
+														compact
 													/>
 												</div>
-												<div className="grid grid-cols-2 gap-3">
-													<div className="flex flex-col gap-1.5 z-40">
-														<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-															Estado Contrato
-														</label>
-														<Select
-															options={estadoContratoOptions}
-															value={estadoContrato}
-															onChange={(val) => setEstadoContrato(val as EstadoContrato)}
-															placeholder="Estado"
-															classes={selectClasses}
-														/>
-													</div>
-													<div className="flex flex-col gap-1.5 focus-within:z-30">
-														<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-															Fecha Venta
-                                                            <span className="text-red-500 ml-1">*</span>
-														</label>
-														<input
-															type="date"
-															value={fechaVenta}
-															onChange={(e) => setFechaVenta(e.target.value)}
-															disabled={isSubmitting}
-															className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
-														/>
-													</div>
+											</div>
+											<div className="z-10 focus-within:z-50">
+												<ClientSearchAutocomplete
+													selectedClientId={
+														selectedClientId
+													}
+													onSelectClient={
+														setSelectedClientId
+													}
+													isLead={isNewLead}
+												/>
+											</div>
+											<div className="grid grid-cols-2 gap-3">
+												<div className="flex flex-col gap-1.5 z-40">
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Estado del contrato
+													</label>
+													<Select
+														options={
+															estadoContratoOptions
+														}
+														value={estadoContrato}
+														onChange={(val) =>
+															setEstadoContrato(
+																val as EstadoContrato,
+															)
+														}
+														placeholder="Estado"
+														classes={selectClasses}
+													/>
+												</div>
+												<div className="flex flex-col gap-1.5">
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Fecha de venta
+														<span className="ml-1 text-red-500">
+															*
+														</span>
+													</label>
+													<input
+														type="date"
+														value={fechaVenta}
+														onChange={(e) =>
+															setFechaVenta(
+																e.target.value,
+															)
+														}
+														disabled={isSubmitting}
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
+													/>
 												</div>
 											</div>
 										</div>
@@ -435,7 +508,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 										</h3>
 										<div className="grid grid-cols-2 gap-4">
 											<div
-												onClick={() => setTipoPago("CONTADO")}
+												onClick={() =>
+													setTipoPago("CONTADO")
+												}
 												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CONTADO" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 shadow-sm shadow-teal-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-300"}`}
 											>
 												<div className="flex flex-col gap-1">
@@ -453,7 +528,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 											<div
 												onClick={() => {
 													setTipoPago("CREDITO");
-													setEstadoContrato("FIRMADO");
+													setEstadoContrato(
+														"FIRMADO",
+													);
 												}}
 												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CREDITO" ? "border-purple-500 bg-purple-50/50 dark:bg-purple-900/20 shadow-sm shadow-purple-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-purple-300"}`}
 											>
@@ -491,16 +568,28 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														<div className="flex flex-col gap-1.5 focus-within:z-10">
 															<label className="text-xs font-semibold text-gray-500">
 																Número Cuotas
-                                                                <span className="text-red-500 ml-1">*</span>
+																<span className="text-red-500 ml-1">
+																	*
+																</span>
 															</label>
 															<input
 																type="number"
 																min="1"
 																max="48"
 																placeholder="Ej: 24"
-																value={numCuotas}
-                                                                required
-																onChange={(e) => setNumCuotas(Number(e.target.value))}
+																value={
+																	numCuotas
+																}
+																required
+																onChange={(e) =>
+																	setNumCuotas(
+																		Number(
+																			e
+																				.target
+																				.value,
+																		),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
@@ -508,16 +597,26 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 															<label className="text-xs font-semibold text-gray-500">
 																Día del Mes a
 																Pagar
-                                                                <span className="text-red-500 ml-1">*</span>
+																<span className="text-red-500 ml-1">
+																	*
+																</span>
 															</label>
 															<input
 																type="number"
 																min="1"
 																max="28"
-                                                                required
+																required
 																placeholder="Ej: 15"
 																value={diaPago}
-																onChange={(e) => setDiaPago(Number(e.target.value))}
+																onChange={(e) =>
+																	setDiaPago(
+																		Number(
+																			e
+																				.target
+																				.value,
+																		),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
@@ -533,7 +632,15 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 																value={
 																	mesesGracia
 																}
-																onChange={(e) => setMesesGracia(Number(e.target.value))}
+																onChange={(e) =>
+																	setMesesGracia(
+																		Number(
+																			e
+																				.target
+																				.value,
+																		),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
@@ -548,7 +655,15 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 																value={
 																	tasaInteres
 																}
-																onChange={(e) => setTasaInteres(Number(e.target.value))}
+																onChange={(e) =>
+																	setTasaInteres(
+																		Number(
+																			e
+																				.target
+																				.value,
+																		),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
@@ -610,7 +725,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 																			Sugerida
 																		</span>
 																		<span className="text-xl font-bold text-gray-900 dark:text-white mt-1">
-																			{formatCurrency(calculosCredito.cuotaInicial)}
+																			{formatCurrency(
+																				calculosCredito.cuotaInicial,
+																			)}
 																		</span>
 																	</div>
 																	<div className="flex flex-col items-center">
@@ -619,7 +736,11 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 																			Calculada
 																		</span>
 																		<span className="text-xl font-bold text-gray-900 dark:text-white mt-1">
-																			{formatCurrency(Number(calculosCredito.mensualidadBackend))}
+																			{formatCurrency(
+																				Number(
+																					calculosCredito.mensualidadBackend,
+																				),
+																			)}
 																			/mes
 																		</span>
 																	</div>
