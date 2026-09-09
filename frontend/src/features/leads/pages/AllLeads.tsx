@@ -11,6 +11,9 @@ import { EditLeadModal } from "../components/EditLeadModal";
 import { CreateLeadModal } from "../components/CreateLeadModal";
 import { DeleteLeadModal } from "../components/DeleteLeadModal";
 import { classes, options } from "@/shared/constants";
+import { ChangeLeadStatusModal } from "../components/ChangeLeadStatusModal";
+import { useState } from "react";
+import type { ManualStatus } from "../types";
 
 const selectClasses = classes.searchableSelect;
 
@@ -39,6 +42,8 @@ export const AllLeads = () => {
 
 	const { openModal, closeModal, selectedLead, activeModal } =
 		useLeadModals();
+
+	const [targetStatus, setTargetStatus] = useState<ManualStatus | null>(null);
 
 	return (
 		<div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
@@ -189,6 +194,10 @@ export const AllLeads = () => {
 									onDelete={() =>
 										openModal("delete_lead", lead)
 									}
+									onChangeStatus={(status) => {
+										openModal("change_status", lead);
+										setTargetStatus(status);
+									}}
 								/>
 							))}
 						</AnimatePresence>
@@ -222,6 +231,12 @@ export const AllLeads = () => {
 				isOpen={activeModal === "delete_lead"}
 				onClose={closeModal}
 				lead={selectedLead}
+			/>
+			<ChangeLeadStatusModal
+				isOpen={activeModal === "change_status"}
+				onClose={closeModal}
+				lead={selectedLead}
+				targetStatus={targetStatus!}
 			/>
 		</div>
 	);
