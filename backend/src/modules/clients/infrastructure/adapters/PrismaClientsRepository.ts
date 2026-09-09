@@ -164,9 +164,8 @@ export class PrismaClientsRepository implements IClientsRepository {
 			.filter((numero): numero is string => numero !== null);
 	}
 
-	async create(data: CreateClientDTO) {
-		return this.prisma.$transaction(async (tx) => {
-			// Resolve persona first
+	async create(data: CreateClientDTO, tx?: Prisma.TransactionClient) {
+		const execute = async (prismaInstance: Prisma.TransactionClient) => {
 			const persona = await this.identityResolver.resolveIdentity(
 				{
 					id_tipo_doc: data.id_tipo_doc_identidad,
@@ -184,18 +183,18 @@ export class PrismaClientsRepository implements IClientsRepository {
 					id_ubigeo: data.id_ubigeo ?? null,
 					telefonos: data.telefonos ?? [],
 				},
-				tx,
+				prismaInstance,
 			);
-
-			// Create client
-			return tx.clientes.create({
+			return prismaInstance.clientes.create({
 				data: {
 					persona: { connect: { id: persona.id } },
 					...(data.solvencia ? { solvencia: data.solvencia } : {}),
 					...(data.actitud ? { actitud: data.actitud } : {}),
 				},
 			});
-		});
+		};
+		if (tx) return execute(tx);
+		return this.prisma.$transaction(async (newTx) => execute(newTx));
 	}
 
 	async update(id: number, data: UpdateClientDTO) {

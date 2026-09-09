@@ -1,6 +1,7 @@
 import {
 	Clientes,
 	Personas,
+	Prisma,
 	TelefonosPersona,
 	TipoDocIdentidad,
 	Ubigeos,
@@ -25,7 +26,7 @@ export interface IClientsRepository {
 		query: GetClientsQueryDTO,
 	): Promise<PaginatedClientsResult<ClientWithRelationsDTO>>;
 	findById(id: number): Promise<ClientWithRelationsDTO | null>;
-	create(data: CreateClientDTO): Promise<Clientes>;
+	create(data: CreateClientDTO, tx?: Prisma.TransactionClient): Promise<Clientes>;
 	update(id: number, data: UpdateClientDTO): Promise<Clientes>;
 	delete(id: number): Promise<Clientes>;
 	findByDocument(
