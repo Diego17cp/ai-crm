@@ -45,12 +45,12 @@ export const getEstadoCuotaColor = (estado: EstadoCuota) => {
 
 export const getEstadoContratoColor = (estado: EstadoContrato) => {
 	switch (estado) {
-		case "FIRMADO": return "bg-blue-100 text-blue-700";
-		case "ADENDA": return "bg-purple-100 text-purple-700";
-		case "ESCRITURA PUBLICA": return "bg-indigo-100 text-indigo-700";
-		case "POR RESOLVER": return "bg-red-100 text-red-700";
-		case "CESION CONTRACTUAL": return "bg-cyan-100 text-cyan-700";
-		default: return "bg-gray-100 text-gray-700";
+		case "FIRMADO": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800/50";
+		case "ADENDA": return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800/50";
+		case "ESCRITURA PUBLICA": return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/50";
+		case "POR RESOLVER": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800/50";
+		case "CESION CONTRACTUAL": return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800/50";
+		default: return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700";
 	}
 };
 

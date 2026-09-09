@@ -1,4 +1,4 @@
-import type { Telefono } from "@/features/leads/types";
+import type { Person, Telefono } from "@/core/types";
 import type { EstadoLote } from "@/features/lots/types";
 
 export type TipoPago = "CONTADO" | "CREDITO";
@@ -45,10 +45,13 @@ export interface Venta {
 	estado: EstadoVenta;
 	estado_contrato: EstadoContrato;
 	cliente: {
-		nombres: string;
-		apellidos: string;
-		numero: string; // Es el documento de identidad
-		email: string;
+		persona: {
+			nombres: string;
+			apellidos: string;
+			numero: string; // Es el documento de identidad
+			email: string;
+			telefonos: Telefono[]
+		};
 	};
 	lote: LoteVenta;
 	cuotas_pendientes: number;
@@ -76,11 +79,13 @@ export interface AllSalesFilters {
 	q?: string;
 	fecha_inicio?: string;
 	fecha_fin?: string;
+	userId?: string;
 }
 
 export interface CreateSalePayload {
 	id_lote: number;
-	id_cliente: number;
+	id_cliente?: number;
+	id_lead?: number;
 	fecha_venta?: string;
 	monto_total: number;
 	tipo_pago: TipoPago;
@@ -117,33 +122,23 @@ export interface VentaById {
 	estado: EstadoVenta;
 	estado_contrato: EstadoContrato;
 	cliente: {
-		nombres: string;
-		apellidos: string;
-		numero: string; // Es el documento de identidad
-		fecha_nacimiento: string;
-		sexo: string;
-		email: string;
-		es_peruano: boolean;
-		nacionalidad: string | null;
+		persona: Person
 	};
 	lote: LoteVenta;
-    cuotas: {
-        id: number;
-        numero_cuota: number;
-        monto_cuota: string;
-        fecha_vencimiento: string;
-        fecha_pago: string | null;
-        estado: EstadoCuota;
-        metodo_pago: string | null;
+	cuotas: {
+		id: number;
+		numero_cuota: number;
+		monto_cuota: string;
+		fecha_vencimiento: string;
+		fecha_pago: string | null;
+		estado: EstadoCuota;
+		metodo_pago: string | null;
 		notificaciones: Notificacion[];
-    }[];
+	}[];
 }
 export interface VentaByIdResponse {
-    success: boolean;
-    data: VentaById;
-}
-interface VentaWithClienteWithTelefonos extends Omit<Venta, 'cliente'> {
-	cliente: Venta['cliente'] & { telefonos: Telefono[] };
+	success: boolean;
+	data: VentaById;
 }
 export interface Cobro {
 	id: number;
@@ -154,7 +149,7 @@ export interface Cobro {
 	fecha_pago: string | null;
 	estado: EstadoCuota;
 	metodo_pago: MetodoPago | null;
-	venta: VentaWithClienteWithTelefonos;
+	venta: Venta;
 	dias_mora: number | null;
 	numero_de_notificaciones: number;
 }
@@ -168,7 +163,7 @@ export interface CobrosResponse {
 		totalPages: number;
 		hasNextPage: boolean;
 		hasPreviousPage: boolean;
-	}
+	};
 }
 export interface CollectionsBoardFilters {
 	page: number;
