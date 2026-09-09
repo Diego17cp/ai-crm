@@ -124,6 +124,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 									nombres: true,
 									apellidos: true,
 									numero: true,
+									email: true
 								},
 							},
 						},

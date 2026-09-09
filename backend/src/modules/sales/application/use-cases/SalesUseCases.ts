@@ -14,10 +14,14 @@ import {
 	Prisma,
 } from "generated/prisma/client";
 import { ReminderSenderService } from "../services/ReminderSenderService";
+import { IClientsRepository } from "@/modules/clients/application/ports/IClientsRepository";
+import { ILeadsRepository } from "@/modules/leads/application/ports/ILeadsRepository";
 
 export class SalesUseCases {
 	constructor(
 		private readonly repo: ISalesRepository,
+		private readonly clientRepo: IClientsRepository,
+		private readonly leadsRepo: ILeadsRepository,
 		private readonly reminderSender: ReminderSenderService,
 	) {}
 
@@ -62,9 +66,9 @@ export class SalesUseCases {
 	}
 
 	async createSale(data: CreateSaleDTO) {
-		if (!data.id_lote || !data.id_cliente || !data.monto_total)
+		if (!data.id_lote || !data.monto_total)
 			throw new AppError(
-				"Lote, Cliente y Monto total son obligatorios",
+				"Lote y Monto total son obligatorios",
 				400,
 			);
 		let cuotasToCreate: Prisma.CuotasCreateManyVentaInput[] = [];
@@ -111,6 +115,52 @@ export class SalesUseCases {
 			}
 		}
 
+		let idCliente = null;
+
+		const lead = data.id_lead
+			? await this.leadsRepo.findById(data.id_lead)
+			: null;
+		if (data.id_lead && !data.id_cliente) {
+			if (!lead) throw new AppError("Lead no encontrado", 404);
+			if (!lead.persona.id_tipo_doc) {
+				throw new AppError(
+					"El lead no tiene un tipo de documento de identidad asignado",
+					400,
+				);
+			}
+			if (!lead.persona.numero) {
+				throw new AppError(
+					"El lead no tiene un número de documento de identidad asignado",
+					400,
+				);
+			}
+			const cliente = await this.clientRepo.create({
+				id_tipo_doc_identidad: lead.persona.id_tipo_doc,
+				numero: lead.persona.numero,
+				nombres: lead.persona.nombres,
+				apellidos: lead.persona.apellidos,
+				fecha_nacimiento: lead.persona.fecha_nacimiento,
+				sexo: lead.persona.sexo,
+				estado_civil: lead.persona.estado_civil,
+				es_peruano: lead.persona.es_peruano,
+				nacionalidad: lead.persona.nacionalidad,
+				email: lead.persona.email,
+				ocupacion: lead.persona.ocupacion,
+				id_ubigeo: lead.persona.id_ubigeo,
+				telefonos: lead.persona.telefonos.map((t) => ({
+					numero: t.numero!,
+					tipo: t.tipo!,
+				})),
+			});
+			idCliente = cliente.id;
+		} else if (data.id_cliente) {
+			const cliente = await this.clientRepo.findById(data.id_cliente);
+			if (!cliente) throw new AppError("Cliente no encontrado", 404);
+			idCliente = cliente.id;
+		} else {
+			throw new AppError("Cliente no encontrado", 404);
+		}
+
 		const salePayload: Prisma.VentasCreateInput = {
 			fecha_venta: data.fecha_venta
 				? new Date(data.fecha_venta)
@@ -126,7 +176,8 @@ export class SalesUseCases {
 			estado: !isCredito ? EstadoVenta.FINALIZADA : EstadoVenta.PENDIENTE,
 			estado_contrato: data.estado_contrato || EstadoContrato.FIRMADO,
 			lote: { connect: { id: data.id_lote } },
-			cliente: { connect: { id: data.id_cliente } },
+			cliente: { connect: { id: idCliente } },
+			lead: data.id_lead ? { connect: { id: data.id_lead } } : undefined,
 			asesor: { connect: { id: data.id_asesor } },
 		};
 
@@ -135,7 +186,7 @@ export class SalesUseCases {
 				salePayload,
 				cuotasToCreate,
 				data.id_lote,
-				data.id_cliente,
+				idCliente,
 			);
 			return newSale;
 		} catch (error: any) {
