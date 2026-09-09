@@ -10,3 +10,5 @@ export const LEAD_TRANSITIONS: Record<EstadoLead, EstadoLead[]> = {
 	GANADO: [],
 	PERDIDO: [],
 };
+
+export const ALLOWED_MANUAL_TRANSITIONS: EstadoLead[] = ["CALIFICADO", "NEGOCIACION", "PERDIDO"];

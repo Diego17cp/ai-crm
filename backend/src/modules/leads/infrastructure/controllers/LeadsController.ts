@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { LeadsUseCases } from "../../application/use-cases/LeadsUseCases";
 import { EstadoCivil, SexoPersona } from "generated/prisma/client";
+import { AuthRequest } from "@/app/middlewares/authGuard";
 
 export class LeadsController {
 	constructor(private readonly leadsUseCases: LeadsUseCases) {}
@@ -73,6 +74,26 @@ export class LeadsController {
 			const id = Number(req.params.id);
 			const lead = await this.leadsUseCases.deleteLead(id);
 			res.status(200).json({ success: true, data: lead });
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	updateState = async (req: AuthRequest, res: Response, next: NextFunction) => {
+		try {
+			const { leadId } = req.params
+			const { newState, motivo } = req.body
+			const userId = req.user?.id as string
+			const result = await this.leadsUseCases.updateManualState(
+				Number(leadId),
+				newState,
+				userId,
+				motivo,
+			);
+			res.status(200).json({
+				success: true,
+				data: result,
+			});
 		} catch (error) {
 			next(error);
 		}

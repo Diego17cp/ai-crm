@@ -1,3 +1,4 @@
+import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
 import {
 	CreateLeadDTO,
 	GetLeadsQueryDTO,
@@ -5,6 +6,9 @@ import {
 } from "../../domain/dtos";
 import { ILeadsRepository } from "../ports/ILeadsRepository";
 import { AppError } from "@/core/errors/AppError";
+import { EstadoLead } from "generated/prisma/enums";
+import { ALLOWED_MANUAL_TRANSITIONS } from "@/core/crm/lead-transitions";
+import { PrismaClient } from "generated/prisma/client";
 
 const parseNullableString = (value?: string | null): string | null => {
 	if (!value) return null;
@@ -13,7 +17,11 @@ const parseNullableString = (value?: string | null): string | null => {
 };
 
 export class LeadsUseCases {
-	constructor(private readonly repo: ILeadsRepository) {}
+	constructor(
+		private readonly repo: ILeadsRepository,
+		private leadTransitionService: LeadTransitionService,
+		private prisma: PrismaClient,
+	) {}
 
 	async getAllLeads(query: GetLeadsQueryDTO) {
 		return this.repo.findPaginated(query);
@@ -212,5 +220,41 @@ export class LeadsUseCases {
 				409,
 			);
 		return this.repo.delete(id);
+	}
+
+	async updateManualState(
+		leadId: number,
+		newState: EstadoLead,
+		userId: string,
+		motivo?: string,
+	) {
+		if (isNaN(leadId) || leadId <= 0)
+			throw new AppError("ID de Lead inválido", 400);
+		if (!userId || userId.trim() === "")
+			throw new AppError("ID de usuario es requerido", 400);
+		if (!ALLOWED_MANUAL_TRANSITIONS.includes(newState))
+			throw new AppError(
+				`El estado ${newState} no se puede asignar manualmente. Solo se dispara automáticamente por el sistema.`,
+				400,
+			);
+		if (newState === "PERDIDO" && (!motivo || motivo.trim() === ""))
+			throw new AppError("El motivo de pérdida es obligatorio", 400);
+
+		await this.prisma.$transaction(async (tx) => {
+			await this.leadTransitionService.transition({
+				leadId,
+				nuevoEstado: newState,
+				idUsuario: userId,
+				motivo,
+				tx,
+			});
+			if (newState === "PERDIDO")
+				await tx.leads.update({
+					where: { id: leadId },
+					data: {
+						motivo_perdida: motivo ?? null,
+					},
+				});
+		});
 	}
 }
