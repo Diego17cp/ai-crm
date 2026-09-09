@@ -54,6 +54,11 @@ export class PrismaChatsRepository implements IChatsRepository {
 							apellidos: true,
 						},
 					},
+					lead: {
+						select: {
+							id: true,
+						},
+					},
 					asesor: {
 						select: {
 							id: true,
@@ -84,6 +89,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 			last_message_at: chat.mensajes[0]?.created_at || null,
 			estado: chat.estado,
 			canal: chat.canal,
+			lead: chat.lead,
 			session_id: chat.session_id,
 		}));
 		data.sort(
@@ -127,6 +133,11 @@ export class PrismaChatsRepository implements IChatsRepository {
 						},
 					},
 				},
+				lead: {
+					select: {
+						id: true,
+					}
+				},
 				mensajes: {
 					orderBy: { created_at: "asc" },
 					select: {
@@ -157,6 +168,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 			id: chat.id,
 			cliente: chat.persona,
 			asesor: chat.asesor,
+			lead: chat.lead,
 			created_at: chat.created_at,
 			estado: chat.estado,
 			canal: chat.canal,

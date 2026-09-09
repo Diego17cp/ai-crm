@@ -1,77 +1,89 @@
 import { ToolAttachment } from "@/core/chat/ToolAttachment";
-import { CanalContacto, EstadoChat, TipoEventoConversacion, TipoRemitente } from "generated/prisma/enums";
+import {
+	CanalContacto,
+	EstadoChat,
+	TipoEventoConversacion,
+	TipoRemitente,
+} from "generated/prisma/enums";
 
 export interface ChatMessageDTO {
-    id: number;
-    usuario: {
-        id: string;
-        nombres: string;
-        apellidos: string;
-        rol: {
-            id: number;
-            nombre: string;
-        }
-    } | null;
-    remitente: TipoRemitente | null;
-    created_at: Date;
-    contenido: string | null;
-    adjunto?: ToolAttachment[] | null
-};
+	id: number;
+	usuario: {
+		id: string;
+		nombres: string;
+		apellidos: string;
+		rol: {
+			id: number;
+			nombre: string;
+		};
+	} | null;
+	remitente: TipoRemitente | null;
+	created_at: Date;
+	contenido: string | null;
+	adjunto?: ToolAttachment[] | null;
+}
 export interface ChatDTO {
-    id: string;
-    session_id: string | null;
-    cliente: {
-        id: number;
-        nombres: string | null;
-        apellidos: string | null;
-    } | null;
-    asesor: {
-        id: string;
-        nombres: string | null;
-        apellidos: string | null;
-        rol: {
-            id: number;
-            nombre: string;
-        }
-    } | null;
-    mensajes: ChatMessageDTO[];
-    created_at: Date;
-    last_message_at: Date | null;
-    estado: EstadoChat;
-    canal: CanalContacto | null;
-    adjunto?: ToolAttachment[] | null
+	id: string;
+	session_id: string | null;
+	cliente: {
+		id: number;
+		nombres: string | null;
+		apellidos: string | null;
+	} | null;
+	asesor: {
+		id: string;
+		nombres: string | null;
+		apellidos: string | null;
+		rol: {
+			id: number;
+			nombre: string;
+		};
+	} | null;
+	mensajes: ChatMessageDTO[];
+	created_at: Date;
+	last_message_at: Date | null;
+	estado: EstadoChat;
+	canal: CanalContacto | null;
+	lead: {
+		id: number;
+	} | null;
+	adjunto?: ToolAttachment[] | null;
 }
 export interface GetChatsQueryDTO {
-    q?: string | undefined;
-    estado?: EstadoChat | undefined;
-    canal?: CanalContacto | undefined;
-    id_asesor?: string | undefined;
-    page: number;
-    limit: number;
+	q?: string | undefined;
+	estado?: EstadoChat | undefined;
+	canal?: CanalContacto | undefined;
+	id_asesor?: string | undefined;
+	page: number;
+	limit: number;
 }
 export interface PaginatedChatResults<T> {
-    data: T[];
-    meta: {
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-    }
+	data: T[];
+	meta: {
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	};
 }
 export interface LiveChatQueueItemDTO {
-    id: string;
-    nombre: string;
-    canal: CanalContacto | null;
-    lastMessage: string | null;
-    createdAt: Date;
+	id: string;
+	nombre: string;
+	canal: CanalContacto | null;
+	lastMessage: string | null;
+	createdAt: Date;
 }
 
 export interface EventDTO {
 	id: number;
 	tipo: TipoEventoConversacion;
-	usuario: { id: string; nombres: string | null; apellidos: string | null } | null;
+	usuario: {
+		id: string;
+		nombres: string | null;
+		apellidos: string | null;
+	} | null;
 	metadata: Record<string, unknown> | null;
 	created_at: Date;
 }

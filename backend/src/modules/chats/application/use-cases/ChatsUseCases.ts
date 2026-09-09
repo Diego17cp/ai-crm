@@ -2,9 +2,15 @@ import { AppError } from "@/core/errors/AppError";
 import { GetChatsQueryDTO } from "../../domain/dtos";
 import { IChatsRepository } from "../ports/IChatsRepository";
 import { EstadoChat } from "generated/prisma/enums";
+import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
+import { PrismaClient } from "generated/prisma/client";
 
 export class ChatUseCases {
-	constructor(private chatsRepository: IChatsRepository) {}
+	constructor(
+		private chatsRepository: IChatsRepository,
+		private leadTransitionService: LeadTransitionService,
+		private prisma: PrismaClient,
+	) {}
 	async getChats(query: GetChatsQueryDTO) {
 		return this.chatsRepository.findChats(query);
 	}
@@ -72,6 +78,7 @@ export class ChatUseCases {
 				content,
 				senderRole,
 			);
+			if (senderRole === "ASESOR") await this.tryTransitionToContacted(chatId)
 			return message;
 		} catch (error: any) {
 			throw new AppError(
@@ -79,6 +86,24 @@ export class ChatUseCases {
 				500,
 			);
 		}
+	}
+	private async tryTransitionToContacted(chatId: string) {
+		const chat = await this.chatsRepository.findChatById(chatId)
+		if (!chat?.lead?.id) return
+		const lead = await this.prisma.leads.findUnique({
+			where: { id: chat.lead.id },
+			select: { estado: true }
+		})
+		if (lead?.estado !== "NUEVO") return
+		await this.prisma.$transaction(tx => 
+			this.leadTransitionService.transition({
+				leadId: chat.lead?.id!,
+				nuevoEstado: "CONTACTADO",
+				idUsuario: chat.asesor?.id ?? undefined,
+				motivo: "Primer mensaje del asesor en el chat en vivo",
+				tx
+			})
+		)
 	}
 	async updateChatStatus(
 		chatId: string,

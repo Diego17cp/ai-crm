@@ -1,5 +1,7 @@
 import { env } from "@/config";
+import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
 import { MetricsService } from "@/core/crm/MetricsService";
+import { IdentityResolverService } from "@/core/identity/IdentityResolverService";
 import { prisma } from "@/infrastructure/database/prismaClient";
 import { DocumentDeliveryService } from "@/infrastructure/documents/DocumentDeliveryService";
 import { PdfKitQuotePdfService } from "@/infrastructure/pdf/PdfKitQuotePdfService";
@@ -44,8 +46,11 @@ export const startWebsocket = (server: Server) => {
 				`[Websockets] Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`,
 			);
 	}
+	const metricsService = new MetricsService()
+	const leadTransitionService = new LeadTransitionService(metricsService)
+	const identityResolverService = new IdentityResolverService(prisma)
 	const chatsRepo = new PrismaChatsRepository(prisma);
-	const chatsUseCase = new ChatUseCases(chatsRepo);
+	const chatsUseCase = new ChatUseCases(chatsRepo, leadTransitionService, prisma);
 	const socketController = new SocketChatController(
 		ioInstance,
 		chatsUseCase,
@@ -55,7 +60,6 @@ export const startWebsocket = (server: Server) => {
 	const repo = new PrismaQuoteRepository(prisma);
 	const chatbotRepo = new PrismaChatbotRepository(prisma);
 	const pdfService = new PdfKitQuotePdfService();
-	const metrics = new MetricsService();
 	const notifier = new SocketEventNotifier();
 	const deliver = new DocumentDeliveryService(prisma, whatsappService);
 	const quoteUseCases = new QuoteUseCases(
@@ -64,8 +68,10 @@ export const startWebsocket = (server: Server) => {
 		pdfService,
 		deliver,
 		chatbotRepo,
-		metrics,
+		metricsService,
 		notifier,
+		identityResolverService,
+		whatsappService
 	);
 	const socketQuotesController = new SocketQuotesController(
 		ioInstance,
