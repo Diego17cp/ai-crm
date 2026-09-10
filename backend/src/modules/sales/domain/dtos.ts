@@ -23,7 +23,7 @@ export interface CreateSaleDTO {
 
 export interface PayQuotaDTO {
 	metodo_pago: MetodoPago;
-	// TODO: recibir comprobante fisico (File) para generar URL s3/local
+	comprobante_url?: string;
 }
 
 export interface GetSalesQueryDTO {

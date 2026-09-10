@@ -229,12 +229,10 @@ export class SalesUseCases {
 		if (!data.metodo_pago)
 			throw new AppError("Método de pago requerido", 400);
 
-		const comprobanteUrlTest = "url_pendiente_upload.jpg";
-
 		const updatePayload: Prisma.CuotasUpdateInput = {
 			estado: EstadoCuota.PAGADO,
 			fecha_pago: new Date(),
-			comprobante_url: comprobanteUrlTest,
+			comprobante_url: data.comprobante_url ?? null,
 			metodo_pago: data.metodo_pago,
 		};
 

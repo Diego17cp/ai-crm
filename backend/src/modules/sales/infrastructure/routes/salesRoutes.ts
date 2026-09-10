@@ -12,6 +12,7 @@ import { PrismaClientsRepository } from "@/modules/clients/infrastructure/adapte
 import { PrismaLeadsRepository } from "@/modules/leads/infrastructure/adapters/PrismaLeadsRepository";
 import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
 import { MetricsService } from "@/core/crm/MetricsService";
+import { uploadComprobanteMiddleware } from "@/app/middlewares/uploadComprobanteMiddleware";
 
 export function salesRoutes(): Router {
 	const router = Router();
@@ -31,8 +32,8 @@ export function salesRoutes(): Router {
 				`Proveedor de WhatsApp no soportado: ${env.WHATSAPP_PROVIDER}`,
 			);
 	}
-	const metricsService = new MetricsService()
-	const leadTransitionService = new LeadTransitionService(metricsService)
+	const metricsService = new MetricsService();
+	const leadTransitionService = new LeadTransitionService(metricsService);
 	const reminderSender = new ReminderSenderService(
 		whatsappService,
 		repository,
@@ -43,7 +44,7 @@ export function salesRoutes(): Router {
 		leadsRepo,
 		reminderSender,
 		leadTransitionService,
-		prisma
+		prisma,
 	);
 	const controller = new SalesController(useCases);
 
@@ -51,7 +52,12 @@ export function salesRoutes(): Router {
 	router.get("/", authGuard, controller.getAll);
 	router.get("/:id", authGuard, controller.getById);
 	router.post("/", authGuard, controller.create);
-	router.patch("/cuotas/:idCuota/pay", authGuard, controller.payQuota);
+	router.patch(
+		"/cuotas/:idCuota/pay",
+		authGuard,
+		uploadComprobanteMiddleware.single("comprobante"),
+		controller.payQuota,
+	);
 	router.post(
 		"/cuotas/:idCuota/recordatorios",
 		authGuard,

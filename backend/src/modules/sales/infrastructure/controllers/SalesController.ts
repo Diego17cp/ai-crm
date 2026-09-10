@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { SalesUseCases } from "../../application/use-cases/SalesUseCases";
 import { AuthRequest } from "@/app/middlewares/authGuard";
+import { env } from "@/config";
 
 export class SalesController {
 	constructor(private readonly useCases: SalesUseCases) {}
@@ -16,7 +17,7 @@ export class SalesController {
 				q: req.query.q as string,
 				fecha_inicio: req.query.fecha_inicio as string,
 				fecha_fin: req.query.fecha_fin as string,
-				id_asesor: req.query.userId as string
+				id_asesor: req.query.userId as string,
 			});
 			res.status(200).json({
 				success: true,
@@ -83,9 +84,12 @@ export class SalesController {
 
 	payQuota = async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			const comprobanteUrl = req.file
+				? `${env.API_URL}/uploads/comprobantes/${req.file.filename}`
+				: undefined;
 			const paidQuota = await this.useCases.payQuota(
 				Number(req.params.idCuota),
-				req.body,
+				{ ...req.body, comprobante_url: comprobanteUrl },
 			);
 			res.status(200).json({
 				success: true,
