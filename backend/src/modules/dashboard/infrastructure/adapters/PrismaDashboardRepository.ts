@@ -5,10 +5,23 @@ import { DashboardStats, AppointmentEvent } from "../../domain/Dashboard";
 export class PrismaDashboardRepository implements IDashboardRepository {
 	constructor(private readonly prisma: PrismaClient) {}
 
-	async getStats(): Promise<DashboardStats> {
+	async getStats(idAsesor?: string): Promise<DashboardStats> {
 		const [leads, clients, soldLots, availableLots] = await Promise.all([
-			this.prisma.leads.count(),
-			this.prisma.clientes.count(),
+			this.prisma.leads.count({
+				where: {
+					estado: { notIn: ["GANADO", "PERDIDO"] },
+					...(idAsesor ? { id_asesor: idAsesor } : {}),
+				},
+			}),
+			idAsesor
+				? this.prisma.ventas
+						.findMany({
+							where: { id_asesor: idAsesor },
+							select: { id_cliente: true },
+							distinct: ["id_cliente"],
+						})
+						.then((v) => v.length)
+				: this.prisma.clientes.count(),
 			this.prisma.lotes.count({ where: { estado: "Vendido" } }),
 			this.prisma.lotes.count({ where: { estado: "Disponible" } }),
 		]);
@@ -16,7 +29,7 @@ export class PrismaDashboardRepository implements IDashboardRepository {
 		return { leads, clients, soldLots, availableLots };
 	}
 
-	async getRecentEvents(): Promise<AppointmentEvent[]> {
+	async getRecentEvents(idAsesor?: string): Promise<AppointmentEvent[]> {
 		const citas = await this.prisma.citas.findMany({
 			include: {
 				persona: {
@@ -32,6 +45,7 @@ export class PrismaDashboardRepository implements IDashboardRepository {
 			},
 			where: {
 				estado_cita: { in: ["PROGRAMADA", "ATENDIDA"] },
+				...(idAsesor ? { id_usuario_responsable: idAsesor } : {}),
 			},
 			take: 20,
 			orderBy: { fecha_cita: "asc" },
@@ -45,9 +59,13 @@ export class PrismaDashboardRepository implements IDashboardRepository {
 					).substring(0, 8)
 				: "10:00:00";
 
+			const nombreCliente = cita.persona.nombres
+				? `${cita.persona.nombres} ${cita.persona.apellidos ?? ""}`.trim()
+				: cita.persona.numero || "Cliente anónimo";
+
 			return {
 				id: cita.id.toString(),
-				title: `Cita c/ ${cita.persona.nombres || ""} ${cita.persona.apellidos || cita.persona.numero} - Proyecto ${cita.proyecto.nombre}`,
+				title: `Cita c/ ${nombreCliente} - Proyecto ${cita.proyecto.nombre}`,
 				start: `${dateStr}T${startTime}.000Z`,
 				allDay: !cita.hora_cita,
 				backgroundColor:
