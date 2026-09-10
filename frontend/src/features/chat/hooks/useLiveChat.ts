@@ -11,16 +11,18 @@ import type { ChatStatus } from "../types";
 import { chatsService } from "../service/chatsService";
 import type { ApiError } from "@/core/types";
 
-export const useLiveChat = () => {
+export const useLiveChat = (selectedChatIdRef?: React.RefObject<string | null>) => {
 	const { user } = useAuthStore();
 	const socket = useRef<Socket | null>(null);
 	const {
+		activeChats,
 		setInitialQueue,
 		setInitialActiveChats,
 		addChatToQueue,
 		removeChatFromQueue,
 		moveChatToActive,
 		updateChatLastMessage,
+		markAsUnread
 	} = useLiveChatStore();
 	const queryClient = useQueryClient();
 	const { isLoading: isLoadingQueue } = useQuery({
@@ -47,6 +49,21 @@ export const useLiveChat = () => {
 			return data;
 		},
 	});
+	useEffect(() => {
+		if (!socket.current) return;
+		const joinRooms = () => {
+			activeChats.forEach((chat) => {
+				socket.current?.emit("client:JOIN_CHAT_ROOM", { chatId: chat.id });
+			});
+		};
+		if (socket.current.connected) {
+			joinRooms();
+		}
+		socket.current.on("connect", joinRooms);
+		return () => {
+			socket.current?.off("connect", joinRooms);
+		};
+	}, [activeChats]);
 	const useUpdateChatStatusMutation = (
 		chatId: string,
 		newState: ChatStatus,
@@ -133,8 +150,11 @@ export const useLiveChat = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["chat", payload.chatId],
 			});
-			if (payload.role === "cliente") {
+			if (payload.role.toLowerCase() === "cliente") {
 				updateChatLastMessage(payload.chatId, payload.content);
+				if (payload.chatId !== selectedChatIdRef?.current) {
+					markAsUnread(payload.chatId);
+				}
 				toast("Nuevo mensaje", {
 					description: payload.content,
 					duration: 5000,
@@ -169,7 +189,9 @@ export const useLiveChat = () => {
 		moveChatToActive,
 		updateChatLastMessage,
 		user,
-		queryClient
+		queryClient,
+		markAsUnread,
+		selectedChatIdRef
 	]);
 	const handleTakeChat = (chatId: string) => {
 		if (!user) {
@@ -197,5 +219,6 @@ export const useLiveChat = () => {
 		handleTakeChat,
 		handleSendMessage,
 		useUpdateChatStatusMutation,
+		selectedChatIdRef
 	};
 };
