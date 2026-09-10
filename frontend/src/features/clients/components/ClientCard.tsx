@@ -361,7 +361,7 @@ export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
 									client.solvencia,
 								)}`}
 							>
-								{client.solvencia.replace("_", " ") ??
+								{client.solvencia?.replace("_", " ") ??
 									"No evaluada"}
 							</p>
 						</div>
