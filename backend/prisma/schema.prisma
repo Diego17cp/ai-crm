@@ -687,10 +687,12 @@ model MetricasAsesorDiarias {
   clientes_atendidos        Int      @default(0)
   tiempo_respuesta_prom_seg Int?
   puntuacion_atencion_prom  Decimal? @db.Decimal(3, 2)
+  respuestas_contadas       Int      @default(0)
+  evaluaciones_contadas     Int      @default(0)
 
   citas_agendadas        Int @default(0)
-	citas_atendidas        Int @default(0)
-	cotizaciones_generadas Int @default(0)
+  citas_atendidas        Int @default(0)
+  cotizaciones_generadas Int @default(0)
 
   ventas_cerradas Int     @default(0)
   monto_vendido   Decimal @default(0) @db.Decimal(12, 2)
