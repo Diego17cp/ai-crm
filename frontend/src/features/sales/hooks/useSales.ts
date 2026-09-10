@@ -125,9 +125,10 @@ export const useSales = () => {
 			queryFn: () => salesService.findById(id),
 			enabled: Boolean(id),
 		});
-	const usePayQuotaMutation = (id: number, metodoPago: MetodoPago) =>
+	const usePayQuotaMutation = (id: number) =>
 		useMutation({
-			mutationFn: () => salesService.payQuota(id, metodoPago),
+			mutationFn: (data: { metodoPago: MetodoPago; comprobante: File }) =>
+				salesService.payQuota(id, data.metodoPago, data.comprobante),
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: ["venta"] });
 				queryClient.invalidateQueries({ queryKey: ["cobranzas"] });

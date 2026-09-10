@@ -108,6 +108,17 @@ export interface Notificacion {
 	} | null;
 }
 
+export interface Cuota {
+	id: number;
+	numero_cuota: number;
+	monto_cuota: string;
+	fecha_vencimiento: string;
+	fecha_pago: string | null;
+	estado: EstadoCuota;
+	metodo_pago: MetodoPago;
+	notificaciones: Notificacion[];
+	comprobante_url: string | null
+}
 export interface VentaById {
 	id: number;
 	fecha_venta: string;
@@ -125,16 +136,7 @@ export interface VentaById {
 		persona: Person
 	};
 	lote: LoteVenta;
-	cuotas: {
-		id: number;
-		numero_cuota: number;
-		monto_cuota: string;
-		fecha_vencimiento: string;
-		fecha_pago: string | null;
-		estado: EstadoCuota;
-		metodo_pago: string | null;
-		notificaciones: Notificacion[];
-	}[];
+	cuotas: Cuota[];
 }
 export interface VentaByIdResponse {
 	success: boolean;
