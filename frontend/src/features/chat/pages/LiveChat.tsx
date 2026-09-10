@@ -1,36 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LiveSidebar } from "../components/live/LiveSidebar";
 import { LiveChatPanel } from "../components/live/LiveChatPanel";
 import { useLiveChat } from "../hooks/useLiveChat";
 import { useLiveChatStore } from "../store/useLiveChatStore";
 
 export const LiveChat = () => {
-	const { isLoadingItems, handleTakeChat, handleSendMessage } = useLiveChat();
 	const [activeTab, setActiveTab] = useState<"queue" | "active">("queue");
 	const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
-	const pendingQueue = useLiveChatStore((state) => state.queueQueue);
-	const myChats = useLiveChatStore((state) => state.activeChats);
-	const isQueue = pendingQueue.some((q) => q.id === selectedChatId);
-	const isMine = myChats.some((q) => q.id === selectedChatId);
+	const selectedChatIdRef = useRef<string | null>(null);
 
 	useEffect(() => {
-		if (selectedChatId !== null && isMine && activeTab === "queue") {
-			setActiveTab("active");
+		selectedChatIdRef.current = selectedChatId;
+		if (selectedChatId) {
+			useLiveChatStore.getState().markAsRead(selectedChatId);
 		}
-	}, [selectedChatId, isMine, activeTab]);
+	}, [selectedChatId]);
 
-	useEffect(() => {
-		if (selectedChatId !== null && !isQueue && !isMine) {
-			setSelectedChatId(null);
-		}
-	}, [selectedChatId, isQueue, isMine]);
+	const { isLoadingItems, handleTakeChat, handleSendMessage, useUpdateChatStatusMutation } =
+		useLiveChat(selectedChatIdRef);
+
+	const reassignMutation = useUpdateChatStatusMutation(selectedChatId || "", "BOT")
+
+	const handleTabChange = (tab: "queue" | "active") => {
+		setSelectedChatId(null);
+		setActiveTab(tab);
+	};
 
 	return (
 		<div className="flex h-[calc(100vh-115px)] w-full mb-0 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
 			<LiveSidebar
 				activeTab={activeTab}
-				setActiveTab={setActiveTab}
+				setActiveTab={handleTabChange}
 				selectedChatId={selectedChatId}
 				setSelectedChatId={setSelectedChatId}
 				isLoading={isLoadingItems}
@@ -41,6 +42,11 @@ export const LiveChat = () => {
 				onTakeChat={handleTakeChat}
 				onSendMessage={handleSendMessage}
 				onCloseChat={() => setSelectedChatId(null)}
+				onReassignBot={() => {
+					reassignMutation.mutate(undefined, {
+						onSuccess: () => setSelectedChatId(null)
+					})
+				}}
 			/>
 		</div>
 	);

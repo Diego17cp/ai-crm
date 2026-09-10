@@ -4,7 +4,6 @@ import { useChats } from "../../hooks/useChats";
 import { getCanalIcon, getRelativeWaitTime } from "../../utils/chatFormatters";
 import { ErrorState } from "@/shared/components";
 import { useEffect, useRef, useState } from "react";
-import { useLiveChat } from "../../hooks/useLiveChat";
 import ReactMarkdown from "react-markdown";
 import { AttachmentCard } from "../AttachmentCard";
 
@@ -14,6 +13,7 @@ interface Props {
 	onTakeChat: (chatId: string) => void;
 	onSendMessage: (chatId: string, message: string) => void;
 	onCloseChat: () => void;
+	onReassignBot?: (chatId: string) => void;
 }
 
 export const LiveChatPanel = ({
@@ -22,10 +22,9 @@ export const LiveChatPanel = ({
 	onTakeChat,
 	onSendMessage,
 	onCloseChat,
+	onReassignBot,
 }: Props) => {
 	const { useChatByIdQuery } = useChats();
-	const { useUpdateChatStatusMutation } = useLiveChat();
-	const mutation = useUpdateChatStatusMutation(chatId || "", "BOT");
 	const { data, isLoading, isError, error, refetch } = useChatByIdQuery(
 		chatId || "",
 	);
@@ -125,11 +124,11 @@ export const LiveChatPanel = ({
 				{!isQueue && (
 					<button
 						className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium transition-colors"
-						onClick={() =>
-							mutation.mutate(undefined, {
-								onSuccess: () => onCloseChat(),
-							})
-						}
+						onClick={() => {
+							if (chatId && onReassignBot) {
+								onReassignBot(chatId);
+							}
+						}}
 					>
 						<FiXCircle /> Reasignar al Bot
 					</button>

@@ -9,7 +9,7 @@ interface Props {
 	setActiveTab: (tab: "queue" | "active") => void;
 	selectedChatId: string | null;
 	setSelectedChatId: (id: string) => void;
-    isLoading: boolean;
+	isLoading: boolean;
 }
 
 export const LiveSidebar = ({
@@ -17,10 +17,11 @@ export const LiveSidebar = ({
 	setActiveTab,
 	selectedChatId,
 	setSelectedChatId,
-    isLoading
+	isLoading,
 }: Props) => {
 	const queueQueue = useLiveChatStore((state) => state.queueQueue);
 	const activeChats = useLiveChatStore((state) => state.activeChats);
+	const unreadChatIds = useLiveChatStore((state) => state.unreadChatIds);
 	const data = activeTab === "queue" ? queueQueue : activeChats;
 
 	return (
@@ -67,62 +68,88 @@ export const LiveSidebar = ({
 			</div>
 			<div className="flex-1 overflow-y-auto main-scrollbar p-3 space-y-2">
 				{isLoading ? (
-                    <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800/40 rounded-2xl animate-pulse" />
-                        ))}
-                    </div>
-                ): data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center opacity-80 px-4 mt-10">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3 text-gray-400">
-                            <FiInbox size={24} />
-                        </div>
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                            {activeTab === "queue" ? "No hay chats en cola" : "No tienes chats activos"}
-                        </h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {activeTab === "queue" 
-                                ? "Los clientes que soliciten hablar con un asesor aparecerán aquí." 
-                                : "Acepta un chat de la cola de espera para comenzar."}
-                        </p>
-                    </div>
-                ) : data.map((chat) => (
-					<div
-						key={chat.id}
-						onClick={() => setSelectedChatId(chat.id)}
-						className={`p-3 rounded-2xl cursor-pointer border transition-all ${
-							selectedChatId === chat.id
-								? "bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800/50"
-								: "bg-white border-transparent hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/50"
-						}`}
-					>
-						<div className="flex justify-between items-start mb-1">
-							<h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-								{chat.canal === "WHATSAPP" ? (
-									<FaWhatsapp className="text-green-500" />
-								) : (
-									<FiMessageCircle className="text-blue-500" />
-								)}
-								{chat.nombre}
-							</h4>
-							<span className="text-[10px] flex items-center gap-1 text-gray-400 font-medium">
-								{activeTab === "queue" ? (
-									<>
-										<FiClock />{" "}
-										{getRelativeWaitTime(chat.createdAt)}
-									</>
-								) : (
-									<span className="text-green-500">
-										Activo
-									</span>
-								)}
-							</span>
+					<div className="space-y-3">
+						{[...Array(5)].map((_, i) => (
+							<div
+								key={i}
+								className="h-16 bg-gray-100 dark:bg-gray-800/40 rounded-2xl animate-pulse"
+							/>
+						))}
+					</div>
+				) : data.length === 0 ? (
+					<div className="flex flex-col items-center justify-center h-full text-center opacity-80 px-4 mt-10">
+						<div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3 text-gray-400">
+							<FiInbox size={24} />
 						</div>
-						<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-							{chat.lastMessage}
+						<h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+							{activeTab === "queue"
+								? "No hay chats en cola"
+								: "No tienes chats activos"}
+						</h4>
+						<p className="text-xs text-gray-500 dark:text-gray-400">
+							{activeTab === "queue"
+								? "Los clientes que soliciten hablar con un asesor aparecerán aquí."
+								: "Acepta un chat de la cola de espera para comenzar."}
 						</p>
 					</div>
-				))}
+				) : (
+					data.map((chat) => {
+						const isUnread = unreadChatIds.has(chat.id)
+						return (
+							<div
+								key={chat.id}
+								onClick={() => {
+									setSelectedChatId(chat.id);
+									if (isUnread && selectedChatId !== chat.id) {
+										useLiveChatStore
+											.getState()
+											.markAsRead(chat.id);
+									}
+								}}
+								className={`p-3 rounded-2xl cursor-pointer border transition-all ${
+									selectedChatId === chat.id
+										? "bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800/50"
+										: "bg-white border-transparent hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/50"
+								}`}
+							>
+								<div className="flex justify-between items-start mb-1">
+									<h4 className={`text-sm flex items-center gap-2 ${isUnread && selectedChatId !== chat.id ? "font-bold " : "text-gray-900 dark:text-white"}`}>
+										{chat.canal === "WHATSAPP" ? (
+											<FaWhatsapp className="text-green-500" />
+										) : (
+											<FiMessageCircle className="text-blue-500" />
+										)}
+										{chat.nombre}
+									</h4>
+									<span className="text-[10px] flex items-center gap-1 text-gray-400 font-medium">
+										{activeTab === "queue" ? (
+											<>
+												<FiClock />{" "}
+												{getRelativeWaitTime(
+													chat.createdAt,
+												)}
+											</>
+										) : (
+											<span className="text-green-500">
+												Activo
+											</span>
+										)}
+									</span>
+								</div>
+								<div className="flex items-center justify-between gap-2">
+									<p
+										className={`text-xs truncate flex-1 ${isUnread && selectedChatId !== chat.id ? "text-gray-900 dark:text-gray-100 font-bold" : "text-gray-500 dark:text-gray-400"}`}
+									>
+										{chat.lastMessage}
+									</p>
+									{isUnread && selectedChatId !== chat.id && (
+										<span className="size-2.5 shrink-0 rounded-full bg-red-500 animate-pulse" />
+									)}
+								</div>
+							</div>
+						);
+					})
+				)}
 			</div>
 		</div>
 	);
