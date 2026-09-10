@@ -1,9 +1,11 @@
 import type { IconType } from "react-icons";
 
 export interface SidebarItem {
-    text: string;
-    icon: IconType;
-    to: string;
-    subItems?: SidebarItem[];
-    restricted?: boolean;
+	text: string;
+	icon: IconType;
+	to: string;
+	subItems?: SidebarItem[];
+	restricted?: boolean;
+	hasNotifications?: boolean;
+	notificationsCount?: number;
 }
