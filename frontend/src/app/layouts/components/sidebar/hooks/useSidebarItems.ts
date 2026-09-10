@@ -12,12 +12,18 @@ import {
 	FiCalendar,
 	FiDollarSign,
 	FiSettings,
+	FiTrendingUp,
 } from "react-icons/fi";
 import { LuCalculator } from "react-icons/lu";
+import { useAuthStore } from "@/features/auth";
 
 export const useSidebarItems = (): SidebarItem[] => {
-	const unreadChatsCount = useLiveChatStore((state) => state.unreadChatIds.size);
+	const unreadChatsCount = useLiveChatStore(
+		(state) => state.unreadChatIds.size,
+	);
 	const hasChats = unreadChatsCount > 0;
+	const { user } = useAuthStore();
+	const isAdmin = user?.rol === "ADMIN";
 
 	return [
 		{
@@ -25,6 +31,15 @@ export const useSidebarItems = (): SidebarItem[] => {
 			icon: FiPieChart,
 			to: "/admin/dashboard",
 		},
+		...(!isAdmin
+			? [
+					{
+						text: "Mi Desempeño",
+						icon: FiTrendingUp,
+						to: "/admin/metrics",
+					} as SidebarItem,
+				]
+			: []),
 		{
 			text: "Conversaciones",
 			icon: FiMessageSquare,

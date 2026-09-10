@@ -3,6 +3,7 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
 import {
+	AdvisorMetricsPage,
 	AllAppointmentsPage,
 	AllCustomersPage,
 	AllLeadsPage,
@@ -146,6 +147,12 @@ function App() {
 									<Route
 										path="history"
 										element={<QuotesHistoryPage />}
+									/>
+								</Route>
+								<Route path="metrics">
+									<Route
+										path=":idUsuario?"
+										element={<AdvisorMetricsPage />}
 									/>
 								</Route>
 							</Route>

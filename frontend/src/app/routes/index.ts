@@ -16,3 +16,4 @@ export const ChatsHistoryPage = lazyPage(() => import("@/features/chat/pages/Cha
 export const LiveChatPage = lazyPage(() => import("@/features/chat/pages/LiveChat"), "LiveChat");
 export const QuoteReviewPage = lazyPage(() => import("@/features/quotes/pages/ReviewQuotes"), "QuoteReview");
 export const QuotesHistoryPage = lazyPage(() => import("@/features/quotes/pages/QuotesHistory"), "QuotesHistory");
+export const AdvisorMetricsPage = lazyPage(() => import("@/features/metrics/pages/AdvisorMetrics"), "AdvisorMetrics");
