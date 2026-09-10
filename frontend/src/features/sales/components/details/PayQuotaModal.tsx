@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { type MetodoPago } from "../../types";
 import { useSales } from "../../hooks/useSales";
-import { FiX, FiUploadCloud } from "react-icons/fi";
+import { FiX, FiUploadCloud, FiFile } from "react-icons/fi";
 import { AnimatePresence, motion } from "motion/react";
+import { toast } from "sonner";
 
 interface Props {
 	isOpen: boolean;
@@ -15,24 +16,41 @@ export const PayQuotaModal = ({ isOpen, onClose, cuotaId }: Props) => {
 	const { usePayQuotaMutation } = useSales();
 	const [metodoPago, setMetodoPago] = useState<MetodoPago>("TRANSFERENCIA");
 	const [filePreview, setFilePreview] = useState<string | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-	const mutation = usePayQuotaMutation(cuotaId, metodoPago);
+	const mutation = usePayQuotaMutation(cuotaId);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
+			setSelectedFile(file);
 			const objectUrl = URL.createObjectURL(file);
 			setFilePreview(objectUrl);
 		}
 	};
+	const handleRemoveFile = () => {
+		setFilePreview(null);
+		setSelectedFile(null);
+	};
 
 	const confirmPayment = () => {
-		mutation.mutate(undefined, {
-			onSuccess: () => {
-				onClose();
-				setFilePreview(null);
+		if (!selectedFile) {
+			toast.error("Debe subir un comprobante");
+			return;
+		}
+		if (!metodoPago) {
+			toast.error("Debe seleccionar un método de pago");
+			return;
+		}
+		mutation.mutate(
+			{ metodoPago, comprobante: selectedFile },
+			{
+				onSuccess: () => {
+					onClose();
+					handleRemoveFile();
+				},
 			},
-		});
+		);
 	};
 
 	return (
@@ -90,7 +108,8 @@ export const PayQuotaModal = ({ isOpen, onClose, cuotaId }: Props) => {
 							</div>
 							<div>
 								<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-									Comprobante (Opcional por ahora)
+									Comprobante{" "}
+									<sup className="text-red-500">*</sup>
 								</label>
 								{!filePreview ? (
 									<label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
@@ -100,28 +119,68 @@ export const PayQuotaModal = ({ isOpen, onClose, cuotaId }: Props) => {
 												size={24}
 											/>
 											<p className="text-sm text-gray-500 dark:text-gray-400">
-												Clic para subir imagen
+												Clic para subir imagen o PDF
 											</p>
 										</div>
 										<input
 											type="file"
 											className="hidden"
-											accept="image/*"
+											accept="image/*,application/pdf"
 											onChange={handleFileChange}
 										/>
 									</label>
 								) : (
-									<div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
-										<img
-											src={filePreview}
-											alt="Comprobante"
-											className="w-full h-full object-cover"
-										/>
+									<div className="relative w-full h-24 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-center group transition-colors hover:border-gray-200 dark:hover:border-gray-700">
+										{selectedFile?.type.startsWith(
+											"image/",
+										) ? (
+											<div className="relative w-full h-full flex items-center justify-center p-2">
+												<div
+													className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-15 blur-md scale-105 pointer-events-none select-none"
+													style={{
+														backgroundImage: `url(${filePreview})`,
+													}}
+												/>
+												<img
+													src={filePreview}
+													alt="Comprobante"
+													className="relative z-10 max-w-full max-h-full object-contain rounded-lg drop-shadow-xs transition-transform duration-300 group-hover:scale-[1.01]"
+												/>
+											</div>
+										) : (
+											<div className="flex items-center gap-3 p-4 w-full relative pr-12">
+												<div className="shrink-0 w-9 h-9 bg-linear-to-tr from-teal-500/10 to-teal-500/5 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center border border-teal-500/10 text-lg shadow-xs">
+													<FiFile />
+												</div>
+												<div className="flex-1 min-w-0">
+													<p
+														className="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate"
+														title={
+															selectedFile?.name
+														}
+													>
+														{selectedFile?.name}
+													</p>
+													<p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 uppercase tracking-wider font-semibold">
+														{selectedFile?.size
+															? (
+																	selectedFile.size /
+																	1024 /
+																	1024
+																).toFixed(2)
+															: "0"}{" "}
+														MB
+													</p>
+												</div>
+											</div>
+										)}
 										<button
-											onClick={() => setFilePreview(null)}
-											className="absolute top-2 cursor-pointer right-2 bg-black/60 text-white p-1 rounded-full hover:bg-red-500 transition-colors"
+											type="button"
+											onClick={handleRemoveFile}
+											className="absolute top-2 right-2 z-20 p-1.5 bg-white/80 dark:bg-gray-800/85 text-gray-400 hover:text-red-500 rounded-md backdrop-blur-xs border border-gray-100 dark:border-gray-700 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 shadow-xs cursor-pointer flex items-center justify-center"
+											title="Remover archivo"
 										>
-											<FiX />
+											<FiX className="text-sm stroke-[2.5]" />
 										</button>
 									</div>
 								)}
