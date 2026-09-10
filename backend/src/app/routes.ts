@@ -14,6 +14,7 @@ import { rolesRoutes } from "@/modules/roles";
 import { chatRoutes } from "@/modules/chats";
 import { docTypesRoutes } from "@/modules/document-types";
 import { quotesRoutes } from "@/modules/quotes/infrastructure/routes/quotesRoutes";
+import { metricsRoutes } from "@/modules/metrics";
 
 const router: Router = Router();
 
@@ -32,6 +33,7 @@ router.use("/roles", rolesRoutes());
 router.use("/chats", chatRoutes());
 router.use("/tipos-documento", docTypesRoutes());
 router.use("/cotizaciones", quotesRoutes())
+router.use("/metricas", metricsRoutes())
 
 router.use("/", (_, res) => {
 	res.json({

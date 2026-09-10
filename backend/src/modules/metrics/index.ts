@@ -1,0 +1,1 @@
+export { metricsRoutes } from "./infrastructure/routes/metricsRoutes";
