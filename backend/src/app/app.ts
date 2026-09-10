@@ -24,6 +24,7 @@ app.use(
 				"frame-ancestors": ["'self'", env.FRONTEND_URL],
 			},
 		},
+		crossOriginResourcePolicy: { policy: "cross-origin" }
 	}),
 );
 app.use(express.json());
