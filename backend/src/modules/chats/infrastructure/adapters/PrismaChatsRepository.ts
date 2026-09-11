@@ -136,7 +136,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 				lead: {
 					select: {
 						id: true,
-					}
+					},
 				},
 				mensajes: {
 					orderBy: { created_at: "asc" },
@@ -456,5 +456,16 @@ export class PrismaChatsRepository implements IChatsRepository {
 				},
 			},
 		});
+	}
+	async findLastClientMessageTime(chatId: string): Promise<Date | null> {
+		const msg = await this.prisma.mensajes.findFirst({
+			where: {
+				id_conversacion: chatId,
+				remitente: "HUMANO",
+				id_usuario: null,
+			},
+			orderBy: { created_at: "desc" },
+		});
+		return msg?.created_at ?? null;
 	}
 }

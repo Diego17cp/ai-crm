@@ -21,6 +21,7 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 			id: msg.id,
 			remitente: msg.remitente as "HUMANO" | "BOT",
 			contenido: msg.contenido || "",
+			id_usuario: msg.id_usuario,
 			adjuntos: (msg.adjunto as unknown as ToolAttachment[]) ?? undefined,
 			created_at: msg.created_at,
 		}));

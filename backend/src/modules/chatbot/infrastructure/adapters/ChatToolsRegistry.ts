@@ -252,6 +252,36 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					},
 				},
 			},
+			// Calificacion atencion
+			{
+				type: "function",
+				function: {
+					name: "registrar_calificacion_atencion",
+					description:
+						"Registra la calificación (1 a 5) que el cliente da sobre la atención recibida. SIEMPRE, antes de despedirte definitivamente de una conversación (el cliente agradece, se despide, o dice que no necesita nada más), pídele amablemente que califique del 1 al 5 la atención recibida. Cuando el cliente responda con un número, usa esta tool inmediatamente.",
+					parameters: {
+						type: "object",
+						properties: {
+							puntuacion: {
+								type: "integer",
+								description: "Puntuación de 1 a 5.",
+							},
+							comentario: {
+								type: "string",
+								description:
+									"Comentario opcional que el cliente haya dado junto a la calificación",
+							},
+							sentimiento: {
+								type: "string",
+								enum: ["POSITIVO", "NEUTRAL", "NEGATIVO"],
+								description:
+									"Infiere el sentimiento general del cliente basándote en el TONO de su comentario y el resto de la conversación, no solo en el número. Ej: 'me encantó' con puntuación 5 = POSITIVO; 'ya, gracias' seco con puntuación 3 = NEUTRAL; 'no me resolvieron nada' con puntuación 2 = NEGATIVO.",
+							},
+						},
+						required: ["puntuacion"],
+					},
+				},
+			},
 		];
 	}
 
@@ -280,6 +310,8 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				return await this.enviarPlanoProyecto(args, conversacionId);
 			case "generar_cotizacion":
 				return await this.generarCotizacion(args, conversacionId);
+			case "registrar_calificacion_atencion":
+				return await this.registrarCalificacion(args, conversacionId);
 			default:
 				throw new Error(`Tool ${name} no existe`);
 		}
@@ -1062,6 +1094,89 @@ export class ChatToolsRegistry implements IToolsRegistry {
 		} catch (error) {
 			console.error("Error al generar cotización:", error);
 			return { message: "Ocurrió un error al generar la cotización." };
+		}
+	}
+
+	private async registrarCalificacion(
+		args: {
+			puntuacion: number;
+			comentario?: string;
+			sentimiento?: "POSITIVO" | "NEUTRAL" | "NEGATIVO";
+		},
+		conversacionId?: string,
+	) {
+		if (!conversacionId)
+			return {
+				message: "No se pudo registrar la calificación.",
+			};
+		if (args.puntuacion < 1 || args.puntuacion > 5)
+			return {
+				message: "La calificación debe estar entre 1 y 5.",
+			};
+		try {
+			const conversacion = await this.prisma.conversaciones.findUnique({
+				where: { id: conversacionId },
+				select: {
+					id_persona: true,
+					id_usuario_asignado: true,
+					conversacionAsignacions: {
+						select: {
+							id_usuario: true,
+						},
+						take: 1,
+						orderBy: { fecha_inicio: "asc" },
+					},
+				},
+			});
+			if (!conversacion?.id_persona)
+				return {
+					message:
+						"No se pudo asociar la calificación a un contacto.",
+				};
+
+			const idUsuarioResponsable =
+				conversacion.id_usuario_asignado ??
+				conversacion.conversacionAsignacions[0]?.id_usuario ??
+				null;
+			const huboAsesor = idUsuarioResponsable !== null;
+			const creada = await this.prisma.$transaction(async (tx) => {
+				const registro = await tx.evaluacionesAtencion.create({
+					data: {
+						id_persona: conversacion.id_persona!,
+						id_conversacion: conversacionId,
+						id_usuario: idUsuarioResponsable,
+						tipo: huboAsesor ? "ASESOR" : "CHATBOT",
+						puntuacion: args.puntuacion,
+						comentario: args.comentario ?? null,
+						sentimiento: args.sentimiento ?? null,
+						es_automatica: false,
+					},
+				});
+				if (huboAsesor)
+					await this.metricsService.incrementPuntajeAtencion(
+						idUsuarioResponsable!,
+						args.puntuacion,
+						tx,
+					);
+				return registro;
+			});
+			console.log(
+				`[registrarCalificacion] Evaluación creada con id=${creada.id} para conversación ${conversacionId}`,
+			);
+
+			return {
+				prompt_result:
+					"¡Gracias por tu calificación! Agradece cálidamente al cliente por su tiempo y despídete con cordialidad.",
+			};
+		} catch (error) {
+			console.error(
+				"[registrarCalificacion] Error al registrar calificación:",
+				error,
+			);
+			return {
+				prompt_result:
+					"Gracias por tu comentario. Hubo un pequeño inconveniente técnico al registrarlo, pero igual lo tomamos en cuenta. ¡Que tengas un buen día!",
+			};
 		}
 	}
 }

@@ -21,12 +21,11 @@ export class ProcessChatMessageUseCase {
 				role: "system",
 				content: this.getSystemPrompt(history.length === 0),
 			},
-			...history.map((msg: ChatMessage) => ({
-				role: (msg.remitente === "HUMANO" ? "user" : "assistant") as
-					| "user"
-					| "assistant",
-				content: msg.contenido,
-			})),
+			...history.map((msg: ChatMessage) => {
+				if (msg.remitente === "BOT") return { role: "assistant" as const, content: msg.contenido }
+				if (msg.remitente === "HUMANO" && msg.id_usuario) return { role:"assistant" as const, content: `[Respondido por un asesor humano]: ${msg.contenido}` }
+				return { role: "user" as const, content: msg.contenido}
+			}),
 			{ role: "user", content: userInput },
 		];
 
@@ -115,6 +114,7 @@ INFORMACIÓN DE DESCUENTOS: Si el usuario pregunta de forma general "¿Tienen pr
     - REGLAS DE CÁLCULO ESTRICTAS: Explícale que el "Pago Inicial" se compone del 10% del lote sumado a la primera cuota adelantada, tal como te lo indique la herramienta en sus montos finales.
 4. DERIVACIÓN: Si el usuario exige reiteradamente o pide explícitamente "hablar con un humano" o un "asesor de verdad", y siente frustración, usa la herramienta 'solicitar_asistencia_humana'.
 5. LÍMITE DE DOMINIO (MUY IMPORTANTE): Eres un asesor inmobiliario. RECHAZA ENFÁTICA Y CORTÉSEMENTE cualquier pregunta que no esté relacionada con la venta de lotes, terrenos, proyectos inmobiliarios de la empresa o financiamiento. Si te preguntan sobre programación, matemáticas, ciencias, recetas de cocina o cualquier otro tema, responde que eres un bot especializado en bienes raíces y no puedes ayudar con eso.
-6. Sé cortés, un poco persuasivo y usa emojis moderadamente.`;
+6. Sé cortés, un poco persuasivo y usa emojis moderadamente.
+7. CONTINUIDAD TRAS ASESOR HUMANO: Si en el historial ves mensajes marcados como "[Respondido por un asesor humano]", significa que un asesor YA atendió esa parte de la conversación. NO vuelvas a responder esas preguntas ni te ofrezcas a transferir de nuevo a menos que el cliente lo pida explícitamente. Continúa la conversación con naturalidad desde donde el asesor la dejó.`;
 	}
 }

@@ -4,13 +4,17 @@ import { IChatsRepository } from "../ports/IChatsRepository";
 import { EstadoChat } from "generated/prisma/enums";
 import { LeadTransitionService } from "@/core/crm/LeadTransitionService";
 import { PrismaClient } from "generated/prisma/client";
+import { MetricsService } from "@/core/crm/MetricsService";
 
 export class ChatUseCases {
+	private readonly metricsService: MetricsService
 	constructor(
 		private chatsRepository: IChatsRepository,
 		private leadTransitionService: LeadTransitionService,
 		private prisma: PrismaClient,
-	) {}
+	) {
+		this.metricsService = new MetricsService()
+	}
 	async getChats(query: GetChatsQueryDTO) {
 		return this.chatsRepository.findChats(query);
 	}
@@ -78,7 +82,17 @@ export class ChatUseCases {
 				content,
 				senderRole,
 			);
-			if (senderRole === "ASESOR") await this.tryTransitionToContacted(chatId)
+			if (senderRole === "ASESOR") { 
+				await this.tryTransitionToContacted(chatId)
+				const lastClientMessage = await this.chatsRepository.findLastClientMessageTime(chatId)
+				if (lastClientMessage) {
+					const chat = await this.chatsRepository.findChatById(chatId)
+					if (chat?.asesor?.id) {
+						const seconds = Math.round((Date.now() - lastClientMessage.getTime()) / 1000)
+						await this.prisma.$transaction((tx) => this.metricsService.incrementTiempoRespuesta(chat.asesor?.id!, seconds, tx))
+					}
+				}
+			}
 			return message;
 		} catch (error: any) {
 			throw new AppError(
