@@ -108,13 +108,15 @@ export const useChatbot = () => {
 	const messageMutation = useMutation({
 		mutationFn: (msg: string) => chatbotService.sendMessage(msg),
 		onSuccess: (data) => {
-			const newBotMsg: Message = {
-				id: `bot-${Date.now().toString()}`,
-				role: "bot",
-				content: data.respuesta,
-				attachments: data.adjuntos
-			};
-			setLocalMessages((prev) => [...prev, newBotMsg]);
+			if (data.respuesta) {
+				const newBotMsg: Message = {
+					id: `bot-${Date.now().toString()}`,
+					role: "bot",
+					content: data.respuesta,
+					attachments: data.adjuntos
+				};
+				setLocalMessages((prev) => [...prev, newBotMsg]);
+			}
 			queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
 		}
 	});
