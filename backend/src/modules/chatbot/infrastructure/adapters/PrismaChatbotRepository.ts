@@ -161,4 +161,21 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 			created_at: msg.created_at,
 		};
 	}
+
+	async findLastBotMessage(
+		conversacionId: string,
+	): Promise<ChatMessage | null> {
+		const msg = await this.prisma.mensajes.findFirst({
+			where: { id_conversacion: conversacionId, remitente: "BOT" },
+			orderBy: { created_at: "desc" },
+		});
+		if (!msg) return null;
+		return {
+			id: msg.id,
+			remitente: msg.remitente as "HUMANO" | "BOT",
+			contenido: msg.contenido || "",
+			id_usuario: msg.id_usuario,
+			created_at: msg.created_at,
+		};
+	}
 }

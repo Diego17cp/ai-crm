@@ -41,12 +41,11 @@ export class ChatbotController {
 					content: mensaje,
 					role: "cliente",
 				});
-				const ultimoMensaje =
-					await this.chatbotRepo.findLastMessage(conversacionId);
+				const ultimoAvisoBot =
+					await this.chatbotRepo.findLastBotMessage(conversacionId); // 🔧
 				const debeAvisar =
-					!ultimoMensaje ||
-					ultimoMensaje.remitente !== "BOT" ||
-					Date.now() - (ultimoMensaje.created_at?.getTime() ?? 0) >
+					!ultimoAvisoBot ||
+					Date.now() - (ultimoAvisoBot.created_at?.getTime() ?? 0) >
 						COOLDOWN_AVISO_ESPERA_MS;
 
 				if (debeAvisar) {

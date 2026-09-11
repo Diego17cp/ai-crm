@@ -32,4 +32,5 @@ export interface IChatbotRepository {
 	): Promise<{ id: string }>;
 	reactivateConversation(conversacionId: string): Promise<void>;
 	findLastMessage(conversacionId: string): Promise<ChatMessage | null>;
+	findLastBotMessage(conversacionId: string): Promise<ChatMessage | null>;
 }
