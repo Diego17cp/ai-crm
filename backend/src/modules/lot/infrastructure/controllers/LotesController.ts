@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "@/app/middlewares/authGuard";
 import { LotesUseCases } from "../../application/use-cases/LotesUseCases";
 import { EstadoLote } from "generated/prisma/client";
+import { CreateLoteDTO } from "../../domain/dtos";
 
 export class LotesController {
 	constructor(private readonly lotesUseCases: LotesUseCases) {}
@@ -57,7 +58,19 @@ export class LotesController {
 
 	create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
-			const lote = await this.lotesUseCases.createLote(req.body);
+			const files = (req.files as Express.Multer.File[]) || []
+			const mainIdx = req.body.indice_principal !== undefined ? Number(req.body.indice_principal) : 0
+
+			const dto: CreateLoteDTO = {
+				id_manzana: Number(req.body.id_manzana),
+				numero_lote: req.body.numero_lote,
+				numero_partida: req.body.numero_partida,
+				area_m2: Number(req.body.area_m2),
+				precio_m2: Number(req.body.precio_m2),
+				estado: req.body.estado,
+				ubicacion_referencial: req.body.ubicacion_referencial,
+			}
+			const lote = await this.lotesUseCases.createLote(dto, files, mainIdx);
 			res.status(201).json({ success: true, data: lote });
 		} catch (error) {
 			next(error);
