@@ -223,7 +223,7 @@ export const AllLots = () => {
                 ) : (
                     <>
                         <motion.div
-                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
+                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
                         >
                             {lotes.map(lote => (
