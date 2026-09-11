@@ -1,11 +1,12 @@
 import { useChatbot } from "../hooks/useChatbot";
 import { BotMessage } from "../components/BotMessage";
 import { UserMessage } from "../components/UserMessage";
-import { FiSend } from "react-icons/fi";
+import { FiArrowDown, FiSend } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { NOMBRE_EMPRESA } from "@/shared/constants";
 import { AsesorMessage } from "../components/AsesorMessage";
+import { useRef, useState } from "react";
 
 export const Chat = () => {
 	const {
@@ -21,6 +22,25 @@ export const Chat = () => {
 		isLiveMode,
 		chatHistory,
 	} = useChatbot();
+
+	const [showScrollButton, setShowScrollButton] = useState(false);
+	const mainContainerRef = useRef<HTMLDivElement>(null);
+
+	const handleScroll = () => {
+		const container = mainContainerRef.current;
+		if (!container) return;
+		const totalScrollable = container.scrollHeight - container.clientHeight;
+		const distanceFromBottom = totalScrollable - container.scrollTop;
+		if (distanceFromBottom > 100) {
+			setShowScrollButton(true);
+		} else {
+			setShowScrollButton(false);
+		}
+	};
+
+	const scrollToBottom = () => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	};
 
 	if (isFatalError)
 		return (
@@ -38,7 +58,7 @@ export const Chat = () => {
 		);
 
 	return (
-		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950">
+		<div className="flex flex-col h-screen max-h-screen bg-white dark:bg-gray-950 relative">
 			<header className="shrink-0 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 bg-opacity-80 backdrop-blur-md p-4 sticky top-0 z-10">
 				<div className="max-w-4xl mx-auto flex items-center justify-between">
 					<div>
@@ -65,7 +85,11 @@ export const Chat = () => {
 					</div>
 				</div>
 			</header>
-			<main className="flex-1 overflow-y-auto p-4 md:p-8 w-full main-scrollbar">
+			<main
+				ref={mainContainerRef}
+				onScroll={handleScroll}
+				className="flex-1 overflow-y-auto p-4 md:p-8 w-full main-scrollbar"
+			>
 				<div className="max-w-4xl mx-auto">
 					{isInitialLoading ? (
 						<div className="flex w-full mb-6">
@@ -163,6 +187,38 @@ export const Chat = () => {
 					<div ref={messagesEndRef} className="h-4" />
 				</div>
 			</main>
+			<AnimatePresence>
+				{showScrollButton && (
+					<motion.div
+						initial={{ opacity: 0, y: 10, scale: 0.85, x: "-50%" }}
+						animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
+						exit={{ opacity: 0, y: 10, scale: 0.85, x: "-50%" }}
+						transition={{
+							type: "spring",
+							stiffness: 400,
+							damping: 25,
+						}}
+						className="absolute bottom-32 left-1/2 z-20"
+					>
+						<button
+							type="button"
+							onClick={scrollToBottom}
+							className="
+								flex items-center justify-center size-9 rounded-full 
+								bg-white/70 dark:bg-gray-800/70 
+								backdrop-blur-md 
+								border border-gray-200/50 dark:border-gray-700/50 
+								text-gray-600 dark:text-gray-300 shadow-md 
+								hover:bg-white/90 dark:hover:bg-gray-700/90 
+								active:scale-95 transition-all cursor-pointer
+							"
+							aria-label="Ir al último mensaje"
+						>
+							<FiArrowDown size={16} />
+						</button>
+					</motion.div>
+				)}
+			</AnimatePresence>
 			<footer className="shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
 				<div className="max-w-4xl mx-auto">
 					<form
