@@ -4,6 +4,12 @@ export interface ImagenLote {
 	es_principal: boolean;
 	url_imagen: string;
 }
+export interface LoteImagenLocal {
+	id: string;
+	file: File;
+	preview: string;
+	isPrincipal: boolean;
+}
 export interface Lote {
 	id: number;
 	id_manzana: number;
@@ -12,7 +18,7 @@ export interface Lote {
 	area_m2: string;
 	precio_m2: string;
 	precio_total: string;
-	ubicacion_referencial: string | null;
+	ubicacion_referencial?: string;
 	estado: EstadoLote;
 	created_at: string;
 	imagenes: ImagenLote[];
@@ -39,11 +45,11 @@ export interface LotesResponse {
 	};
 }
 export interface FiltrosState {
-    q?: string;
-    id_proyecto?: number;
-    id_etapa?: number;
-    id_manzana?: number;
-    estado?: EstadoLote;
-    page: number;
-    limit: number;
+	q?: string;
+	id_proyecto?: number;
+	id_etapa?: number;
+	id_manzana?: number;
+	estado?: EstadoLote;
+	page: number;
+	limit: number;
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePagination } from "@/shared/hooks/usePagination";
 import { lotsService } from "../service/lotsService";
-import type { EstadoLote, FiltrosState, Lote } from "../types";
+import type { EstadoLote, FiltrosState, Lote, LoteImagenLocal } from "../types";
 import { apiClient } from "@/core/api";
 import { toast } from "sonner";
 import type { ApiError } from "@/core/types";
@@ -118,8 +118,8 @@ export const useLots = () => {
         }
     });
 
-    const useCreateLoteMutation = (data: Omit<Lote, "id" | "created_at" | "imagenes" | "manzana">) => useMutation({
-        mutationFn: () => lotsService.create(data),
+    const useCreateLoteMutation = (data: Omit<Lote, "id" | "created_at" | "imagenes" | "manzana">, imagenes: LoteImagenLocal[]) => useMutation({
+        mutationFn: () => lotsService.create(data, imagenes),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lotes"] });
             toast.success("Lote creado exitosamente");
