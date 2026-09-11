@@ -9,6 +9,10 @@ export interface ChatMessage {
 	adjuntos?: ToolAttachment[];
 	created_at?: Date;
 }
+export interface ConversationLookup {
+	id: string;
+	estado: "BOT" | "ESPERANDO_ASESOR" | "ATENDIDO_HUMANO" | "FINALIZADO";
+}
 
 export interface IChatbotRepository {
 	getMessagesByConversation(conversacionId: string): Promise<ChatMessage[]>;
@@ -18,12 +22,14 @@ export interface IChatbotRepository {
 		contenido: string,
 		adjuntos?: ToolAttachment[],
 	): Promise<void>;
-	findActiveConversationBySession(
+	findConversationBySession(
 		sessionId: string,
-	): Promise<{ id: string } | null>;
+	): Promise<ConversationLookup | null>;
 	findChatById(chatId: string): Promise<Conversaciones | null>;
 	createConversation(
 		sessionId: string,
 		canal: "WEB" | "WHATSAPP",
 	): Promise<{ id: string }>;
+	reactivateConversation(conversacionId: string): Promise<void>;
+	findLastMessage(conversacionId: string): Promise<ChatMessage | null>;
 }

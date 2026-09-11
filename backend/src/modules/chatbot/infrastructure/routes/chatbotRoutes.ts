@@ -84,6 +84,7 @@ export function createChatbotRouter(): Router {
 	const chatbotController = new ChatbotController(
 		processChatMessage,
 		resolveChatSessionUseCase,
+		chatbotRepo
 	);
 
 	const whatsappWebhookController = new WhatsappWebhookController(

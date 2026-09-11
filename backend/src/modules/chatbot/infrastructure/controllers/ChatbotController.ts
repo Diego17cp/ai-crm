@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { ProcessChatMessageUseCase } from "../../application/use-cases/ProcessChatMessageUseCase";
 import { ResolveChatSessionUseCase } from "../../application/use-cases/ResolveChatSessionUseCase";
+import { IChatbotRepository } from "../../application/ports/IChatbotRepository";
+import { getIO } from "@/bootstrap/startWebsocket";
+import { pickRespuestaEnEspera } from "@/core/chat/waitingResponses";
 
+const COOLDOWN_AVISO_ESPERA_MS = 60_000;
 export class ChatbotController {
 	constructor(
 		private readonly processChatMessageUseCase: ProcessChatMessageUseCase,
 		private readonly resolveChatSessionUseCase: ResolveChatSessionUseCase,
+		private readonly chatbotRepo: IChatbotRepository,
 	) {}
 
 	handleMessage = async (req: Request, res: Response, next: NextFunction) => {
@@ -19,10 +24,49 @@ export class ChatbotController {
 						"Los campos 'identifier', 'canal' y 'mensaje' son obligatorios",
 				});
 			}
-			const conversacionId = await this.resolveChatSessionUseCase.execute(
-				identifier,
-				canal as "WEB" | "WHATSAPP",
-			);
+			const { conversacionId, estado } =
+				await this.resolveChatSessionUseCase.execute(
+					identifier,
+					canal as "WEB" | "WHATSAPP",
+				);
+			if (estado !== "BOT") {
+				await this.chatbotRepo.saveMessage(
+					conversacionId,
+					"HUMANO",
+					mensaje,
+				);
+				const io = getIO();
+				io.to(conversacionId).emit("server:NEW_MESSAGE", {
+					chatId: conversacionId,
+					content: mensaje,
+					role: "cliente",
+				});
+				const ultimoMensaje =
+					await this.chatbotRepo.findLastMessage(conversacionId);
+				const debeAvisar =
+					!ultimoMensaje ||
+					ultimoMensaje.remitente !== "BOT" ||
+					Date.now() - (ultimoMensaje.created_at?.getTime() ?? 0) >
+						COOLDOWN_AVISO_ESPERA_MS;
+
+				if (debeAvisar) {
+					const respuesta = pickRespuestaEnEspera(
+						estado as "ESPERANDO_ASESOR" | "ATENDIDO_HUMANO",
+					);
+					await this.chatbotRepo.saveMessage(
+						conversacionId,
+						"BOT",
+						respuesta,
+					);
+					return res
+						.status(200)
+						.json({ success: true, data: { respuesta } });
+				}
+
+				return res
+					.status(200)
+					.json({ success: true, data: { respuesta: null } });
+			}
 			const { respuesta, adjuntos } =
 				await this.processChatMessageUseCase.execute(
 					conversacionId,

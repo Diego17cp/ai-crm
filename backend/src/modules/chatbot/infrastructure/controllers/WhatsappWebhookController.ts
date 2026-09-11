@@ -92,16 +92,13 @@ export class WhatsappWebhookController {
 				if (typeof oldestWamid === "string")
 					this.processedWamids.delete(oldestWamid);
 			}
-			const chatId = await this.resolveChatSessionUseCase.execute(
-				from,
-				"WHATSAPP",
-			);
-			const chat = await this.chatbotRepo.findChatById(chatId);
-			const isBotActive = chat?.estado === "BOT";
-			if (isBotActive) {
-				const { respuesta: response } =
+			const { conversacionId: chatId, estado } =
+				await this.resolveChatSessionUseCase.execute(from, "WHATSAPP");
+
+			if (estado === "BOT") {
+				const { respuesta } =
 					await this.processChatMessageUseCase.execute(chatId, text);
-				const formattedResponse = markdownToWhatsappText(response);
+				const formattedResponse = markdownToWhatsappText(respuesta);
 				await this.whatsappService.sendTextMessage(
 					from,
 					formattedResponse,
@@ -110,7 +107,7 @@ export class WhatsappWebhookController {
 				await this.chatbotRepo.saveMessage(chatId, "HUMANO", text);
 				const io = getIO();
 				io.to(chatId).emit("server:NEW_MESSAGE", {
-					chatId,
+					chatId: chatId,
 					content: text,
 					role: "cliente",
 				});

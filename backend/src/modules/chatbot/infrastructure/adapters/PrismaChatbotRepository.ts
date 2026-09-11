@@ -1,4 +1,9 @@
-import { Conversaciones, Prisma, PrismaClient } from "generated/prisma/client";
+import {
+	Conversaciones,
+	EstadoChat,
+	Prisma,
+	PrismaClient,
+} from "generated/prisma/client";
 import {
 	ChatMessage,
 	IChatbotRepository,
@@ -31,7 +36,7 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 		conversacionId: string,
 		remitente: "HUMANO" | "BOT",
 		contenido: string,
-		adjuntos?: ToolAttachment[]
+		adjuntos?: ToolAttachment[],
 	): Promise<void> {
 		await this.prisma.$transaction(async (tx) => {
 			await tx.mensajes.create({
@@ -40,9 +45,11 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 					remitente,
 					contenido,
 					...(adjuntos && adjuntos.length > 0
-						? { adjunto: adjuntos as unknown as Prisma.InputJsonValue }
-						: {}
-					)
+						? {
+								adjunto:
+									adjuntos as unknown as Prisma.InputJsonValue,
+							}
+						: {}),
 				},
 			});
 			await tx.eventosConversacion.create({
@@ -78,15 +85,14 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 		});
 	}
 
-	async findActiveConversationBySession(
+	async findConversationBySession(
 		sessionId: string,
-	): Promise<{ id: string } | null> {
+	): Promise<{ id: string; estado: EstadoChat } | null> {
 		const conversacion = await this.prisma.conversaciones.findFirst({
 			where: {
 				session_id: sessionId,
-				estado: "BOT",
 			},
-			select: { id: true },
+			select: { id: true, estado: true },
 		});
 		return conversacion;
 	}
@@ -132,5 +138,27 @@ export class PrismaChatbotRepository implements IChatbotRepository {
 			});
 			return nueva;
 		});
+	}
+
+	async reactivateConversation(conversacionId: string): Promise<void> {
+		await this.prisma.conversaciones.update({
+			where: { id: conversacionId },
+			data: { estado: "BOT" },
+		});
+	}
+
+	async findLastMessage(conversacionId: string): Promise<ChatMessage | null> {
+		const msg = await this.prisma.mensajes.findFirst({
+			where: { id_conversacion: conversacionId },
+			orderBy: { created_at: "desc" },
+		});
+		if (!msg) return null;
+		return {
+			id: msg.id,
+			remitente: msg.remitente as "HUMANO" | "BOT",
+			contenido: msg.contenido || "",
+			id_usuario: msg.id_usuario,
+			created_at: msg.created_at,
+		};
 	}
 }
