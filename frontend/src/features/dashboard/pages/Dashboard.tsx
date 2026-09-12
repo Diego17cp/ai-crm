@@ -11,11 +11,10 @@ import { useAuthStore } from "@/features/auth";
 import { RiDashboardHorizontalLine } from "react-icons/ri";
 
 export const Dashboard = () => {
-	const { user } = useAuthStore();
+	const { isAdmin } = useAuthStore();
 	const { stats, events, isLoading, isRefetching, refetch } = useDashboard();
 	const { desde, hasta } = useDateRangeLast7Days();
 	const { data: overview } = useAdminOverview(desde, hasta);
-	const isAdmin = user?.rol === "ADMIN";
 
 	return (
 		<div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">

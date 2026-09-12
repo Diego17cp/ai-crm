@@ -16,11 +16,9 @@ import { useAuthStore } from "@/features/auth";
 
 export const useSales = () => {
 	const queryClient = useQueryClient();
-	const { user } = useAuthStore();
+	const { user, isAdmin } = useAuthStore();
 
 	const userId = user?.id;
-	const userRole = user?.rol;
-	const isAdmin = userRole === "ADMIN";
 	const { currentPage, perPage, goToPage, setPerPage } = usePagination({
 		initialPage: 1,
 		initialPerPage: 12,

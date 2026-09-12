@@ -17,12 +17,10 @@ export const useQuotes = () => {
 		initialPage: 1,
 		initialPerPage: 12,
 	});
-	const { user } = useAuthStore();
+	const { user, isAdmin } = useAuthStore();
   const queryClient = useQueryClient()
 
 	const userId = user?.id;
-	const userRole = user?.rol;
-	const isAdmin = userRole === "ADMIN";
 
 	const [searchTerm, setSearchTerm] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");

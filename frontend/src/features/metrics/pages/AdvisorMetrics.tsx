@@ -11,7 +11,7 @@ import { motion } from "motion/react"
 import { GrPieChart } from "react-icons/gr";
 
 export const AdvisorMetrics = () => {
-	const { user } = useAuthStore();
+	const { user, isAdmin } = useAuthStore();
 	const { idUser, idUsuario: idUsuarioParam } = useParams<{
 		idUser?: string;
 		idUsuario?: string;
@@ -20,9 +20,8 @@ export const AdvisorMetrics = () => {
 	const location = useLocation()
 	const  nameFromNav = (location.state as { nombre?: string } | null)?.nombre;
 
-	const isAdmin = user?.rol === "ADMIN"
 	const idUsuario = idParam && isAdmin ? idParam : (user?.id ?? "")
-	const seingOther = isAdmin && Boolean(idParam) && idParam !== user.id
+	const seingOther = isAdmin && Boolean(idParam) && idParam !== user?.id
 
 	const { desde, hasta } = useDateRangeLast7Days();
 	const { data, isLoading, isError, refetch, isRefetching } = useAdvisorMetrics(idUsuario, desde, hasta);

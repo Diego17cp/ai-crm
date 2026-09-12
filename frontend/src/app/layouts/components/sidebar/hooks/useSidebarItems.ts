@@ -22,8 +22,8 @@ export const useSidebarItems = (): SidebarItem[] => {
 		(state) => state.unreadChatIds.size,
 	);
 	const hasChats = unreadChatsCount > 0;
-	const { user } = useAuthStore();
-	const isAdmin = user?.rol === "ADMIN";
+	const { isAdmin } = useAuthStore();
+
 
 	return [
 		{
