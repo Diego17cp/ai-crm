@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>()(
 			set(() => ({
 				user,
 				isAuthenticated: true,
-				isAdmin: user.rol.toLowerCase() === "admin",
+				isAdmin: user.rol?.toLowerCase() === "admin",
 			})),
 		clearAuth: () =>
 			set(() => ({
