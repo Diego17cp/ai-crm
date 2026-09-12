@@ -2,7 +2,11 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "@/app/middlewares/authGuard";
 import { LotesUseCases } from "../../application/use-cases/LotesUseCases";
 import { EstadoLote } from "generated/prisma/client";
-import { CreateLoteDTO } from "../../domain/dtos";
+import {
+	CreateLoteDTO,
+	ImageUpdateInput,
+	UpdateLoteDTO,
+} from "../../domain/dtos";
 
 export class LotesController {
 	constructor(private readonly lotesUseCases: LotesUseCases) {}
@@ -24,17 +28,15 @@ export class LotesController {
 				: undefined;
 			const estado = req.query.estado as EstadoLote | undefined;
 
-			const result = await this.lotesUseCases.getAllLotes(
-				{
-					q,
-					page,
-					limit,
-					id_proyecto,
-					id_etapa,
-					id_manzana,
-					estado,
-				},
-			);
+			const result = await this.lotesUseCases.getAllLotes({
+				q,
+				page,
+				limit,
+				id_proyecto,
+				id_etapa,
+				id_manzana,
+				estado,
+			});
 
 			res.status(200).json({
 				success: true,
@@ -58,8 +60,11 @@ export class LotesController {
 
 	create = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
-			const files = (req.files as Express.Multer.File[]) || []
-			const mainIdx = req.body.indice_principal !== undefined ? Number(req.body.indice_principal) : 0
+			const files = (req.files as Express.Multer.File[]) || [];
+			const mainIdx =
+				req.body.indice_principal !== undefined
+					? Number(req.body.indice_principal)
+					: 0;
 
 			const dto: CreateLoteDTO = {
 				id_manzana: Number(req.body.id_manzana),
@@ -69,8 +74,12 @@ export class LotesController {
 				precio_m2: Number(req.body.precio_m2),
 				estado: req.body.estado,
 				ubicacion_referencial: req.body.ubicacion_referencial,
-			}
-			const lote = await this.lotesUseCases.createLote(dto, files, mainIdx);
+			};
+			const lote = await this.lotesUseCases.createLote(
+				dto,
+				files,
+				mainIdx,
+			);
 			res.status(201).json({ success: true, data: lote });
 		} catch (error) {
 			next(error);
@@ -80,18 +89,35 @@ export class LotesController {
 	update = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
 			const id = Number(req.params.id);
-			const lote = await this.lotesUseCases.updateLote(id, req.body);
+			const files = (req.files as Express.Multer.File[]) || [];
+
+			const fields: UpdateLoteDTO = {};
+			if (req.body.numero_lote !== undefined)
+				fields.numero_lote = req.body.numero_lote;
+			if (req.body.numero_partida !== undefined)
+				fields.numero_partida = req.body.numero_partida;
+			if (req.body.area_m2 !== undefined)
+				fields.area_m2 = Number(req.body.area_m2);
+			if (req.body.precio_m2 !== undefined)
+				fields.precio_m2 = Number(req.body.precio_m2);
+			if (req.body.ubicacion_referencial !== undefined)
+				fields.ubicacion_referencial = req.body.ubicacion_referencial;
+			if (req.body.estado !== undefined) fields.estado = req.body.estado;
+			const images: ImageUpdateInput | undefined = req.body.imagenes
+				? JSON.parse(req.body.imagenes)
+				: undefined;
+			const lote = await this.lotesUseCases.updateLote(
+				id,
+				{ ...fields, images },
+				files,
+			);
 			res.status(200).json({ success: true, data: lote });
 		} catch (error) {
 			next(error);
 		}
 	};
 
-	delete = async (
-		req: AuthRequest,
-		res: Response,
-		next: NextFunction,
-	) => {
+	delete = async (req: AuthRequest, res: Response, next: NextFunction) => {
 		try {
 			const id = Number(req.params.id);
 			const lote = await this.lotesUseCases.deleteLote(id);

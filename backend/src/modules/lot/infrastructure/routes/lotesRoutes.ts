@@ -7,17 +7,27 @@ import { authGuard } from "@/app/middlewares/authGuard";
 import { uploadLotesImagenesMiddleware } from "@/app/middlewares/uploadLotesImagenesMiddleware";
 
 export function lotesRoutes(): Router {
-    const router = Router();
-    
-    const lotesRepo = new PrismaLotesRepository(prisma);
-    const lotesUseCases = new LotesUseCases(lotesRepo);
-    const controller = new LotesController(lotesUseCases);
+	const router = Router();
 
-    router.get("/", authGuard, controller.getAll);
-    router.get("/:id", authGuard, controller.getById);
-    router.post("/", authGuard, uploadLotesImagenesMiddleware.array("imagenes", 10), controller.create);
-    router.put("/:id", authGuard, controller.update);
-    router.delete("/:id", authGuard, controller.delete);
+	const lotesRepo = new PrismaLotesRepository(prisma);
+	const lotesUseCases = new LotesUseCases(lotesRepo);
+	const controller = new LotesController(lotesUseCases);
 
-    return router;
+	router.get("/", authGuard, controller.getAll);
+	router.get("/:id", authGuard, controller.getById);
+	router.post(
+		"/",
+		authGuard,
+		uploadLotesImagenesMiddleware.array("imagenes", 10),
+		controller.create,
+	);
+	router.put(
+		"/:id",
+		authGuard,
+		uploadLotesImagenesMiddleware.array("imagenes_nuevas", 10),
+		controller.update,
+	);
+	router.delete("/:id", authGuard, controller.delete);
+
+	return router;
 }

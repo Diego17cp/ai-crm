@@ -51,7 +51,7 @@ export class LotesUseCases {
 		);
 	}
 
-	async updateLote(id: number, data: UpdateLoteDTO) {
+	async updateLote(id: number, data: UpdateLoteDTO, newFiles: Express.Multer.File[] = []) {
 		if (isNaN(id) || id <= 0)
 			throw new AppError("ID de lote inválido", 400);
 		const lote = await this.repo.findById(id);
@@ -63,7 +63,7 @@ export class LotesUseCases {
 				400,
 			);
 		}
-		return this.repo.update(id, data);
+		return this.repo.update(id, data, newFiles);
 	}
 
 	async deleteLote(id: number) {

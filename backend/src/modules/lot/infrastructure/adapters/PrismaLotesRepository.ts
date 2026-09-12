@@ -94,14 +94,16 @@ export class PrismaLotesRepository implements ILotesRepository {
 
 		const totalPages = Math.ceil(total / limit);
 
-		const data = lotesData.map(lt => ({
+		const data = lotesData.map((lt) => ({
 			...lt,
-			imagenes: [...lt.imagenes.sort((a, b) => {
-				if (a.es_principal && !b.es_principal) return -1;
-        if (!a.es_principal && b.es_principal) return 1;
-				return 0;
-			})]
-		}))
+			imagenes: [
+				...lt.imagenes.sort((a, b) => {
+					if (a.es_principal && !b.es_principal) return -1;
+					if (!a.es_principal && b.es_principal) return 1;
+					return 0;
+				}),
+			],
+		}));
 
 		return {
 			data: data as unknown as LoteWithRelationsDTO[],
@@ -171,10 +173,75 @@ export class PrismaLotesRepository implements ILotesRepository {
 		});
 	}
 
-	async update(id: number, data: UpdateLoteDTO): Promise<Lotes> {
-		return this.prisma.lotes.update({
-			where: { id },
-			data,
+	async update(
+		id: number,
+		data: UpdateLoteDTO,
+		newFiles: Express.Multer.File[] = [],
+	): Promise<Lotes & { imagenes: LotesImagenes[] }> {
+		const { images, ...fields } = data;
+		return this.prisma.$transaction(async (tx) => {
+			if (Object.keys(fields).length > 0)
+				await tx.lotes.update({ where: { id }, data: fields });
+			if (images?.remove && images.remove.length > 0)
+				await tx.lotesImagenes.deleteMany({
+					where: { id: { in: images.remove }, id_lote: id },
+				});
+			let newIds: number[] = [];
+			if (newFiles.length > 0) {
+				for (const file of newFiles) {
+					const created = await tx.lotesImagenes.create({
+						data: {
+							id_lote: id,
+							url_imagen: file.filename,
+							es_principal: false,
+						},
+					});
+					newIds.push(created.id);
+				}
+			}
+			let finalMainId: number | undefined;
+			if (images?.mark_main !== undefined) finalMainId = images.mark_main;
+			else if (
+				images?.mark_new_main !== undefined &&
+				newIds[images.mark_new_main] !== undefined
+			)
+				finalMainId = newIds[images.mark_new_main];
+
+			if (finalMainId !== undefined) {
+				await tx.lotesImagenes.updateMany({
+					where: { id_lote: id },
+					data: {
+						es_principal: false,
+					},
+				});
+				await tx.lotesImagenes.update({
+					where: { id: finalMainId },
+					data: {
+						es_principal: true,
+					},
+				});
+			} else {
+				const main = await tx.lotesImagenes.findFirst({
+					where: { id_lote: id, es_principal: true },
+				});
+				if (!main) {
+					const first = await tx.lotesImagenes.findFirst({
+						where: { id_lote: id },
+						orderBy: { id: "asc" },
+					});
+					if (first)
+						await tx.lotesImagenes.update({
+							where: { id: first.id },
+							data: {
+								es_principal: true,
+							},
+						});
+				}
+			}
+			return tx.lotes.findUniqueOrThrow({
+				where: { id },
+				include: { imagenes: true },
+			});
 		});
 	}
 

@@ -30,7 +30,11 @@ export interface ILotesRepository {
 		data: CreateLoteDTO,
 		imagenes: CreateImage[],
 	): Promise<Lotes & { imagenes: LotesImagenes[] }>;
-	update(id: number, data: UpdateLoteDTO): Promise<Lotes>;
+	update(
+		id: number,
+		data: UpdateLoteDTO,
+		newFiles?: Express.Multer.File[],
+	): Promise<Lotes & { imagenes: LotesImagenes[] }>;
 	delete(id: number): Promise<any>;
 	hasSales(id: number): Promise<boolean>;
 }

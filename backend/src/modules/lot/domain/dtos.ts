@@ -15,7 +15,15 @@ export interface CreateImage {
 	es_principal: boolean;
 }
 
-export interface UpdateLoteDTO extends Partial<CreateLoteDTO> {}
+export interface ImageUpdateInput {
+	remove?: number[];
+	mark_main?: number;
+	mark_new_main?: number;
+}
+
+export interface UpdateLoteDTO extends Partial<CreateLoteDTO> {
+	images?: ImageUpdateInput | undefined;
+}
 
 export interface GetLotesQueryDTO {
 	q?: string | undefined;
