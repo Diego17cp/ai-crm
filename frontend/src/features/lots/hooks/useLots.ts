@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePagination } from "@/shared/hooks/usePagination";
 import { lotsService } from "../service/lotsService";
-import type { EstadoLote, FiltrosState, Lote, LoteImagenLocal } from "../types";
+import type { EstadoLote, FiltrosState, ImageUpdateInput, Lote, LoteImagenLocal } from "../types";
 import { apiClient } from "@/core/api";
 import { toast } from "sonner";
 import type { ApiError } from "@/core/types";
@@ -129,8 +129,8 @@ export const useLots = () => {
             toast.error(message);
         }
     });
-    const useUpdateLoteMutation = (id: number, data: Partial<Omit<Lote, "id" | "created_at" | "imagenes" | "manzana">>) => useMutation({
-        mutationFn: () => lotsService.update(id, data),
+    const useUpdateLoteMutation = (id: number, data: Partial<Omit<Lote, "id" | "created_at" | "imagenes" | "manzana">>, imagenesUpdate: ImageUpdateInput, archivosNuevos: File[]) => useMutation({
+        mutationFn: () => lotsService.update(id, data, imagenesUpdate, archivosNuevos),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lotes"] });
             toast.success("Lote actualizado exitosamente");

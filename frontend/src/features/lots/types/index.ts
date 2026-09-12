@@ -53,3 +53,9 @@ export interface FiltrosState {
 	page: number;
 	limit: number;
 }
+
+export interface ImageUpdateInput {
+	remove?: number[];
+	mark_main?: number;
+	mark_new_main?: number;
+}

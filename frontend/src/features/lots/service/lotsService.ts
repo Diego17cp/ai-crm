@@ -1,6 +1,7 @@
 import { apiClient } from "@/core/api";
 import type {
 	FiltrosState,
+	ImageUpdateInput,
 	Lote,
 	LoteImagenLocal,
 	LotesResponse,
@@ -51,8 +52,24 @@ export const lotsService = {
 		loteData: Partial<
 			Omit<Lote, "id" | "created_at" | "imagenes" | "manzana">
 		>,
+		imagenesUpdate: ImageUpdateInput,
+		archivosNuevos: File[],
 	) => {
-		const response = await apiClient.put(`/lotes/${id}`, loteData);
+		const formData = new FormData();
+
+		Object.entries(loteData).forEach(([key, value]) => {
+			if (value !== undefined && value !== null)
+				formData.append(key, String(value));
+		});
+		formData.append("imagenes", JSON.stringify(imagenesUpdate));
+		archivosNuevos.forEach((file) =>
+			formData.append("imagenes_nuevas", file),
+		);
+		const response = await apiClient.put(`/lotes/${id}`, formData, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
 		return response.data.data;
 	},
 	delete: async (id: number) => {
