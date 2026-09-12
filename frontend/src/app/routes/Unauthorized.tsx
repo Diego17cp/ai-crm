@@ -2,7 +2,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router";
 import { motion } from "motion/react";
 
-export const NotFound = () => {
+export const Unauthorized = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -11,30 +11,33 @@ export const NotFound = () => {
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen p-6 text-center select-none bg-gray-50 dark:bg-gray-950 overflow-hidden">
 			<div className="relative mb-6">
-				<motion.h1
-					animate={{ y: [0, -12, 0] }}
-					transition={{
-						duration: 4,
-						repeat: Infinity,
-						ease: "easeInOut",
+				<motion.h1 
+					animate={{ 
+						y: [0, -8, 0],
+						rotate: [0, 1.5, -1.5, 0]
 					}}
-					className="text-[120px] sm:text-[180px] font-black text-gray-200 dark:text-gray-800/40 leading-none pointer-events-none tracking-tighter select-none filter drop-shadow-xs"
+					transition={{
+						duration: 4.5,
+						repeat: Infinity,
+						ease: "easeInOut"
+					}}
+					className="text-[120px] sm:text-[180px] font-black text-gray-200 dark:text-gray-800/40 leading-none pointer-events-none tracking-tighter select-none"
 				>
-					404
+					403
 				</motion.h1>
 				<div className="absolute inset-0 flex items-center justify-center">
-					<motion.span
+					<motion.span 
 						initial={{ scale: 0.3, opacity: 0, y: 30 }}
 						animate={{ scale: 1, opacity: 1, y: 12 }}
 						transition={{
 							type: "spring",
 							stiffness: 300,
 							damping: 15,
-							delay: 0.1,
+							delay: 0.1
 						}}
-						className="text-3xl sm:text-4xl font-extrabold bg-linear-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent transform"
+						className="text-2xl sm:text-3xl font-extrabold bg-linear-to-r from-red-500 to-amber-500 dark:from-red-400 dark:to-amber-400 bg-clip-text text-transparent transform whitespace-nowrap"
 					>
-						¡Ups!
+						Acceso Restringido
 					</motion.span>
 				</div>
 			</div>
@@ -45,11 +48,10 @@ export const NotFound = () => {
 				className="flex flex-col items-center"
 			>
 				<h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
-					Página no encontrada
+					No tienes permisos
 				</h2>
 				<p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8 text-sm sm:text-base leading-relaxed">
-					Lo sentimos, la ruta a la que intentas acceder no existe o
-					ha sido movida. Verifica la URL ingresada.
+					Lo sentimos, tu rol actual no cuenta con las credenciales necesarias para visualizar este módulo. Si crees que es un error, contacta a soporte.
 				</p>
 				<motion.button
 					whileTap={{ scale: 0.97 }}

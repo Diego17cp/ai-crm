@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 import { AuthProvider } from "./providers/AuthProvider";
 import { SidebarProvider } from "./providers/SidebarProvider";
 import { Toaster } from "sonner";
@@ -17,13 +17,15 @@ import {
 	DashboardPage,
 	LiveChatPage,
 	LoginPage,
+	NotFoundPage,
 	QuoteReviewPage,
 	QuotesHistoryPage,
 	SaleDetailPage,
+	UnauthorizedPage,
 } from "./routes";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { ThemeProvider } from "./providers/ThemeProvider";
-import { NotFound } from "./routes/NotFound";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 function App() {
 	return (
@@ -85,7 +87,16 @@ function App() {
 									path="appointments"
 									element={<AllAppointmentsPage />}
 								/>
-								<Route path="sales">
+								<Route
+									path="sales"
+									element={
+										<ProtectedRoute
+											allowedRoles={["ADMIN"]}
+										>
+											<Outlet />
+										</ProtectedRoute>
+									}
+								>
 									<Route
 										index
 										element={
@@ -105,7 +116,16 @@ function App() {
 										element={<CollectionsPage />}
 									/>
 								</Route>
-								<Route path="settings">
+								<Route
+									path="settings"
+									element={
+										<ProtectedRoute
+											allowedRoles={["ADMIN"]}
+										>
+											<Outlet />
+										</ProtectedRoute>
+									}
+								>
 									<Route
 										index
 										element={
@@ -156,7 +176,11 @@ function App() {
 									/>
 								</Route>
 							</Route>
-							<Route path="*" element={<NotFound />} />
+							<Route path="*" element={<NotFoundPage />} />
+							<Route
+								path="/unauthorized"
+								element={<UnauthorizedPage />}
+							/>
 						</Routes>
 					</SidebarProvider>
 				</AuthProvider>
