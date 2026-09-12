@@ -390,23 +390,6 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 										</div>
 										<div className="flex flex-col gap-1.5">
 											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-												Ubicación Referencial (Opcional)
-											</label>
-											<input
-												type="text"
-												value={ubicacionReferencial}
-												onChange={(e) =>
-													setUbicacionReferencial(
-														e.target.value,
-													)
-												}
-												disabled={isSubmitting}
-												placeholder="Ej: 11029304"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-											/>
-										</div>
-										<div className="flex flex-col gap-1.5">
-											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
 												Área (m²){" "}
 												<span className="text-red-500">
 													*
@@ -440,6 +423,23 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: 1500"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+											/>
+										</div>
+										<div className="flex flex-col gap-1.5 md:col-span-2">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Ubicación Referencial (Opcional)
+											</label>
+											<input
+												type="text"
+												value={ubicacionReferencial}
+												onChange={(e) =>
+													setUbicacionReferencial(
+														e.target.value,
+													)
+												}
+												disabled={isSubmitting}
+												placeholder="Ej: En una esquina"
 												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
 											/>
 										</div>
