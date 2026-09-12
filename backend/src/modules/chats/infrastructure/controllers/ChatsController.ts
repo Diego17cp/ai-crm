@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ChatUseCases } from "../../application/use-cases/ChatsUseCases";
 import { CanalContacto, EstadoChat } from "generated/prisma/enums";
 import { AuthRequest } from "@/app/middlewares/authGuard";
+import { getIO } from "@/bootstrap/startWebsocket";
 
 export class ChatsController {
 	constructor(private chatUseCases: ChatUseCases) {}
@@ -109,6 +110,11 @@ export class ChatsController {
 				String(newStatus) as EstadoChat,
 				userId,
 			);
+			const io = getIO();
+			io.to(String(chatId)).emit("server:CHAT_STATUS_CHANGED", {
+				chatId,
+				newStatus
+			});
 			res.json({
 				success: true,
 				message: "Estado del chat actualizado correctamente",

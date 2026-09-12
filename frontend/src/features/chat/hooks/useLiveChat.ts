@@ -78,6 +78,9 @@ export const useLiveChat = (selectedChatIdRef?: React.RefObject<string | null>) 
 				queryClient.invalidateQueries({
 					queryKey: ["live-chat-active"],
 				});
+				queryClient.invalidateQueries({
+					queryKey: ["chatSession"],
+				});
 				toast.success("Estado del chat actualizado");
 			},
 			onError: (error: ApiError) => {
@@ -171,16 +174,23 @@ export const useLiveChat = (selectedChatIdRef?: React.RefObject<string | null>) 
 					);
 			}
 		};
+		const handleChatStatusChanged = (payload: { chatId: string; newStatus: string }) => {
+			queryClient.invalidateQueries({ queryKey: ["chat", payload.chatId] });
+			queryClient.invalidateQueries({ queryKey: ["live-chat-queue"] });
+			queryClient.invalidateQueries({ queryKey: ["live-chat-active"] });
+		};
 		socket.current.on(
 			"server:CHAT_REQUIRES_HUMAN",
 			handleChatRequiresHuman,
 		);
 		socket.current.on("server:CHAT_ASSIGNED", handleChatAssigned);
 		socket.current.on("server:NEW_MESSAGE", handleNewMessage);
+		socket.current.on("server:CHAT_STATUS_CHANGED", handleChatStatusChanged);
 		return () => {
 			currentSocket.off("server:CHAT_REQUIRES_HUMAN", handleChatRequiresHuman);
 			currentSocket.off("server:CHAT_ASSIGNED", handleChatAssigned);
 			currentSocket.off("server:NEW_MESSAGE", handleNewMessage);
+			currentSocket.off("server:CHAT_STATUS_CHANGED", handleChatStatusChanged);
 			// currentSocket.disconnect();
 		};
 	}, [

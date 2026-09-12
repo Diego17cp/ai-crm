@@ -73,13 +73,20 @@ export const useChatbot = () => {
 				}]);
 			}
 		}
+		const handleChatStatusChanged = (payload: { chatId: string, newStatus: string }) => {
+			if (payload.chatId === activeChatIdRef.current) {
+				queryClient.invalidateQueries({ queryKey: ["chatSession", sessionId] });
+			}
+		};
 		socket.current.on("connect", handleConnect);
 		socket.current.on("server:CHAT_ASSIGNED", handleChatAssigned);
 		socket.current.on("server:NEW_MESSAGE", handleNewMessage);
+		socket.current.on("server:CHAT_STATUS_CHANGED", handleChatStatusChanged);
 		return () => {
 			currentSocket.off("connect", handleConnect);
 			currentSocket.off("server:CHAT_ASSIGNED", handleChatAssigned);
 			currentSocket.off("server:NEW_MESSAGE", handleNewMessage);
+			currentSocket.off("server:CHAT_STATUS_CHANGED", handleChatStatusChanged);
 			// currentSocket.disconnect();
 		}
 	}, [sessionId, queryClient]);
