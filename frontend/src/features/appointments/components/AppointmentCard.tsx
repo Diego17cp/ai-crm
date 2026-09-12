@@ -19,6 +19,7 @@ import {
 	formatDate,
 	formatTime,
 } from "../utils/appointmentsFormatters";
+import { useAuthStore } from "@/features/auth";
 
 interface AppointmentCardProps {
 	cita: Cita;
@@ -35,6 +36,7 @@ export const AppointmentCard = ({
 	onMarkCanceled,
 	onDelete,
 }: AppointmentCardProps) => {
+	const { isAdmin } = useAuthStore();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const menuRef = useClickOutside(() => setIsMenuOpen(false));
 
@@ -117,14 +119,21 @@ export const AppointmentCard = ({
 										</button>
 									</>
 								)}
-								<div className="h-px bg-gray-100 dark:bg-gray-700 w-full" />
-								<button
-									onClick={onDelete}
-									className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 cursor-pointer transition-colors text-left"
-								>
-									<FiTrash2 size={14} className="shrink-0" />{" "}
-									Eliminar
-								</button>
+								{isAdmin && (
+									<>
+										<div className="h-px bg-gray-100 dark:bg-gray-700 w-full" />
+										<button
+											onClick={onDelete}
+											className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 cursor-pointer transition-colors text-left"
+										>
+											<FiTrash2
+												size={14}
+												className="shrink-0"
+											/>{" "}
+											Eliminar
+										</button>
+									</>
+								)}
 							</motion.div>
 						)}
 					</div>

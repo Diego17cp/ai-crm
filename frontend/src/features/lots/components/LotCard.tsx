@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import type { Lote, EstadoLote } from "../types";
 import { ImagesCarousel } from "./ImagesCarousel";
+import { useAuthStore } from "@/features/auth";
 
 interface Props {
 	lote: Lote;
@@ -34,7 +35,9 @@ const statusConfig: Record<EstadoLote, { color: string; label: string }> = {
 	},
 };
 
+
 export const LotCard = ({ lote, onEdit, onDelete }: Props) => {
+	const { isAdmin } = useAuthStore()
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [currentImageIdx, setCurrentImageIdx] = useState(0);
 	const menuRef = useRef<HTMLDivElement>(null);
@@ -97,57 +100,59 @@ export const LotCard = ({ lote, onEdit, onDelete }: Props) => {
 				>
 					{statusStyle.label}
 				</div>
-				<div className="absolute top-3 right-3" ref={menuRef}>
-					<button
-						onClick={(e) => {
-							e.stopPropagation();
-							setIsMenuOpen(!isMenuOpen);
-						}}
-						className="p-2 cursor-pointer bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 backdrop-blur-md text-gray-600 dark:text-gray-300 rounded-xl transition-all shadow-sm"
-					>
-						<FiMoreVertical size={18} />
-					</button>
+				{isAdmin && (
+					<div className="absolute top-3 right-3" ref={menuRef}>
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setIsMenuOpen(!isMenuOpen);
+							}}
+							className="p-2 cursor-pointer bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 backdrop-blur-md text-gray-600 dark:text-gray-300 rounded-xl transition-all shadow-sm"
+						>
+							<FiMoreVertical size={18} />
+						</button>
 
-					<AnimatePresence>
-						{isMenuOpen && (
-							<motion.div
-								initial={{
-									opacity: 0,
-									scale: 0.95,
-									y: -10,
-									transformOrigin: "top right",
-								}}
-								animate={{ opacity: 1, scale: 1, y: 0 }}
-								exit={{ opacity: 0, scale: 0.95, y: -10 }}
-								className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-20 py-1 overflow-hidden"
-							>
-								<button
-									onClick={() => {
-										setIsMenuOpen(false);
-										onEdit?.();
+						<AnimatePresence>
+							{isMenuOpen && (
+								<motion.div
+									initial={{
+										opacity: 0,
+										scale: 0.95,
+										y: -10,
+										transformOrigin: "top right",
 									}}
-									className="w-full cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+									animate={{ opacity: 1, scale: 1, y: 0 }}
+									exit={{ opacity: 0, scale: 0.95, y: -10 }}
+									className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-20 py-1 overflow-hidden"
 								>
-									<FiEdit2
-										size={14}
-										className="text-blue-500"
-									/>
-									Editar Lote
-								</button>
-								<button
-									onClick={() => {
-										setIsMenuOpen(false);
-										onDelete?.();
-									}}
-									className="w-full cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left font-medium"
-								>
-									<FiTrash2 size={14} />
-									Eliminar
-								</button>
-							</motion.div>
-						)}
-					</AnimatePresence>
-				</div>
+									<button
+										onClick={() => {
+											setIsMenuOpen(false);
+											onEdit?.();
+										}}
+										className="w-full cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+									>
+										<FiEdit2
+											size={14}
+											className="text-blue-500"
+										/>
+										Editar Lote
+									</button>
+									<button
+										onClick={() => {
+											setIsMenuOpen(false);
+											onDelete?.();
+										}}
+										className="w-full cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left font-medium"
+									>
+										<FiTrash2 size={14} />
+										Eliminar
+									</button>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</div>
+				)}
 			</div>
 			<div className="p-5 flex flex-col flex-1">
 				<div className="flex justify-between items-start mb-3">

@@ -24,6 +24,7 @@ import { getDotStateColor, getStateColor } from "../utils/leadsFormatters";
 import { DetailItem } from "./DetailItem";
 import { TimelineItem } from "./TimelineItem";
 import { PhoneLinkBadge } from "@/shared/components";
+import { useAuthStore } from "@/features/auth";
 
 interface LeadCardProps {
 	lead: Lead;
@@ -71,6 +72,7 @@ export const LeadCard = ({ lead, onEdit, onDelete, onChangeStatus }: LeadCardPro
 	const menuRef = useClickOutside(() => setIsMenuOpen(false));
 
 	const { persona } = lead;
+	const { isAdmin } = useAuthStore()
 
 	const fullName = getFullName(persona.nombres, persona.apellidos);
 	const initials = getInitials(persona.nombres, persona.apellidos);
@@ -258,25 +260,29 @@ export const LeadCard = ({ lead, onEdit, onDelete, onChangeStatus }: LeadCardPro
 									<FiXCircle size={14} />
 									Marcar Perdido
 								</button>
-								<div className="h-px bg-gray-100 dark:bg-gray-700" />
-								<button
-									type="button"
-									onClick={() => {
-										setIsMenuOpen(false);
-										onDelete?.();
-									}}
-									className="
-                    flex w-full items-center gap-2
-                    px-3.5 py-2.5
-                    text-left text-sm
-                    text-red-600 dark:text-red-400
-                    hover:bg-red-50 dark:hover:bg-red-900/10
-                    cursor-pointer
-                  "
-								>
-									<FiTrash2 size={14} />
-									Eliminar
-								</button>
+								{isAdmin && (
+									<>
+										<div className="h-px bg-gray-100 dark:bg-gray-700" />
+										<button
+											type="button"
+											onClick={() => {
+												setIsMenuOpen(false);
+												onDelete?.();
+											}}
+											className="
+												flex w-full items-center gap-2
+												px-3.5 py-2.5
+												text-left text-sm
+												text-red-600 dark:text-red-400
+												hover:bg-red-50 dark:hover:bg-red-900/10
+												cursor-pointer
+											"
+										>
+											<FiTrash2 size={14} />
+											Eliminar
+										</button>
+									</>
+								)}
 							</motion.div>
 						)}
 					</div>
