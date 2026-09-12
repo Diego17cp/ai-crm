@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuthStore } from "../store/auth.store"
 import { apiClient, setupAuthInterceptor } from "@/core/api";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@/core/types";
 import { AppLoader } from "@/core/components";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { setUser, clearAuth, isAuthenticated } = useAuthStore();
-    const [isInitialized, setIsInitialized] = useState(false);
-    const location = useLocation();
+    const { setUser, clearAuth, setInitialized } = useAuthStore();
     const navigate = useNavigate();
     useEffect(() => {
         setupAuthInterceptor();
@@ -35,20 +33,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => window.removeEventListener("auth:logout", handleLogoutEvt);
     }, [navigate]);
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (!isLoading && isFetched) setIsInitialized(true);
-    }, [isLoading, isFetched]);
-    useEffect(() => {
-        if (!isInitialized) return;
-        const isAuthRoute = location.pathname.startsWith("/auth");
-        const isAdminRoute = location.pathname.startsWith("/admin");
-        if (!isAuthenticated && !isAuthRoute && isAdminRoute) {
-            navigate("/auth/login", {
-                replace: true,
-                state: { from: location.pathname },
-            });
-        }
-    }, [isInitialized, location.pathname]);
-    if (isLoading || !isInitialized) return <AppLoader />;
+        if (!isLoading && isFetched) setInitialized(true);
+    }, [isLoading, isFetched, setInitialized]);
+    
+    if (isLoading) return <AppLoader />;
     return <>{children}</>;
 };

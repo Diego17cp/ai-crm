@@ -6,8 +6,10 @@ interface AuthState {
 	user: User | null;
 	isAuthenticated: boolean;
 	isAdmin: boolean;
+	isInitialized: boolean;
 	setUser: (user: User | null) => void;
 	clearAuth: () => void;
+	setInitialized: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -15,11 +17,12 @@ export const useAuthStore = create<AuthState>()(
 		user: null,
 		isAuthenticated: false,
 		isAdmin: false,
-		setUser: (user: User) =>
+		isInitialized: false,
+		setUser: (user) =>
 			set(() => ({
 				user,
-				isAuthenticated: true,
-				isAdmin: user.rol?.toLowerCase() === "admin",
+				isAuthenticated: !!user,
+				isAdmin: user?.rol?.toLowerCase() === "admin",
 			})),
 		clearAuth: () =>
 			set(() => ({
@@ -27,5 +30,6 @@ export const useAuthStore = create<AuthState>()(
 				isAuthenticated: false,
 				isAdmin: false,
 			})),
+		setInitialized: (value) => set(() => ({ isInitialized: value })),
 	})),
 );
