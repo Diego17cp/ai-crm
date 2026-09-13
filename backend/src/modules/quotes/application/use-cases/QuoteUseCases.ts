@@ -138,8 +138,9 @@ export class QuoteUseCases {
 			);
 
 		if (cotizacion.id_conversacion) {
-			const mensaje =
-				"Gracias por tu paciencia. Uno de nuestros asesores revisó tu solicitud y se pondrá en contacto contigo directamente para conversar sobre las condiciones de tu cotización. 🙂";
+			const mensaje = motivo 
+				? `Gracias por tu paciencia. Uno de nuestros asesores revisó tu solicitud y nos indicó lo siguiente: "${motivo}". Se pondrá en contacto contigo directamente para conversar sobre las condiciones de tu cotización. 🙂`
+				: "Gracias por tu paciencia. Uno de nuestros asesores revisó tu solicitud y se pondrá en contacto contigo directamente para conversar sobre las condiciones de tu cotización. 🙂";
 			await this.chatbotRepo.saveMessage(
 				cotizacion.id_conversacion,
 				"BOT",

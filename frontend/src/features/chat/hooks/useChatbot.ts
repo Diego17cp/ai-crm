@@ -64,12 +64,13 @@ export const useChatbot = () => {
 				}]);
 			}
 		};
-		const handleNewMessage = (payload: { chatId: string, content: string, role: string }) => {
+		const handleNewMessage = (payload: { chatId: string, content: string, role: string, attachment?: ToolAttachment }) => {
 			if (payload.chatId === activeChatIdRef.current && payload.role !== "cliente") {
 				setLocalMessages(prev => [...prev, {
-					id: `asesor-${Date.now()}`,
-					role: "asesor",
+					id: `${payload.role}-${Date.now()}`,
+					role: payload.role === "bot" ? "bot" : "asesor",
 					content: payload.content,
+					attachments: payload.attachment ? [payload.attachment] : undefined
 				}]);
 			}
 		}

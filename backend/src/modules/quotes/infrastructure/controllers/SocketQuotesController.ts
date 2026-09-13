@@ -29,12 +29,12 @@ export class SocketQuotesController {
 				}
 			},
 		);
-    socket.on("client:REJECT_REVIEW", async (payload: { quoteId: number, asesorId: string }) => {
+    socket.on("client:REJECT_REVIEW", async (payload: { quoteId: number, asesorId: string, motivo: string }) => {
       try {
-        await this.quoteUseCases.rejectReview(payload.quoteId, payload.asesorId)
+        await this.quoteUseCases.rejectReview(payload.quoteId, payload.asesorId, payload.motivo)
         this.io.emit("server:QUOTE_REJECTED", {
           quoteId: payload.quoteId,
-          asesorId: payload.asesorId
+          asesorId: payload.asesorId,
         })
         socket.leave(String(payload.quoteId))
       } catch (error: any) {
