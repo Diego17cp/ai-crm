@@ -872,17 +872,21 @@ export class ChatToolsRegistry implements IToolsRegistry {
 			const lote = await this.prisma.lotes.findUnique({
 				where: { id: args.id_lote },
 				include: {
+					imagenes: true,
 					manzana: {
 						include: {
 							etapa: {
 								include: {
-									proyecto: true,
+									proyecto: {
+										include: { ubigeo: true },
+									},
 								},
 							},
 						},
 					},
 				},
 			});
+
 			if (!lote)
 				return {
 					message:
@@ -1042,7 +1046,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 					prompt_result: `Cotización registrada (código ${codigo}), pero requiere revisión de un asesor antes de enviarse porque las condiciones solicitadas se salen de los parámetros estándar. Dile al cliente que un asesor la revisará y se la enviará en breve.`,
 				};
 			}
-			const proyectoNombre = lote.manzana.etapa.proyecto.nombre;
+			const proyecto = lote.manzana.etapa.proyecto;
 			const loteIdentificador = `${lote.manzana.codigo}-${lote.numero_lote.replace(/^LT-/i, "")}`;
 
 			const pdfBuffer = await this.quotePdfService.generate({
@@ -1050,7 +1054,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				clienteNombre:
 					`${lead.persona.nombres ?? ""} ${lead.persona.apellidos ?? ""}`.trim() ||
 					"Cliente",
-				proyectoNombre,
+				proyectoNombre: proyecto.nombre,
 				loteIdentificador,
 				areaM2: Number(lote.area_m2),
 				precioLista,
@@ -1060,6 +1064,15 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				cuotaInicial,
 				numeroCuotas,
 				montoCuota,
+				ubicacionProyecto: proyecto.ubicacion,
+				ubigeoProyecto: proyecto.ubigeo?.nombre,
+				referenciaLote: lote.ubicacion_referencial,
+				partidaRegistral: lote.numero_partida,
+				imagenesLote: lote.imagenes.map((img) => ({
+					url: img.url_imagen,
+					esPrincipal: img.es_principal,
+					descripcion: img.descripcion,
+				})),
 			});
 
 			const pdfUrl = saveQuotePdf(pdfBuffer, codigo);
@@ -1073,7 +1086,7 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				url: pdfUrl,
 				filename: `Cotizacion_${codigo}.pdf`,
 				whatsappTemplateName: "envio_cotizacion",
-				whatsappTemplateParams: [proyectoNombre],
+				whatsappTemplateParams: [proyecto.nombre],
 			});
 
 			if (docResult.deliveredByWhatsapp)

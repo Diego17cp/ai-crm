@@ -65,6 +65,15 @@ export class QuoteUseCases {
 			montoCuota: cotizacion.monto_cuota
 				? Number(cotizacion.monto_cuota)
 				: undefined,
+			ubicacionProyecto: proyecto.ubicacion,
+			ubigeoProyecto: proyecto.ubigeo?.nombre,
+			referenciaLote: cotizacion.lote.ubicacion_referencial,
+			partidaRegistral: cotizacion.lote.numero_partida,
+			imagenesLote: cotizacion.lote.imagenes?.map((img) => ({
+				url: img.url_imagen,
+				esPrincipal: img.es_principal,
+				descripcion: img.descripcion,
+			})),
 		});
 		const pdfUrl = saveQuotePdf(pdfBuffer, cotizacion.codigo);
 
@@ -214,17 +223,21 @@ export class QuoteUseCases {
 		const lote = await this.prisma.lotes.findUnique({
 			where: { id: data.id_lote },
 			include: {
+				imagenes: true,
 				manzana: {
 					include: {
 						etapa: {
 							include: {
-								proyecto: true,
+								proyecto: {
+									include: { ubigeo: true },
+								},
 							},
 						},
 					},
 				},
 			},
 		});
+
 
 		if (!lote) throw new AppError("Lote no encontrado", 404);
 		if (lote.estado !== "Disponible")
@@ -312,6 +325,15 @@ export class QuoteUseCases {
 			cuotaInicial,
 			numeroCuotas,
 			montoCuota,
+			ubicacionProyecto: lote.manzana.etapa.proyecto.ubicacion,
+			ubigeoProyecto: lote.manzana.etapa.proyecto.ubigeo?.nombre,
+			referenciaLote: lote.ubicacion_referencial,
+			partidaRegistral: lote.numero_partida,
+			imagenesLote: lote.imagenes.map((img) => ({
+				url: img.url_imagen,
+				esPrincipal: img.es_principal,
+				descripcion: img.descripcion,
+			})),
 		});
 		const pdfUrl = saveQuotePdf(pdfBuffer, codigo);
 		let entregadaPorWhatsapp = false;

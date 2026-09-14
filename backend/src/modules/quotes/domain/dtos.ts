@@ -2,9 +2,11 @@ import {
 	Cotizaciones,
 	Etapas,
 	Lotes,
+	LotesImagenes,
 	Manzanas,
 	Personas,
 	Proyectos,
+	Ubigeos,
 	Usuarios,
 } from "generated/prisma/client";
 
@@ -21,9 +23,12 @@ export type QuoteWithRelations = Cotizaciones & {
 	asesor: Usuarios | null;
 	revisor: Usuarios | null;
 	lote: Lotes & {
+		imagenes?: LotesImagenes[];
 		manzana: Manzanas & {
 			etapa: Etapas & {
-				proyecto: Proyectos;
+				proyecto: Proyectos & {
+					ubigeo?: Ubigeos | null;
+				};
 			};
 		};
 	};

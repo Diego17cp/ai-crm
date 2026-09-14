@@ -1,6 +1,12 @@
 import { Prisma, PrismaClient } from "generated/prisma/client";
 import { IQuoteRepository } from "../../application/ports/IQuoteRepository";
-import { GetQuotesQueryDTO, PaginatedResult, QuoteDTO, QuoteQueueItemDTO, QuoteWithRelations } from "../../domain/dtos";
+import {
+	GetQuotesQueryDTO,
+	PaginatedResult,
+	QuoteDTO,
+	QuoteQueueItemDTO,
+	QuoteWithRelations,
+} from "../../domain/dtos";
 import { CotizacionesWhereInput } from "generated/prisma/models";
 
 export class PrismaQuoteRepository implements IQuoteRepository {
@@ -30,8 +36,17 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 				asesor: true,
 				lote: {
 					include: {
+						imagenes: true,
 						manzana: {
-							include: { etapa: { include: { proyecto: true } } },
+							include: {
+								etapa: {
+									include: {
+										proyecto: {
+											include: { ubigeo: true },
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -183,34 +198,63 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 		};
 	}
 
-	async findQuotes(query: GetQuotesQueryDTO): Promise<PaginatedResult<QuoteDTO>> {
+	async findQuotes(
+		query: GetQuotesQueryDTO,
+	): Promise<PaginatedResult<QuoteDTO>> {
 		const { q, estado, generado_por, id_usuario, page, limit } = query;
-		const skip = (page - 1) * limit
-		const whereCondition: CotizacionesWhereInput = {}
+		const skip = (page - 1) * limit;
+		const whereCondition: CotizacionesWhereInput = {};
 		if (q) {
 			whereCondition.OR = [
 				{ codigo: { contains: q, mode: "insensitive" } },
 				{ persona: { nombres: { contains: q, mode: "insensitive" } } },
-				{ persona: { apellidos: { contains: q, mode: "insensitive" } } },
+				{
+					persona: {
+						apellidos: { contains: q, mode: "insensitive" },
+					},
+				},
 				{ asesor: { nombres: { contains: q, mode: "insensitive" } } },
 				{ asesor: { apellidos: { contains: q, mode: "insensitive" } } },
 				{ revisor: { nombres: { contains: q, mode: "insensitive" } } },
-				{ revisor: { apellidos: { contains: q, mode: "insensitive" } } },
-				{ lote: { manzana: { etapa: { proyecto: { nombre: { contains: q, mode: "insensitive" } } } } } },
-				{ lote: { manzana: { codigo: { contains: q, mode: "insensitive" } } } },
+				{
+					revisor: {
+						apellidos: { contains: q, mode: "insensitive" },
+					},
+				},
+				{
+					lote: {
+						manzana: {
+							etapa: {
+								proyecto: {
+									nombre: {
+										contains: q,
+										mode: "insensitive",
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					lote: {
+						manzana: {
+							codigo: { contains: q, mode: "insensitive" },
+						},
+					},
+				},
 				{ lote: { numero_lote: { contains: q, mode: "insensitive" } } },
 			];
 		}
 		if (estado) whereCondition.estado = estado;
 		if (generado_por) whereCondition.generado_por = generado_por;
 		if (id_usuario) {
-        whereCondition.OR = [
-            ...(whereCondition.OR || []),
-            { id_asesor: id_usuario },
-            { id_revisor: id_usuario }
-        ];
-    }
-		
+			whereCondition.OR = [
+				...(whereCondition.OR || []),
+				{ id_asesor: id_usuario },
+				{ id_revisor: id_usuario },
+			];
+		}
+
 		const [total, cotizaciones] = await Promise.all([
 			this.prisma.cotizaciones.count({ where: whereCondition }),
 			this.prisma.cotizaciones.findMany({
@@ -223,22 +267,22 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 						select: {
 							id: true,
 							nombres: true,
-							apellidos: true
-						}
+							apellidos: true,
+						},
 					},
 					asesor: {
 						select: {
 							id: true,
 							nombres: true,
 							apellidos: true,
-						}
+						},
 					},
 					revisor: {
 						select: {
 							id: true,
 							nombres: true,
 							apellidos: true,
-						}
+						},
 					},
 					lote: {
 						include: {
@@ -246,18 +290,18 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 								include: {
 									etapa: {
 										include: {
-											proyecto: true
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			})
-		])
-		const totalPages = Math.ceil(total / limit)
-		const data = cotizaciones.map(cot => ({
+											proyecto: true,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}),
+		]);
+		const totalPages = Math.ceil(total / limit);
+		const data = cotizaciones.map((cot) => ({
 			id: cot.id,
 			codigo: cot.codigo,
 			cliente: {
@@ -265,21 +309,25 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 				nombres: cot.persona.nombres,
 				apellidos: cot.persona.apellidos,
 			},
-			asesor: cot.asesor ? {
-				id: cot.asesor.id,
-				nombres: cot.asesor.nombres,
-				apellidos: cot.asesor.apellidos,
-			} : null,
-			revisor: cot.revisor ? {
-				id: cot.revisor.id,
-				nombres: cot.revisor.nombres,
-				apellidos: cot.revisor.apellidos,
-			} : null,
+			asesor: cot.asesor
+				? {
+						id: cot.asesor.id,
+						nombres: cot.asesor.nombres,
+						apellidos: cot.asesor.apellidos,
+					}
+				: null,
+			revisor: cot.revisor
+				? {
+						id: cot.revisor.id,
+						nombres: cot.revisor.nombres,
+						apellidos: cot.revisor.apellidos,
+					}
+				: null,
 			precio_final: Number(cot.precio_final),
 			created_at: cot.created_at,
 			estado: cot.estado,
 			generado_por: cot.generado_por,
-		}))
+		}));
 		return {
 			data,
 			meta: {
@@ -289,7 +337,7 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 				totalPages,
 				hasNextPage: page < totalPages,
 				hasPreviousPage: page > 1,
-			}
-		}
+			},
+		};
 	}
 }
