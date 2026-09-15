@@ -46,7 +46,7 @@ export const DeleteLeadModal = ({ isOpen, onClose, lead }: Props) => {
             setError("Error al intentar eliminar el cliente.");
         }
     };
-    const fullName = [lead.nombres, lead.apellidos].filter(Boolean).join(" ") || "Sin Nombre";
+    const fullName = [lead.persona.nombres, lead.persona.apellidos].filter(Boolean).join(" ") || "Sin Nombre";
     return (
         <AnimatePresence>
             {isOpen && (
