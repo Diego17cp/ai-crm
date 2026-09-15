@@ -681,32 +681,9 @@ export class ChatToolsRegistry implements IToolsRegistry {
 				email: args.email,
 			});
 			const personaId = persona.id;
-			let lead: { id: number } | null = null;
-			if (conversacionId) {
-				const existente = await this.prisma.conversaciones.findUnique({
-					where: { id: conversacionId },
-					select: { id_lead: true },
-				});
-				if (existente?.id_lead) {
-					lead = await this.prisma.leads.findUnique({
-						where: { id: existente.id_lead },
-					});
-				}
-			}
-			if (!lead) {
-				lead = await this.prisma.leads.findFirst({
-					where: {
-						id_persona: personaId,
-						estado: { notIn: ["GANADO", "PERDIDO"] },
-					},
-				});
-			}
-			if (!lead) {
-				lead = await this.prisma.leads.create({
-					data: { id_persona: personaId, estado: "NUEVO" },
-				});
-			}
-			const leadId = lead.id;
+			const leadId = (
+				await this.leadResolver.resolveActiveLeadForPersona(personaId)
+			).id;
 			let proyectoId: number | undefined;
 			if (args.nombre_proyecto) {
 				const proyecto = await this.prisma.proyectos.findFirst({
