@@ -19,15 +19,9 @@ import { ClientSearchAutocomplete } from "./ClientSearchAutocomplete";
 import { useUbigeos } from "@/core/hooks";
 
 import type { CreateAppointmentPayload } from "../types";
-import type {
-	Sexo,
-	EstadoCivil,
-	Solvencia,
-	Actitud,
-	TipoTelefono,
-} from "@/features/leads/types";
+
 import type { Lote } from "@/features/lots/types";
-import type { ApiError } from "@/core/types";
+import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
 import { useAuthStore } from "@/features/auth";
 import { classes, options } from "@/shared/constants";
@@ -231,8 +225,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 				ocupacion: ocupacion.trim() || undefined,
 				sexo: (sexo as Sexo) || undefined,
 				estado_civil: (estadoCivil as EstadoCivil) || undefined,
-				solvencia: (solvencia as Solvencia) || undefined,
-				actitud: (actitud as Actitud) || undefined,
 				id_ubigeo: idUbigeo || undefined,
 				telefonos: phones
 					.filter((p) => p.numero.trim())
@@ -259,8 +251,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		ocupacion,
 		sexo,
 		estadoCivil,
-		solvencia,
-		actitud,
 		idUbigeo,
 		phones,
 	]);
