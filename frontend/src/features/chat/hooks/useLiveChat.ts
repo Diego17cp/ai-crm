@@ -37,7 +37,7 @@ export const useLiveChat = (selectedChatIdRef?: React.RefObject<string | null>) 
 	const { isLoading: isLoadingActive } = useQuery({
 		queryKey: ["live-chat-active"],
 		queryFn: async () => {
-			const data = await liveChatService.getActiveChats();
+			const data = await liveChatService.getActiveChats(user);
 			setInitialActiveChats(data);
 			if (socket.current) {
 				data.forEach((chat) => {
