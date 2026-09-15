@@ -7,13 +7,13 @@ import { PrismaClient } from "generated/prisma/client";
 import { MetricsService } from "@/core/crm/MetricsService";
 
 export class ChatUseCases {
-	private readonly metricsService: MetricsService
+	private readonly metricsService: MetricsService;
 	constructor(
 		private chatsRepository: IChatsRepository,
 		private leadTransitionService: LeadTransitionService,
 		private prisma: PrismaClient,
 	) {
-		this.metricsService = new MetricsService()
+		this.metricsService = new MetricsService();
 	}
 	async getChats(query: GetChatsQueryDTO) {
 		return this.chatsRepository.findChats(query);
@@ -82,14 +82,26 @@ export class ChatUseCases {
 				content,
 				senderRole,
 			);
-			if (senderRole === "ASESOR") { 
-				await this.tryTransitionToContacted(chatId)
-				const lastClientMessage = await this.chatsRepository.findLastClientMessageTime(chatId)
+			if (senderRole === "ASESOR") {
+				await this.tryTransitionToContacted(chatId);
+				const lastClientMessage =
+					await this.chatsRepository.findLastClientMessageTime(
+						chatId,
+					);
 				if (lastClientMessage) {
-					const chat = await this.chatsRepository.findChatById(chatId)
+					const chat =
+						await this.chatsRepository.findChatById(chatId);
 					if (chat?.asesor?.id) {
-						const seconds = Math.round((Date.now() - lastClientMessage.getTime()) / 1000)
-						await this.prisma.$transaction((tx) => this.metricsService.incrementTiempoRespuesta(chat.asesor?.id!, seconds, tx))
+						const seconds = Math.round(
+							(Date.now() - lastClientMessage.getTime()) / 1000,
+						);
+						await this.prisma.$transaction((tx) =>
+							this.metricsService.incrementTiempoRespuesta(
+								chat.asesor?.id!,
+								seconds,
+								tx,
+							),
+						);
 					}
 				}
 			}
@@ -102,22 +114,22 @@ export class ChatUseCases {
 		}
 	}
 	private async tryTransitionToContacted(chatId: string) {
-		const chat = await this.chatsRepository.findChatById(chatId)
-		if (!chat?.lead?.id) return
+		const chat = await this.chatsRepository.findChatById(chatId);
+		if (!chat?.lead?.id) return;
 		const lead = await this.prisma.leads.findUnique({
 			where: { id: chat.lead.id },
-			select: { estado: true }
-		})
-		if (lead?.estado !== "NUEVO") return
-		await this.prisma.$transaction(tx => 
+			select: { estado: true },
+		});
+		if (lead?.estado !== "NUEVO") return;
+		await this.prisma.$transaction((tx) =>
 			this.leadTransitionService.transition({
 				leadId: chat.lead?.id!,
 				nuevoEstado: "CONTACTADO",
 				idUsuario: chat.asesor?.id ?? undefined,
 				motivo: "Primer mensaje del asesor en el chat en vivo",
-				tx
-			})
-		)
+				tx,
+			}),
+		);
 	}
 	async updateChatStatus(
 		chatId: string,
@@ -144,10 +156,14 @@ export class ChatUseCases {
 			throw new AppError("ID de chat es requerido", 400);
 		return this.chatsRepository.findEventsByChatId(chatId);
 	}
-
 	async getAssignmentsByChatId(chatId: string) {
 		if (!chatId || chatId.trim() === "")
 			throw new AppError("ID de chat es requerido", 400);
 		return this.chatsRepository.findAssignmentsByChatId(chatId);
+	}
+	async forceAssignChat(chatId: string, asesorId: string) {
+		if (!chatId || !asesorId)
+			throw new AppError("chatId y asesorId son requeridos", 400);
+		await this.chatsRepository.forceAssignChat(chatId, asesorId);
 	}
 }

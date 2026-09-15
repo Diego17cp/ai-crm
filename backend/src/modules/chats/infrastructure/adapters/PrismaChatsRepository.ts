@@ -441,7 +441,6 @@ export class PrismaChatsRepository implements IChatsRepository {
 			created_at: e.created_at,
 		}));
 	}
-
 	async findAssignmentsByChatId(chatId: string): Promise<AsignacionDTO[]> {
 		return this.prisma.conversacionAsignacion.findMany({
 			where: { id_conversacion: chatId },
@@ -467,5 +466,39 @@ export class PrismaChatsRepository implements IChatsRepository {
 			orderBy: { created_at: "desc" },
 		});
 		return msg?.created_at ?? null;
+	}
+	async forceAssignChat(chatId: string, asesorId: string): Promise<void> {
+		await this.prisma.$transaction(async tx => {
+			await tx.conversaciones.update({
+				where: { id: chatId },
+				data: {
+					estado: "ATENDIDO_HUMANO",
+					id_usuario_asignado: asesorId,
+					fecha_asignacion: new Date()
+				}
+			})
+			await tx.conversacionAsignacion.updateMany({
+				where: { id_conversacion: chatId, fecha_fin: null },
+				data: { fecha_fin: new Date() }
+			})
+			await tx.conversacionAsignacion.create({
+				data: {
+					id_conversacion: chatId,
+					id_usuario: asesorId,
+					fecha_inicio: new Date(),
+					motivo: "Seguimiento de cotización",
+				},
+			});
+			await tx.eventosConversacion.create({
+				data: {
+					id_conversacion: chatId,
+					tipo: "ASESOR_ASIGNADO",
+					id_usuario: asesorId,
+					metadata: {
+						origen: "cotizacion"
+					}
+				}
+			})
+		});
 	}
 }

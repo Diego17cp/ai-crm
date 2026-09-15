@@ -211,6 +211,7 @@ export class QuoteUseCases {
 			pdf_url: quote.pdf_url,
 			generado_por: quote.generado_por,
 			created_at: quote.created_at,
+			id_conversacion: quote.id_conversacion
 		};
 	}
 	async getQuotes(query: GetQuotesQueryDTO) {

@@ -16,10 +16,19 @@ export interface IChatsRepository {
 	findChatBySessionId(sessionId: string): Promise<ChatDTO | null>;
 	findLiveChatQueue(): Promise<LiveChatQueueItemDTO[]>;
 	findLiveActiveChats(idUsuario: string): Promise<LiveChatQueueItemDTO[]>;
-	findLastClientMessageTime(chatId: string): Promise<Date | null>
+	findLastClientMessageTime(chatId: string): Promise<Date | null>;
 	takeChatFromQueue(chatId: string, asesorId: string): Promise<any>;
-	saveMessage(chatId: string, content: string, senderRole: "CLIENTE" | "ASESOR" | "BOT"): Promise<any>;
-	updateChatStatus(chatId: string, newStatus: EstadoChat, idUsuario?: string): Promise<void>;
-	findEventsByChatId(chatId: string): Promise<EventDTO[]>
+	saveMessage(
+		chatId: string,
+		content: string,
+		senderRole: "CLIENTE" | "ASESOR" | "BOT",
+	): Promise<any>;
+	updateChatStatus(
+		chatId: string,
+		newStatus: EstadoChat,
+		idUsuario?: string,
+	): Promise<void>;
+	findEventsByChatId(chatId: string): Promise<EventDTO[]>;
 	findAssignmentsByChatId(chatId: string): Promise<AsignacionDTO[]>;
+	forceAssignChat(chatId: string, asesorId: string): Promise<void>;
 }

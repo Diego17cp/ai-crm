@@ -73,6 +73,7 @@ export interface QuoteDetailDTO {
 	pdf_url: string | null;
 	generado_por: QuoteGeneratedBy;
 	created_at: Date;
+	id_conversacion: string | null;
 }
 
 export interface QuoteDTO {
