@@ -34,6 +34,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
     const [numeroPartida, setNumeroPartida] = useState("");
     const [areaM2, setAreaM2] = useState("");
     const [precioM2, setPrecioM2] = useState("");
+    const [ubicacionReferencial, setUbicacionReferencial] = useState("");
 
     const [imagenes, setImagenes] = useState<LoteImagenLocal[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +70,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
         precio_m2: precioM2,
         precio_total: String(Number(areaM2 || 0) * Number(precioM2 || 0)),
         estado: "Disponible",
+				ubicacion_referencial: ubicacionReferencial || null,
     });
 
     const isSubmitting = createLoteMutation.isPending;
@@ -302,6 +304,23 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
                                             </label>
                                             <input type="number" step="0.01" value={precioM2} onChange={(e) => setPrecioM2(e.target.value)} disabled={isSubmitting} placeholder="Ej: 1500" className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20" />
                                         </div>
+																				<div className="flex flex-col gap-1.5 md:col-span-2">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Ubicación Referencial (Opcional)
+											</label>
+											<input
+												type="text"
+												value={ubicacionReferencial}
+												onChange={(e) =>
+													setUbicacionReferencial(
+														e.target.value,
+													)
+												}
+												disabled={isSubmitting}
+												placeholder="Ej: En una esquina"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+											/>
+										</div>
                                         <div className="md:col-span-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-4 rounded-xl flex justify-between items-center">
                                             <span className="text-emerald-700 dark:text-emerald-400 font-medium">
                                                 Precio Total Referencial
