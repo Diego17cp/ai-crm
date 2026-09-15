@@ -1,16 +1,15 @@
 import { apiClient } from "@/core/api";
-import { useAuthStore } from "@/features/auth";
 import type { QuoteQueueItem } from "../types/live";
 import type { AllQuotesResponse, CreateQuotePayload, QuoteDetail, QuoteFilters } from "../types";
+import type { User } from "@/core/types";
 
-const { user } = useAuthStore.getState();
 
 export const quotesService = {
 	getPendingQueue: async (): Promise<QuoteQueueItem[]> => {
 		const response = await apiClient.get<{ success: boolean; data: QuoteQueueItem[] }>("/cotizaciones/queue");
 		return response.data.data;
 	},
-	getMyReviews: async (): Promise<QuoteQueueItem[]> => {
+	getMyReviews: async (user: User | null): Promise<QuoteQueueItem[]> => {
 		const response = await apiClient.get<{ success: boolean; data: QuoteQueueItem[] }>(`/cotizaciones/mine?id_usuario=${user?.id}`);
 		return response.data.data;
 	},

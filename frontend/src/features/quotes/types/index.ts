@@ -20,6 +20,7 @@ export interface QuoteDetail {
 	pdf_url: string | null;
 	generado_por: GeneradoPor;
 	created_at: string;
+	id_conversacion: string | null
 }
 
 export type GeneradoPor = "BOT" | "ASESOR";

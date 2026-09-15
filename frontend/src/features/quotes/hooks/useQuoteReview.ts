@@ -34,7 +34,7 @@ export const useQuoteReview = () => {
 	const { isLoading: isLoadingMine } = useQuery({
 		queryKey: ["quote-review-mine"],
 		queryFn: async () => {
-			const data = await quotesService.getMyReviews();
+			const data = await quotesService.getMyReviews(user);
 			setInitialMyReviews(data);
 			return data;
 		},
@@ -79,56 +79,100 @@ export const useQuoteReview = () => {
 			});
 		};
 
-		const handleQuoteAssigned = (payload: { quoteId: number; asesorId: string }) => {
+		const handleQuoteAssigned = (payload: {
+			quoteId: number;
+			asesorId: string;
+		}) => {
 			if (payload.asesorId === user?.id) {
 				moveQuoteToMine(payload.quoteId);
 				toast.success("Tomaste esta revisión");
 			} else {
 				removeQuoteFromQueue(payload.quoteId);
 			}
+			queryClient.invalidateQueries({
+				queryKey: ["quote", payload.quoteId],
+			});
 		};
 
 		const handleQuoteApproved = (payload: { quoteId: number }) => {
 			resolveQuote(payload.quoteId);
-			queryClient.invalidateQueries({ queryKey: ["quote", payload.quoteId] });
+			queryClient.invalidateQueries({
+				queryKey: ["quote", payload.quoteId],
+			});
 			toast.success("Cotización aprobada y enviada al cliente");
 		};
 
 		const handleQuoteRejected = (payload: { quoteId: number }) => {
 			resolveQuote(payload.quoteId);
-			queryClient.invalidateQueries({ queryKey: ["quote", payload.quoteId] });
+			queryClient.invalidateQueries({
+				queryKey: ["quote", payload.quoteId],
+			});
 			toast.info("Cotización rechazada");
 		};
 
-		currentSocket.on("server:QUOTE_REQUIRES_REVIEW", handleQuoteRequiresReview);
+		currentSocket.on(
+			"server:QUOTE_REQUIRES_REVIEW",
+			handleQuoteRequiresReview,
+		);
 		currentSocket.on("server:QUOTE_ASSIGNED", handleQuoteAssigned);
 		currentSocket.on("server:QUOTE_APPROVED", handleQuoteApproved);
 		currentSocket.on("server:QUOTE_REJECTED", handleQuoteRejected);
 
 		return () => {
-			currentSocket.off("server:QUOTE_REQUIRES_REVIEW", handleQuoteRequiresReview);
+			currentSocket.off(
+				"server:QUOTE_REQUIRES_REVIEW",
+				handleQuoteRequiresReview,
+			);
 			currentSocket.off("server:QUOTE_ASSIGNED", handleQuoteAssigned);
 			currentSocket.off("server:QUOTE_APPROVED", handleQuoteApproved);
 			currentSocket.off("server:QUOTE_REJECTED", handleQuoteRejected);
 		};
-	}, [user, queryClient, addQuoteToQueue, removeQuoteFromQueue, moveQuoteToMine, resolveQuote]);
+	}, [
+		user,
+		queryClient,
+		addQuoteToQueue,
+		removeQuoteFromQueue,
+		moveQuoteToMine,
+		resolveQuote,
+	]);
 
 	const handleTakeReview = (quoteId: number) => {
 		if (!user) {
 			toast.error("No estás autenticado.");
 			return;
 		}
-		socket.current?.emit("client:TAKE_REVIEW", { quoteId, asesorId: user.id });
+		socket.current?.emit("client:TAKE_REVIEW", {
+			quoteId,
+			asesorId: user.id,
+		});
 	};
 
 	const handleApprove = (quoteId: number) => {
 		if (!user) return;
-		socket.current?.emit("client:APPROVE_REVIEW", { quoteId, asesorId: user.id });
+		socket.current?.emit("client:APPROVE_REVIEW", {
+			quoteId,
+			asesorId: user.id,
+		});
 	};
 
 	const handleReject = (quoteId: number, motivo: string) => {
 		if (!user) return;
-		socket.current?.emit("client:REJECT_REVIEW", { quoteId, asesorId: user.id, motivo });
+		socket.current?.emit("client:REJECT_REVIEW", {
+			quoteId,
+			asesorId: user.id,
+			motivo,
+		});
+	};
+
+	const handleForceTakeChat = (conversacionId: string) => {
+		if (!user) {
+			toast.error("No estás autenticado.");
+			return;
+		}
+		socket.current?.emit("client:FORCE_TAKE_CHAT", {
+			chatId: conversacionId,
+			asesorId: user.id,
+		});
 	};
 
 	return {
@@ -137,5 +181,6 @@ export const useQuoteReview = () => {
 		handleTakeReview,
 		handleApprove,
 		handleReject,
+		handleForceTakeChat,
 	};
 };
