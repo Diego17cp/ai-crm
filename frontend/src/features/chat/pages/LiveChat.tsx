@@ -3,10 +3,15 @@ import { LiveSidebar } from "../components/live/LiveSidebar";
 import { LiveChatPanel } from "../components/live/LiveChatPanel";
 import { useLiveChat } from "../hooks/useLiveChat";
 import { useLiveChatStore } from "../store/useLiveChatStore";
+import { useLocation, useNavigate } from "react-router";
 
 export const LiveChat = () => {
-	const [activeTab, setActiveTab] = useState<"queue" | "active">("queue");
-	const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+	const location = useLocation()
+	const navigate = useNavigate()
+	const preselectedChatId = (location.state as { preselectedChatId?: string | null })?.preselectedChatId;
+
+	const [activeTab, setActiveTab] = useState<"queue" | "active">(preselectedChatId ? "active" : "queue");
+	const [selectedChatId, setSelectedChatId] = useState<string | null>(preselectedChatId ?? null);
 
 	const selectedChatIdRef = useRef<string | null>(null);
 
@@ -16,6 +21,12 @@ export const LiveChat = () => {
 			useLiveChatStore.getState().markAsRead(selectedChatId);
 		}
 	}, [selectedChatId]);
+
+	useEffect(() => {
+		if (preselectedChatId) {
+			navigate(location.pathname, { replace: true, state: null })
+		}
+	}, [])
 
 	const { isLoadingItems, handleTakeChat, handleSendMessage, useUpdateChatStatusMutation } =
 		useLiveChat(selectedChatIdRef);
