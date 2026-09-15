@@ -1,4 +1,6 @@
-import type { Actitud, CreateLeadPayload, Solvencia, Telefono } from "@/features/leads/types";
+import type { Telefono } from "@/core/types";
+import type { Actitud, Solvencia } from "@/features/clients/types";
+import type { CreateLeadPayload } from "@/features/leads/types";
 import type { Lote } from "@/features/lots/types";
 
 export type EstadoCita = 'PROGRAMADA' | 'ATENDIDA' | 'CANCELADA';
