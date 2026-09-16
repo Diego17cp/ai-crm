@@ -100,7 +100,7 @@ export const AllUsers = () => {
 				className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4"
 			>
 				<div className="flex flex-col lg:flex-row gap-4 items-center justify-between w-full">
-					<div className="relative w-full lg:w-96 shrink-0 z-50">
+					<div className="relative w-full lg:w-96 shrink-0 z-30">
 						<FiSearch
 							className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
 							size={18}
@@ -134,7 +134,7 @@ export const AllUsers = () => {
 						</div>
 					</div>
 					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-						<div className="z-40">
+						<div className="z-30">
 							<SearchableSelect
 								options={estadoOptions}
 								value={filters.estado || ""}

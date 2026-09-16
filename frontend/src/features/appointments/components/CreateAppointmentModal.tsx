@@ -635,7 +635,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 											animate={{ opacity: 1, x: 0 }}
 											className="flex flex-col gap-6"
 										>
-											<div className="grid grid-cols-3 gap-4">
+											<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 												<CardCheckbox
 													value={
 														clientMode ===

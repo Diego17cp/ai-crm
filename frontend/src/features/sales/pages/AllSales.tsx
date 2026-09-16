@@ -4,7 +4,7 @@ import {
 	FiPlus,
 	FiRefreshCw,
 	FiSearch,
-    FiX
+	FiX,
 } from "react-icons/fi";
 import { SearchableSelect } from "dialca-ui";
 import { useSales } from "../hooks/useSales";
@@ -59,7 +59,7 @@ export const AllSales = () => {
 		hasActiveFilters,
 	} = useSales();
 
-    const { openModal, closeModal, activeModal } = useVentaModals();
+	const { openModal, closeModal, activeModal } = useVentaModals();
 
 	return (
 		<div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
@@ -109,7 +109,7 @@ export const AllSales = () => {
 				className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4"
 			>
 				<div className="flex flex-col lg:flex-row gap-4 items-center justify-between w-full">
-					<div className="relative w-full lg:w-96 shrink-0 z-50">
+					<div className="relative w-full lg:w-96 shrink-0 z-30">
 						<FiSearch
 							className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
 							size={18}
@@ -121,29 +121,29 @@ export const AllSales = () => {
 							onChange={(e) => handleSearch(e.target.value)}
 							className="w-full px-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
 						/>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-6">
-                            {isFetching && searchTerm ? (
-                                <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <AnimatePresence>
-                                    {searchTerm && !isFetching && (
-                                        <motion.button
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.8 }}
-                                            onClick={clearSearch}
-                                            className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer p-1 rounded-md transition-colors"
-                                            type="button"
-                                        >
-                                            <FiX size={16} />
-                                        </motion.button>
-                                    )}
-                                </AnimatePresence>
-                            )}
-                        </div>
+						<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-6">
+							{isFetching && searchTerm ? (
+								<div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+							) : (
+								<AnimatePresence>
+									{searchTerm && !isFetching && (
+										<motion.button
+											initial={{ opacity: 0, scale: 0.8 }}
+											animate={{ opacity: 1, scale: 1 }}
+											exit={{ opacity: 0, scale: 0.8 }}
+											onClick={clearSearch}
+											className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer p-1 rounded-md transition-colors"
+											type="button"
+										>
+											<FiX size={16} />
+										</motion.button>
+									)}
+								</AnimatePresence>
+							)}
+						</div>
 					</div>
 					<div className="flex-1 w-full grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-						<div className="z-40">
+						<div className="z-30">
 							<SearchableSelect
 								options={estadoVentaOptions}
 								value={filters.estado_venta || ""}
@@ -249,10 +249,7 @@ export const AllSales = () => {
 				) : (
 					<div className="flex flex-col gap-3">
 						{sales.map((venta) => (
-							<SaleListItem
-                                key={venta.id}
-                                venta={venta} 
-                            />
+							<SaleListItem key={venta.id} venta={venta} />
 						))}
 					</div>
 				)}
@@ -271,10 +268,10 @@ export const AllSales = () => {
 					/>
 				</div>
 			)}
-            <CreateSaleModal
-                isOpen={activeModal === "create_sale"}
-                onClose={closeModal}
-            />
+			<CreateSaleModal
+				isOpen={activeModal === "create_sale"}
+				onClose={closeModal}
+			/>
 		</div>
 	);
 };

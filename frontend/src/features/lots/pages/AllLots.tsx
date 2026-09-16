@@ -157,7 +157,7 @@ export const AllLots = () => {
 					</div>
 				</div>
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-gray-100 dark:border-gray-800/60 pt-3">
-					<div className="flex flex-col z-40">
+					<div className="flex flex-col z-30">
 						{loadingProyectos ? (
 							<div className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-gray-500 text-sm animate-pulse">
 								Cargando proyectos...
