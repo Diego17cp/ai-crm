@@ -5,18 +5,16 @@ import {
 	FiCalendar,
 	FiChevronRight,
 	FiChevronLeft,
-	FiUserPlus,
-	FiUserCheck,
 	FiAlertCircle,
-	FiPlus,
-	FiTrash2,
+	FiTarget,
+	FiUser,
 } from "react-icons/fi";
 import { SearchableSelect } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
 import { useAppointments } from "../hooks/useAppointments";
 import { ClientSearchAutocomplete } from "./ClientSearchAutocomplete";
-import { useUbigeos } from "@/core/hooks";
+import { useDocTypes, useUbigeos } from "@/core/hooks";
 
 import type { CreateAppointmentPayload } from "../types";
 
@@ -26,14 +24,11 @@ import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
 import { useAuthStore } from "@/features/auth";
 import { classes, options } from "@/shared/constants";
 import { toast } from "sonner";
+import { CardCheckbox } from "@/shared/components/CardCheckbox";
+import { FaHandshake } from "react-icons/fa";
+import { NewLeadForAppointmentForm } from "./NewLeadAppointmentForm";
 
-const selectClasses = classes.searchableSelect
-
-const sexoOptions = options.sexo;
-const booleanOptions = options.boolean;
-const estadoCivilOptions = options.estadoCivil;
-const solvenciaOptions = options.solvencia;
-const actitudOptions = options.actitud;
+const selectClasses = classes.searchableSelect;
 const phoneTypeOptions = options.phoneType;
 
 interface PhoneUI {
@@ -57,13 +52,15 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 	const [horaCita, setHoraCita] = useState("");
 	const [observaciones, setObservaciones] = useState("");
 
-	const [clientMode, setClientMode] = useState<"existing" | "new">(
-		"existing",
-	);
+	const [clientMode, setClientMode] = useState<
+		"existing_client" | "new_lead" | "existing_lead"
+	>("existing_client");
 	const [selectedClientId, setSelectedClientId] = useState<number | null>(
 		null,
 	);
+	const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
 
+	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
 	const [numeroDoc, setNumeroDoc] = useState("");
 	const [nombres, setNombres] = useState("");
 	const [apellidos, setApellidos] = useState("");
@@ -73,10 +70,9 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 	const [ocupacion, setOcupacion] = useState("");
 
 	const [esPeruano, setEsPeruano] = useState<string>("true");
+	const [nacionalidad, setNacionalidad] = useState("");
 	const [sexo, setSexo] = useState<string>("");
 	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [solvencia, setSolvencia] = useState<string>("");
-	const [actitud, setActitud] = useState<string>("");
 	const [idUbigeo, setIdUbigeo] = useState<string>("");
 
 	const [phones, setPhones] = useState<PhoneUI[]>([]);
@@ -84,6 +80,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 
 	const { projects, useCreateAppointmentMutation } = useAppointments();
 	const { ubigeosQuery } = useUbigeos();
+	const { docTypesQuery } = useDocTypes();
 
 	const { user } = useAuthStore();
 
@@ -148,6 +145,11 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			value: String(u.id),
 			label: `${u.id} - ${u.nombre}`,
 		})) || [];
+	const docTypeOptions =
+		docTypesQuery.data?.map((d) => ({
+			value: String(d.id),
+			label: `${d.id} - ${d.nombre}`,
+		})) || [];
 
 	useEffect(() => {
 		if (isOpen) {
@@ -160,7 +162,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			setHoraCita("");
 			setObservaciones("");
 
-			setClientMode("existing");
+			setClientMode("existing_client");
 			setSelectedClientId(null);
 
 			setNumeroDoc("");
@@ -173,8 +175,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			setEsPeruano("true");
 			setSexo("");
 			setEstadoCivil("");
-			setSolvencia("");
-			setActitud("");
 			setIdUbigeo("");
 			setPhones([]);
 			setError(null);
@@ -200,6 +200,42 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
 	};
 
+	const leadFieldsState = {
+		idTipoDoc,
+		numeroDoc,
+		nombres,
+		apellidos,
+		email,
+		fechaNacimiento,
+		esPeruano,
+		phones,
+		nacionalidad,
+		sexo,
+		idUbigeo,
+		direccion,
+		ocupacion,
+		estadoCivil,
+	};
+
+	const handleFieldChange = (field: string, value: string) => {
+		const setters: Record<string, (val: string) => void> = {
+			idTipoDoc: setIdTipoDoc,
+			numeroDoc: setNumeroDoc,
+			nombres: setNombres,
+			apellidos: setApellidos,
+			email: setEmail,
+			fechaNacimiento: setFechaNacimiento,
+			esPeruano: setEsPeruano,
+			nacionalidad: setNacionalidad,
+			sexo: setSexo,
+			idUbigeo: setIdUbigeo,
+			direccion: setDireccion,
+			ocupacion: setOcupacion,
+			estadoCivil: setEstadoCivil,
+		};
+		setters[field]?.(value);
+	};
+
 	const createPayload = useMemo((): CreateAppointmentPayload => {
 		const payload: CreateAppointmentPayload = {
 			id_proyecto: Number(idProyecto),
@@ -210,17 +246,20 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			observaciones_visita: observaciones.trim() || undefined,
 		};
 
-		if (clientMode === "existing" && selectedClientId) {
+		if (clientMode === "existing_client" && selectedClientId) {
 			payload.id_cliente = selectedClientId;
-		} else if (clientMode === "new") {
-			payload.nuevo_cliente = {
-				id_tipo_doc_identidad: 1,
+		} else if (clientMode === "existing_lead" && selectedLeadId) {
+			payload.id_lead = selectedLeadId;
+		} else if (clientMode === "new_lead") {
+			payload.nuevo_lead = {
+				id_tipo_doc_identidad: Number(idTipoDoc),
 				nombres: nombres.trim() || undefined,
 				apellidos: apellidos.trim() || undefined,
 				numero: numeroDoc.trim(),
 				email: email.trim() || undefined,
 				fecha_nacimiento: fechaNacimiento || undefined,
 				es_peruano: esPeruano === "true",
+				nacionalidad: nacionalidad.trim() || undefined,
 				direccion: direccion.trim() || undefined,
 				ocupacion: ocupacion.trim() || undefined,
 				sexo: (sexo as Sexo) || undefined,
@@ -253,6 +292,9 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		estadoCivil,
 		idUbigeo,
 		phones,
+		idTipoDoc,
+		nacionalidad,
+		selectedLeadId,
 	]);
 
 	const mutation = useCreateAppointmentMutation(createPayload);
@@ -270,17 +312,39 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (clientMode === "existing" && !selectedClientId) {
-			toast.error("Debes buscar y seleccionar un cliente existente de la agenda.");
+		if (clientMode === "existing_client" && !selectedClientId) {
+			toast.error(
+				"Debes buscar y seleccionar un cliente existente de la agenda.",
+			);
 			return setError(
 				"Debes buscar y seleccionar un cliente existente de la agenda.",
 			);
 		}
-		if (clientMode === "new" && !numeroDoc.trim()) {
-			toast.error("El número de documento del nuevo cliente es obligatorio.");
-			return setError(
-				"El número de documento del nuevo cliente es obligatorio.",
+		if (clientMode === "existing_lead" && !selectedLeadId) {
+			toast.error("Debes buscar y seleccionar un lead existente.");
+			return setError("Debes buscar y seleccionar un lead existente.");
+		}
+		if (clientMode === "new_lead" && !numeroDoc.trim()) {
+			toast.error(
+				"El número de documento del nuevo lead es obligatorio.",
 			);
+			return setError(
+				"El número de documento del nuevo lead es obligatorio.",
+			);
+		}
+		if (clientMode === "new_lead" && !idTipoDoc) {
+			toast.error("El tipo de documento del nuevo lead es obligatorio.");
+			return setError(
+				"El tipo de documento del nuevo lead es obligatorio.",
+			);
+		}
+		if (clientMode === "new_lead" && !nombres.trim()) {
+			toast.error("El nombre del nuevo lead es obligatorio.");
+			return setError("El nombre del nuevo lead es obligatorio.");
+		}
+		if (clientMode === "new_lead" && !apellidos.trim()) {
+			toast.error("El apellido del nuevo lead es obligatorio.");
+			return setError("El apellido del nuevo lead es obligatorio.");
 		}
 
 		try {
@@ -288,7 +352,10 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 				onSuccess: () => onClose(),
 			});
 		} catch (err: unknown) {
-			toast.error((err as ApiError)?.response?.data?.message || "Error al crear la cita.");
+			toast.error(
+				(err as ApiError)?.response?.data?.message ||
+					"Error al crear la cita.",
+			);
 			setError(
 				(err as ApiError)?.response?.data?.message ||
 					"Error al crear la cita.",
@@ -329,7 +396,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 							}}
 							className="bg-white dark:bg-gray-900 w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl pointer-events-auto border border-gray-100 dark:border-gray-800 overflow-hidden"
 						>
-							{/* Header */}
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
 									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
@@ -401,57 +467,88 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 													<div className="z-50">
 														<SearchableSelect
-															options={proyectoOptions}
+															options={
+																proyectoOptions
+															}
 															value={idProyecto}
 															onChange={(val) => {
-                                                                setIdProyecto(String(val));
+																setIdProyecto(
+																	String(val),
+																);
 																setIdEtapa("");
-																setIdManzana("");
+																setIdManzana(
+																	"",
+																);
 																setIdLote("");
 															}}
-                                                            label="Seleccionar Proyecto"
-                                                            required
-															classes={selectClasses}
+															label="Seleccionar Proyecto"
+															required
+															classes={
+																selectClasses
+															}
 														/>
 													</div>
 													<div className="z-40">
 														<SearchableSelect
-															options={etapaOptions}
+															options={
+																etapaOptions
+															}
 															value={idEtapa}
 															onChange={(val) => {
-																setIdEtapa(String(val));
-																setIdManzana("");
+																setIdEtapa(
+																	String(val),
+																);
+																setIdManzana(
+																	"",
+																);
 																setIdLote("");
 															}}
 															label="Seleccionar Etapa"
-															classes={selectClasses
+															classes={
+																selectClasses
 															}
-															disabled={!idProyecto}
+															disabled={
+																!idProyecto
+															}
 														/>
 													</div>
 													<div className="z-30">
 														<SearchableSelect
-															options={manzanaOptions}
+															options={
+																manzanaOptions
+															}
 															value={idManzana}
 															onChange={(val) => {
-																setIdManzana(String(val));
+																setIdManzana(
+																	String(val),
+																);
 																setIdLote("");
 															}}
 															label="Seleccionar Manzana"
-															classes={selectClasses}
+															classes={
+																selectClasses
+															}
 															disabled={!idEtapa}
 														/>
 													</div>
 													<div className="z-20">
 														<SearchableSelect
-															options={loteOptions}
+															options={
+																loteOptions
+															}
 															value={idLote}
 															onChange={(val) =>
-																setIdLote(String(val))
+																setIdLote(
+																	String(val),
+																)
 															}
 															label="Seleccionar Lote"
-															classes={selectClasses}
-															disabled={!idManzana}
+															classes={
+																selectClasses
+															}
+															disabled={
+																!idManzana
+															}
 														/>
 													</div>
 												</div>
@@ -464,27 +561,51 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 													<div className="flex flex-col gap-1.5 focus-within:z-10">
 														<label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
 															Fecha de la Cita
-                                                            <span className="text-red-500">*</span>
+															<span className="text-red-500">
+																*
+															</span>
 														</label>
 														<input
 															type="date"
 															value={fechaCita}
-															onChange={(e) => setFechaCita(e.target.value)}
-															disabled={isSubmitting}
-                                                            min={new Date().toISOString().split("T")[0]}
+															onChange={(e) =>
+																setFechaCita(
+																	e.target
+																		.value,
+																)
+															}
+															disabled={
+																isSubmitting
+															}
+															min={
+																new Date()
+																	.toISOString()
+																	.split(
+																		"T",
+																	)[0]
+															}
 															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
 														/>
 													</div>
 													<div className="flex flex-col gap-1.5 focus-within:z-10">
 														<label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
 															Hora de la Cita
-                                                            <span className="text-red-500">*</span>
+															<span className="text-red-500">
+																*
+															</span>
 														</label>
 														<input
 															type="time"
 															value={horaCita}
-															onChange={(e) => setHoraCita(e.target.value)}
-															disabled={isSubmitting}
+															onChange={(e) =>
+																setHoraCita(
+																	e.target
+																		.value,
+																)
+															}
+															disabled={
+																isSubmitting
+															}
 															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
 														/>
 													</div>
@@ -495,7 +616,11 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 													</label>
 													<textarea
 														value={observaciones}
-														onChange={(e) => setObservaciones(e.target.value)}
+														onChange={(e) =>
+															setObservaciones(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="Escribe el motivo de la cita o notas previas..."
 														className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none h-24"
@@ -510,337 +635,102 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 											animate={{ opacity: 1, x: 0 }}
 											className="flex flex-col gap-6"
 										>
-											<div className="grid grid-cols-2 gap-4">
-												<div
-													onClick={() => setClientMode("existing")}
-													className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${clientMode === "existing" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 shadow-sm shadow-teal-500/10" : "border-gray-100 dark:border-gray-800 hover:border-teal-200 dark:hover:border-teal-800/50 bg-white dark:bg-gray-900"}`}
-												>
-													<div className="flex flex-col items-center gap-2 text-center">
-														<div
-															className={`p-3 rounded-full ${clientMode === "existing" ? "bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400" : "bg-gray-50 dark:bg-gray-800 text-gray-400"}`}
-														>
-															<FiUserCheck
-																size={24}
-															/>
-														</div>
-														<span
-															className={`font-semibold text-sm ${clientMode === "existing" ? "text-teal-700 dark:text-teal-400" : "text-gray-600 dark:text-gray-400"}`}
-														>
-															Cliente Existente
-														</span>
-													</div>
-												</div>
-												<div
-													onClick={() => setClientMode("new")}
-													className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${clientMode === "new" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 shadow-sm shadow-teal-500/10" : "border-gray-100 dark:border-gray-800 hover:border-teal-200 dark:hover:border-teal-800/50 bg-white dark:bg-gray-900"}`}
-												>
-													<div className="flex flex-col items-center gap-2 text-center">
-														<div
-															className={`p-3 rounded-full ${clientMode === "new" ? "bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400" : "bg-gray-50 dark:bg-gray-800 text-gray-400"}`}
-														>
-															<FiUserPlus
-																size={24}
-															/>
-														</div>
-														<span
-															className={`font-semibold text-sm ${clientMode === "new" ? "text-teal-700 dark:text-teal-400" : "text-gray-600 dark:text-gray-400"}`}
-														>
-															Nuevo Prospecto
-														</span>
-													</div>
-												</div>
+											<div className="grid grid-cols-3 gap-4">
+												<CardCheckbox
+													value={
+														clientMode ===
+														"existing_client"
+													}
+													onChange={() =>
+														setClientMode(
+															"existing_client",
+														)
+													}
+													title="Cliente existente"
+													icon={FaHandshake}
+													className="p-3!"
+													compact
+												/>
+												<CardCheckbox
+													value={
+														clientMode ===
+														"existing_lead"
+													}
+													onChange={() =>
+														setClientMode(
+															"existing_lead",
+														)
+													}
+													title="Lead existente"
+													icon={FiUser}
+													className="p-3!"
+													compact
+												/>
+												<CardCheckbox
+													value={
+														clientMode ===
+														"new_lead"
+													}
+													onChange={() =>
+														setClientMode(
+															"new_lead",
+														)
+													}
+													title="Nuevo Lead"
+													icon={FiTarget}
+													className="p-3!"
+													compact
+												/>
 											</div>
 											<div className="h-px bg-gray-100 dark:bg-gray-800 w-full" />
-											{clientMode === "existing" ? (
+											{clientMode ===
+											"existing_client" ? (
 												<div className="flex flex-col gap-2 min-h-75">
 													<ClientSearchAutocomplete
-														selectedClientId={selectedClientId}
-														onSelectClient={setSelectedClientId}
+														selectedClientId={
+															selectedClientId
+														}
+														onSelectClient={
+															setSelectedClientId
+														}
+													/>
+												</div>
+											) : clientMode === "existing_lead" ? (
+												<div className="flex flex-col gap-2 min-h-75">
+													<ClientSearchAutocomplete
+														isLead
+														selectedClientId={
+															selectedLeadId
+														}
+														onSelectClient={
+															setSelectedLeadId
+														}
 													/>
 												</div>
 											) : (
-												<motion.div
-													initial={{ opacity: 0 }}
-													animate={{ opacity: 1 }}
-													className="flex flex-col gap-6"
-												>
-													<div className="flex flex-col gap-4">
-														<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2">
-															Datos Personales
-														</h3>
-														<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-															<div className="flex flex-col gap-1.5">
-                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                    Nombres
-                                                                    <span className="text-red-500">*</span>
-                                                                </label>
-																<input
-																	type="text"
-																	value={nombres}
-																	onChange={(e) => setNombres(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="Nombres. Ej: Juan Carlos"
-                                                                    required
-																	className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5">
-                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                    Apellidos
-                                                                    <span className="text-red-500">*</span>
-                                                                </label>
-																<input
-																	type="text"
-																	value={apellidos}
-																	onChange={(e) => setApellidos(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="Apellidos. Ej: Pérez Gomez"
-                                                                    required
-																	className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5">
-                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                    Número de Documento
-                                                                    <span className="text-red-500">*</span>
-                                                                </label>
-																<input
-																	type="text"
-																	value={numeroDoc}
-																	onChange={(e) => setNumeroDoc(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="DNI / Número Doc"
-                                                                    required
-                                                                    minLength={8}
-                                                                    maxLength={8}
-																	className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5">
-                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                    Fecha de Nacimiento
-                                                                </label>
-																<input
-																	type="date"
-																	value={fechaNacimiento}
-																	onChange={(e) => setFechaNacimiento(e.target.value)}
-																	disabled={isSubmitting}
-                                                                    min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split("T")[0]}
-                                                                    max={new Date().toISOString().split("T")[0]}
-																	className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 scheme-light dark:scheme-dark"
-																/>
-															</div>
-														</div>
-													</div>
-													<div className="flex flex-col gap-4">
-														<div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-2">
-															<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">
-																Contacto y
-																Teléfonos
-															</h3>
-															<button
-																type="button"
-																onClick={handleAddPhone}
-																disabled={isSubmitting}
-																className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400 bg-teal-50 hover:bg-teal-100 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 px-3 py-1.5 rounded-lg transition-colors"
-															>
-																<FiPlus />{" "}
-																Agregar
-															</button>
-														</div>
-														<div className="flex flex-col gap-3">
-															<div className="flex flex-col gap-1.5 focus-within:z-40">
-																<input
-																	type="email"
-																	value={email}
-																	onChange={(e) => setEmail(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="Correo electrónico (Opcional)"
-																	className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-															<AnimatePresence>
-																{phones.map(
-																	(phone) => (
-																		<motion.div
-																			key={phone.uiId}
-																			initial={{
-																				opacity: 0,
-																				height: 0,
-																			}}
-																			animate={{
-																				opacity: 1,
-																				height: "auto",
-																			}}
-																			exit={{
-																				opacity: 0,
-																				height: 0,
-																			}}
-																			className="flex items-center gap-2 relative z-30 overflow-visible"
-																		>
-                                                                            <div className="flex flex-col gap-1.5 focus-within:z-40 flex-1">
-                                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                                    Tipo de Teléfono
-                                                                                </label>
-                                                                                <SearchableSelect
-                                                                                    options={phoneTypeOptions}
-                                                                                    value={phone.tipo}
-                                                                                    onChange={(val) =>
-                                                                                        handleUpdatePhone(
-                                                                                            phone.uiId,
-                                                                                            "tipo",
-                                                                                            String(val),
-                                                                                        )
-                                                                                    }
-                                                                                    label=""
-                                                                                    classes={selectClasses}
-                                                                                    disabled={isSubmitting}
-                                                                                />
-                                                                            </div>
-                                                                            <div className="flex flex-col gap-1.5 focus-within:z-40 flex-1">
-                                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                                    Número de Teléfono
-                                                                                </label>
-                                                                                <input
-                                                                                    type="text"
-                                                                                    value={phone.numero}
-                                                                                    onChange={(e) =>
-                                                                                        handleUpdatePhone(
-                                                                                            phone.uiId,
-                                                                                            "numero",
-                                                                                            e.target.value,
-                                                                                        )
-                                                                                    }
-                                                                                    disabled={isSubmitting}
-                                                                                    minLength={9}
-                                                                                    maxLength={11}
-                                                                                    placeholder="Ej: 999888777"
-                                                                                    className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-                                                                                />
-                                                                            </div>
-																			<button
-																				type="button"
-																				onClick={() => handleRemovePhone(phone.uiId)}
-																				disabled={isSubmitting}
-																				className="p-2.5 cursor-pointer text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-																			>
-																				<FiTrash2
-																					size={16}
-																				/>
-																			</button>
-																		</motion.div>
-																	),
-																)}
-															</AnimatePresence>
-															{phones.length ===
-																0 && (
-																<div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/30 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex justify-center text-sm text-gray-500 dark:text-gray-400">
-																	No hay
-																	teléfonos
-																	adicionales
-																</div>
-															)}
-														</div>
-													</div>
-													<div className="flex flex-col gap-4">
-														<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2">
-															Demografía y
-															Ubicación
-														</h3>
-														<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-															<div className="flex flex-col gap-1.5 focus-within:z-40">
-																<SearchableSelect
-																	options={booleanOptions}
-																	value={esPeruano}
-																	onChange={(val) => setEsPeruano(String(val))}
-																	label="¿Nacionalidad Peruana?"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-30">
-																<SearchableSelect
-																	options={sexoOptions}
-																	value={sexo}
-																	onChange={(val) => setSexo(String(val))}
-																	label="Sexo"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-20 md:col-span-2">
-																<SearchableSelect
-																	options={ubigeoOptions}
-																	value={idUbigeo}
-																	onChange={(val) => setIdUbigeo(String(val))}
-																	label="Ubigeo (Distrito/Provincia/Dep)"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-10 md:col-span-2">
-																<input
-																	type="text"
-																	value={direccion}
-																	onChange={(e) => setDireccion(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="Dirección exacta"
-																	className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-														</div>
-													</div>
-													<div className="flex flex-col gap-4 pb-4">
-														<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2">
-															Perfil del Cliente
-														</h3>
-														<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-															<div className="flex flex-col gap-1.5 focus-within:z-50">
-																<SearchableSelect
-																	options={estadoCivilOptions}
-																	value={estadoCivil}
-																	onChange={(val) => setEstadoCivil(String(val))}
-																	label="Estado Civil"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-40">
-																<SearchableSelect
-																	options={solvenciaOptions}
-																	value={solvencia}
-																	onChange={(val) => setSolvencia(String(val))}
-																	label="Nivel de Solvencia"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-30">
-																<SearchableSelect
-																	options={actitudOptions}
-																	value={actitud}
-																	onChange={(val) => setActitud(String(val))}
-																	label="Actitud Inicial"
-																	classes={selectClasses}
-																	disabled={isSubmitting}
-																/>
-															</div>
-															<div className="flex flex-col gap-1.5 focus-within:z-20">
-                                                                <label className="text-xs text-gray-500 dark:text-gray-400 font-semibold px-1">
-                                                                    Ocupación / Trabajo
-                                                                </label>
-																<input
-																	type="text"
-																	value={ocupacion}
-																	onChange={(e) => setOcupacion(e.target.value)}
-																	disabled={isSubmitting}
-																	placeholder="Ocupación / Trabajo"
-																	className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
-																/>
-															</div>
-														</div>
-													</div>
-												</motion.div>
+												<NewLeadForAppointmentForm
+													isSubmitting={isSubmitting}
+													docTypeOptions={
+														docTypeOptions
+													}
+													phoneTypeOptions={
+														phoneTypeOptions
+													}
+													ubigeoOptions={
+														ubigeoOptions
+													}
+													onFieldChange={
+														handleFieldChange
+													}
+													state={leadFieldsState}
+													onAddPhone={handleAddPhone}
+													onUpdatePhone={
+														handleUpdatePhone
+													}
+													onRemovePhone={
+														handleRemovePhone
+													}
+												/>
 											)}
 										</motion.div>
 									)}
