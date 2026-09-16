@@ -169,48 +169,70 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 	}
 
 	async create(
-		data: CreateAppointmentDTO,
-		parsedFecha: Date,
-		parsedHora: Date,
-	) {
+	data: CreateAppointmentDTO,
+	parsedFecha: Date,
+	parsedHora: Date,
+) {
+	return this.prisma.$transaction(async (tx) => {
+		let personaId: number;
+
+		if (data.id_cliente) {
+			personaId = data.id_cliente;
+		} else if (data.nuevo_lead) {
+			const {
+				telefonos,
+				id_tipo_doc_identidad,
+				id_ubigeo,
+				...clienteData
+			} = data.nuevo_lead;
+			const nuevaPersona = await tx.personas.create({
+				data: {
+					numero: clienteData.numero,
+					tipo_doc: { connect: { id: id_tipo_doc_identidad } },
+					nombres: clienteData.nombres || null,
+					apellidos: clienteData.apellidos || null,
+					email: clienteData.email?.toLowerCase() || null,
+					sexo: clienteData.sexo || null,
+					estado_civil: clienteData.estado_civil || null,
+					es_peruano: clienteData.es_peruano ?? true,
+					nacionalidad: clienteData.nacionalidad || null,
+					direccion: clienteData.direccion || null,
+					ocupacion: clienteData.ocupacion || null,
+					...(id_ubigeo ? { ubigeo: { connect: { id: id_ubigeo } } } : {}),
+					...(telefonos && telefonos.length > 0
+						? { telefonos: { create: telefonos } }
+						: {}),
+				},
+			});
+
+			personaId = nuevaPersona.id;
+
+			await tx.leads.create({
+				data: {
+					id_persona: personaId,
+					estado: "NUEVO", 
+					id_asesor: data.id_usuario_responsable, 
+				},
+			});
+		} else {
+			throw new Error("Debe proporcionar un id_cliente existente o los datos para un nuevo_lead.");
+		}
+
 		const createPayload: Prisma.CitasCreateInput = {
 			fecha_cita: parsedFecha,
 			hora_cita: parsedHora,
 			estado_cita: EstadoCita.PROGRAMADA,
 			proyecto: { connect: { id: data.id_proyecto } },
 			asesor: { connect: { id: data.id_usuario_responsable } },
-			persona: {} as any,
+			persona: { connect: { id: personaId } },
+			...(data.id_lote ? { lote: { connect: { id: data.id_lote } } } : {}),
+			...(data.observaciones_visita ? { observaciones_visita: data.observaciones_visita } : {}),
 		};
 
-		if (data.id_lote)
-			createPayload.lote = { connect: { id: data.id_lote } };
-		if (data.observaciones_visita)
-			createPayload.observaciones_visita = data.observaciones_visita;
-		if (data.id_cliente)
-			createPayload.persona.connect = { id: data.id_cliente };
-		else if (data.nuevo_cliente) {
-			const {
-				telefonos,
-				id_tipo_doc_identidad,
-				id_ubigeo,
-				...clienteData
-			} = data.nuevo_cliente;
-			createPayload.persona.create = {
-				numero: clienteData.numero,
-				tipo_doc: { connect: { id: id_tipo_doc_identidad } },
-				nombres: clienteData.nombres || null,
-				apellidos: clienteData.apellidos || null,
-				email: clienteData.email?.toLowerCase() || null,
-				...(id_ubigeo
-					? { ubigeo: { connect: { id: id_ubigeo } } }
-					: {}),
-				...(telefonos && telefonos.length > 0
-					? { telefonos: { create: telefonos } }
-					: {}),
-			};
-		}
-		return this.prisma.citas.create({ data: createPayload });
-	}
+		return tx.citas.create({ data: createPayload });
+	});
+}
+
 	async update(
 		id: number,
 		data: UpdateAppointmentDTO,

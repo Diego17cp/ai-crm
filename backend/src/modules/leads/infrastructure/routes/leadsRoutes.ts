@@ -20,7 +20,7 @@ export function leadsRoutes(): Router {
 	router.post("/", authGuard, controller.create);
 	router.put("/:id", authGuard, controller.update);
 	router.delete("/:id", authGuard, controller.delete);
-    router.patch("/:leadId/estado", authGuard, controller.updateState);
+	router.patch("/:leadId/estado", authGuard, controller.updateState);
 
 	return router;
 }
