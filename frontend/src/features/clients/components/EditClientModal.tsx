@@ -9,7 +9,7 @@ import {
 	FiTrash2,
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
-import { SearchableSelect } from "dialca-ui";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useClients } from "../hooks/useClients";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
@@ -30,7 +30,8 @@ interface PhoneUI {
 	tipo: TipoTelefono;
 }
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
+const searchableSelectClasses = classes.searchableSelect;
 
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean;
@@ -353,10 +354,11 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														*
 													</span>
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													value={idTipoDoc}
-													onChange={(v) =>
-														setIdTipoDoc(v)
+													onChange={(e) =>
+														setIdTipoDoc(e.target.value)
 													}
 													options={docTypeOptions}
 													disabled={isSubmitting}
@@ -568,7 +570,8 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														value={idUbigeo}
 														onChange={setIdUbigeo}
 														placeholder="Buscar distrito/provincia..."
-														classes={selectClasses}
+														classes={searchableSelectClasses}
+														isClearable
 													/>
 												)}
 											</div>
@@ -586,19 +589,20 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Av. Principal 123"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
 											<div className="z-40">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Es Peruano
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={booleanOptions}
 													value={esPeruano}
-													onChange={(val) => {
-														setEsPeruano(val);
-														if (val === "true")
+													onChange={(e) => {
+														setEsPeruano(e.target.value);
+														if (e.target.value === "true")
 															setNacionalidad("");
 													}}
 													placeholder="Seleccionar"
@@ -609,10 +613,13 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Sexo
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={sexoOptions}
 													value={sexo}
-													onChange={setSexo}
+													onChange={(e) =>
+														setSexo(e.target.value)
+													}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
@@ -632,7 +639,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														}
 														disabled={isSubmitting}
 														placeholder="Ej: Argentina, Colombia..."
-														className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 													/>
 												</div>
 											)}
@@ -647,10 +654,13 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Estado Civil
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={estadoCivilOptions}
 													value={estadoCivil}
-													onChange={setEstadoCivil}
+													onChange={(e) =>
+														setEstadoCivil(e.target.value)
+													}
 													placeholder="Seleccionar..."
 													classes={selectClasses}
 												/>
@@ -669,17 +679,20 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Ingeniero, Comerciante..."
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
 											<div className="z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Solvencia (Status Pagos)
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={solvenciaOptions}
 													value={solvencia}
-													onChange={setSolvencia}
+													onChange={(e) =>
+														setSolvencia(e.target.value)
+													}
 													placeholder="Seleccionar..."
 													classes={selectClasses}
 												/>
@@ -688,10 +701,13 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Actitud Comprador
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={actitudOptions}
 													value={actitud}
-													onChange={setActitud}
+													onChange={(e) =>
+														setActitud(e.target.value)
+													}
 													placeholder="Seleccionar..."
 													classes={selectClasses}
 												/>

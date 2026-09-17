@@ -50,7 +50,7 @@ export const DropImages = ({ onClick, onFilesDropped }: Props) => {
 				scale: isDragging ? 1.01 : 1,
 				borderColor: isDragging
 					? "rgb(20, 184, 166)"
-					: "rgba(229, 231, 235, 1)", // Bordes Teal en drag
+					: "rgba(229, 231, 235, 1)",
 			}}
 			transition={{ type: "spring", stiffness: 400, damping: 25 }}
 			className={`
@@ -60,7 +60,7 @@ export const DropImages = ({ onClick, onFilesDropped }: Props) => {
 				${
 					isDragging
 						? "bg-teal-50/50 dark:bg-teal-950/20 border-teal-500"
-						: "border-gray-200 dark:border-gray-700/60 hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
+						: "border-gray-200 dark:border-gray-700/60! hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
 				}
 			`}
 		>

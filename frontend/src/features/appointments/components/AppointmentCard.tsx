@@ -57,9 +57,9 @@ export const AppointmentCard = ({ cita, onEdit, onMarkAttended, onMarkCanceled, 
 			animate={{ opacity: 1, y: 0 }}
 			whileHover={{ y: -3 }}
 			transition={{ type: "spring", stiffness: 350, damping: 28 }}
-			className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+			className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
 		>
-			<div className={`w-20 sm:w-22 shrink-0 flex flex-col items-center justify-center gap-0.5 py-5 ${status.stub} text-white`}>
+			<div className={`w-20 sm:w-22 shrink-0 flex flex-col rounded-l-2xl items-center justify-center gap-0.5 py-5 ${status.stub} text-white`}>
 				<span className="text-[11px] font-medium opacity-80">{diaSemana}</span>
 				<span className="text-3xl font-bold leading-none tabular-nums">{dia}</span>
 				<span className="text-xs font-medium opacity-90">{mes}</span>

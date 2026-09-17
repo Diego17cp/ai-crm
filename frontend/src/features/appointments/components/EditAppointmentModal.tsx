@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { FiX, FiCalendar, FiAlertCircle, FiStar } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
-import { SearchableSelect } from "dialca-ui";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
 import { useAppointments } from "../hooks/useAppointments";
@@ -24,7 +24,8 @@ interface Props {
 	cita: Cita | null;
 }
 
-const selectClasses = classes.searchableSelect
+const selectClasses = classes.select
+const searchableSelectClasses = classes.searchableSelect
 
 const estadoOptions = options.estadoCita;
 
@@ -280,10 +281,11 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 														*
 													</span>
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={estadoOptions}
 													value={estadoCita}
-													onChange={(val) => setEstadoCita(val as EstadoCita)}
+													onChange={(e) => setEstadoCita(e.target.value as EstadoCita)}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
@@ -327,7 +329,8 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													value={idResponsable}
 													onChange={setIdResponsable}
 													placeholder="Seleccionar asesor"
-													classes={selectClasses}
+													classes={searchableSelectClasses}
+													isClearable
 												/>
 											</div>
 										</div>
@@ -337,7 +340,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 											Información del Lote Analizado
 										</h3>
 										<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-											<div className="z-50">
+											<div className="z-20">
 												<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1 block">
 													Proyecto{" "}
 													<span className="text-red-500">
@@ -357,7 +360,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													classes={selectClasses}
 												/>
 											</div>
-											<div className="z-40">
+											<div className="z-20">
 												<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1 block">
 													Etapa
 												</label>
@@ -378,7 +381,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													/>
 												)}
 											</div>
-											<div className="z-30">
+											<div className="z-20">
 												<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1 block">
 													Manzana
 												</label>

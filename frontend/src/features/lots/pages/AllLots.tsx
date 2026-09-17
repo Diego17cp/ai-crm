@@ -15,7 +15,7 @@ import type { ApiError } from "@/core/types";
 import { LotListSkeleton } from "../components/LotListSkeleton";
 import { LotCard } from "../components/LotCard";
 import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
-import { SearchableSelect } from "dialca-ui";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useLotModals } from "../hooks/useLotModals";
 import { CreateLotModal } from "../components/CreateLotModal";
 import { EditLotModal } from "../components/EditLotModal";
@@ -71,7 +71,8 @@ export const AllLots = () => {
 		{ value: "Vendido", label: "Vendido" },
 	];
 
-	const selectClasses = classes.searchableSelect;
+	const selectClasses = classes.select;
+	const searchableSelectClasses = classes.searchableSelect;
 
 	const { openModal, closeModal, activeModal, selectedLot } = useLotModals();
 
@@ -182,7 +183,7 @@ export const AllLots = () => {
 								}
 								placeholder="Todos los Proyectos"
 								isClearable
-								classes={selectClasses}
+								classes={searchableSelectClasses}
 							/>
 						)}
 					</div>
@@ -212,7 +213,7 @@ export const AllLots = () => {
 								placeholder="Todas las Etapas"
 								disabled={!filters.id_proyecto}
 								isClearable
-								classes={selectClasses}
+								classes={searchableSelectClasses}
 							/>
 						)}
 					</div>
@@ -242,19 +243,19 @@ export const AllLots = () => {
 								placeholder="Todas las Manzanas"
 								disabled={!filters.id_etapa}
 								isClearable
-								classes={selectClasses}
+								classes={searchableSelectClasses}
 							/>
 						)}
 					</div>
 					<div className="flex flex-col z-10">
-						<SearchableSelect
+						<Select
+							label=""
 							options={estadoOptions}
 							value={filters.estado || ""}
-							onChange={(val) =>
-								updateFilter("estado", val || undefined)
+							onChange={(e) =>
+								updateFilter("estado", e.target.value || undefined)
 							}
 							placeholder="Todos los Estados"
-							isClearable
 							classes={selectClasses}
 						/>
 					</div>

@@ -11,6 +11,8 @@ import {
 import { useUsers } from "../hooks/useUsers";
 import { useRoles } from "@/features/roles/hooks/useRoles";
 import type { CreateUserPayload } from "../types";
+import { Select } from "dialca-ui";
+import { classes } from "@/shared/constants";
 
 interface Props {
 	isOpen: boolean;
@@ -99,7 +101,9 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 									<div className="space-y-1.5">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Nombres
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<input
 											required
@@ -118,7 +122,9 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 									<div className="space-y-1.5">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Apellidos
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<input
 											required
@@ -137,14 +143,16 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 									<div className="space-y-1.5">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Documento (DNI)
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<div className="relative">
 											<FiCreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
 											<input
 												required
 												type="text"
-                                                minLength={8}
+												minLength={8}
 												maxLength={8}
 												value={formData.dni}
 												onChange={(e) =>
@@ -153,7 +161,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 														dni: e.target.value,
 													})
 												}
-												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+												className="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
 												placeholder="8 dígitos"
 											/>
 										</div>
@@ -161,11 +169,21 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 									<div className="space-y-1.5">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Rol del Sistema
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
-										<select
-											required
-											value={formData.id_rol || ""}
+										<Select
+											label=""
+											// required
+											placeholder="Seleccione un rol"
+											options={roles.map((rol) => ({
+												value: String(rol.id),
+												label: rol.nombre,
+											}))}
+											value={
+												String(formData.id_rol) || ""
+											}
 											onChange={(e) =>
 												setFormData({
 													...formData,
@@ -174,25 +192,15 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 													),
 												})
 											}
-											className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors appearance-none scheme-light dark:scheme-dark"
-										>
-											<option value="" disabled>
-												Selecciona un rol
-											</option>
-											{roles.map((rol) => (
-												<option
-													key={rol.id}
-													value={rol.id}
-												>
-													{rol.nombre}
-												</option>
-											))}
-										</select>
+											classes={classes.select}
+										/>
 									</div>
 									<div className="space-y-1.5">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Correo Electrónico
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<div className="relative">
 											<FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -219,8 +227,8 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 											<FiPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
 											<input
 												type="tel"
-                                                minLength={9}
-                                                maxLength={11}
+												minLength={9}
+												maxLength={11}
 												value={formData.telefono || ""}
 												onChange={(e) =>
 													setFormData({
@@ -237,7 +245,9 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 									<div className="space-y-1.5 sm:col-span-2">
 										<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
 											Contraseña de Acceso
-                                            <span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<div className="relative">
 											<FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />

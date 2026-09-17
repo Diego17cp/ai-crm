@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { FiUsers, FiPlus, FiRefreshCw, FiSearch, FiX } from "react-icons/fi";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { useUsers } from "../hooks/useUsers";
 import { useRoles } from "@/features/roles/hooks/useRoles";
 import { Pagination } from "@/shared/components/Pagination";
@@ -15,7 +15,7 @@ import { EditUserModal } from "../components/EditUserModal";
 import { DeleteUserModal } from "../components/DeleteUserModal";
 import { classes } from "@/shared/constants";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const estadoOptions = [
 	{ value: "ACTIVO", label: "Activos" },
@@ -135,24 +135,26 @@ export const AllUsers = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoOptions}
 								value={filters.estado || ""}
-								onChange={(val) => updateFilter("estado", val)}
+								onChange={(e) => updateFilter("estado", e.target.value)}
 								placeholder="Estado"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={rolesOptions}
 								value={
 									filters.id_rol ? String(filters.id_rol) : ""
 								}
-								onChange={(val) =>
+								onChange={(e) =>
 									updateFilter(
 										"id_rol",
-										val ? Number(val) : undefined,
+										e.target.value ? Number(e.target.value) : undefined,
 									)
 								}
 								placeholder="Rol del Sistema"

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { FiPlus, FiRefreshCw, FiSearch, FiX, FiUsers } from "react-icons/fi";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
 import { LeadCard } from "../components/LeadCard";
 import { LeadListSkeleton } from "../components/LeadListSkeleton";
@@ -15,7 +15,7 @@ import { ChangeLeadStatusModal } from "../components/ChangeLeadStatusModal";
 import { useState } from "react";
 import type { ManualStatus } from "../types";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const sexoOptions = options.sexo;
 const estadoCivilOptions = options.estadoCivil;
@@ -121,21 +121,23 @@ export const AllLeads = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-3">
 						<div className="z-20">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoCivilOptions}
 								value={filters.estado_civil || ""}
-								onChange={(val) =>
-									updateFilter("estado_civil", val)
+								onChange={(e) =>
+									updateFilter("estado_civil", e.target.value)
 								}
 								placeholder="Estado Civil"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-10">
-							<SearchableSelect
+							<Select
+								label=""
 								options={sexoOptions}
 								value={filters.sexo || ""}
-								onChange={(val) => updateFilter("sexo", val)}
+								onChange={(e) => updateFilter("sexo", e.target.value)}
 								placeholder="Sexo"
 								classes={selectClasses}
 							/>

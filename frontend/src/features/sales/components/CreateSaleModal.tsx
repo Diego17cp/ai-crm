@@ -9,7 +9,7 @@ import {
 	FiInfo,
 	FiTarget,
 } from "react-icons/fi";
-import { SearchableSelect as Select } from "dialca-ui";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
 import { useSales } from "../hooks/useSales";
@@ -24,7 +24,8 @@ import { classes } from "@/shared/constants";
 import { CardCheckbox } from "@/shared/components/CardCheckbox";
 import { FaHandshake } from "react-icons/fa";
 
-const selectClasses = classes.searchableSelect;
+const searchableSelectClasses = classes.searchableSelect;
+const selectClasses = classes.select
 
 const estadoContratoOptions = [
 	{ value: "ADENDA", label: "Adenda" },
@@ -329,7 +330,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 											</h3>
 											<div className="grid grid-cols-2 gap-3 relative">
 												<div className="z-50 col-span-2">
-													<Select
+													<SearchableSelect
 														options={
 															proyectoOptions
 														}
@@ -344,11 +345,12 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="1. Proyecto"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
+														isClearable
 													/>
 												</div>
 												<div className="z-40 col-span-2">
-													<Select
+													<SearchableSelect
 														options={etapaOptions}
 														value={idEtapa}
 														onChange={(val) => {
@@ -360,12 +362,13 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="2. Etapa"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idProyecto}
+														isClearable
 													/>
 												</div>
 												<div className="z-30">
-													<Select
+													<SearchableSelect
 														options={manzanaOptions}
 														value={idManzana}
 														onChange={(val) => {
@@ -376,12 +379,13 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="3. Mz"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idEtapa}
+														isClearable
 													/>
 												</div>
 												<div className="z-20">
-													<Select
+													<SearchableSelect
 														options={loteOptions}
 														value={idLote}
 														onChange={(val) =>
@@ -391,8 +395,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}
 														label="4. Lote"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idManzana}
+														isClearable
 													/>
 												</div>
 												{montoTotal > 0 && (
@@ -466,13 +471,14 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														Estado del contrato
 													</label>
 													<Select
+														label=""
 														options={
 															estadoContratoOptions
 														}
 														value={estadoContrato}
-														onChange={(val) =>
+														onChange={(e) =>
 															setEstadoContrato(
-																val as EstadoContrato,
+																e.target.value as EstadoContrato,
 															)
 														}
 														placeholder="Estado"

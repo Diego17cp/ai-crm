@@ -33,8 +33,8 @@ export const DeleteAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 
     if (!cita) return null;
 
-    const clienteNombre = cita.cliente
-        ? `${cita.cliente.nombres} ${cita.cliente.apellidos}`.trim()
+    const clienteNombre = cita.persona
+        ? `${cita.persona.nombres} ${cita.persona.apellidos}`.trim()
         : "el cliente";
 
     const handleSubmit = async (e: React.FormEvent) => {

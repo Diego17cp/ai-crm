@@ -6,7 +6,7 @@ import {
 	FiX,
 	FiMessageCircle,
 } from "react-icons/fi";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { useChats } from "../hooks/useChats";
 import { ChatListItem } from "../components/ChatListItem";
 import { Pagination } from "@/shared/components/Pagination";
@@ -15,7 +15,7 @@ import { useChatModals } from "../hooks/useChatModals";
 import { ChatDetailsModal } from "../components/ChatDetailsModal";
 import { classes } from "@/shared/constants";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const estadoOptions = [
 	{ value: "BOT", label: "Bot" },
@@ -135,19 +135,21 @@ export const ChatsHistory = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoOptions}
 								value={filters.estado || ""}
-								onChange={(val) => updateFilter("estado", val)}
+								onChange={(e) => updateFilter("estado", e.target.value)}
 								placeholder="Estado de Chat"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={canalOptions}
 								value={filters.canal || ""}
-								onChange={(val) => updateFilter("canal", val)}
+								onChange={(e) => updateFilter("canal", e.target.value)}
 								placeholder="Canal de Origen"
 								classes={selectClasses}
 							/>

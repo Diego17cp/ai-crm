@@ -9,7 +9,7 @@ import {
 	FiTrash2,
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
-import { SearchableSelect } from "dialca-ui";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useLeads } from "../hooks/useLeads";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
 import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
@@ -28,7 +28,8 @@ interface PhoneUI {
 	tipo: TipoTelefono;
 }
 
-const selectClasses = classes.searchableSelect;
+const searchableSelectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean;
@@ -287,12 +288,17 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
 													Tipo de documento
-													<span className="text-red-500">*</span>
+													<span className="text-red-500">
+														*
+													</span>
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													value={idTipoDoc}
-													onChange={(val) =>
-														setIdTipoDoc(val)
+													onChange={(e) =>
+														setIdTipoDoc(
+															e.target.value,
+														)
 													}
 													options={docTypeOptions}
 													placeholder="Seleccione..."
@@ -319,7 +325,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													minLength={8}
 													disabled={isSubmitting}
 													placeholder="Ej: 12345678"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -495,7 +501,10 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 														value={idUbigeo}
 														onChange={setIdUbigeo}
 														placeholder="Buscar distrito/provincia..."
-														classes={selectClasses}
+														classes={
+															searchableSelectClasses
+														}
+														isClearable
 													/>
 												)}
 											</div>
@@ -513,17 +522,37 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Av. Principal 123"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
 											<div className="z-40">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Es Peruano
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={booleanOptions}
 													value={esPeruano}
-													onChange={setEsPeruano}
+													onChange={(e) =>
+														setEsPeruano(
+															e.target.value,
+														)
+													}
+													placeholder="Seleccionar"
+													classes={selectClasses}
+												/>
+											</div>
+											<div className="z-30">
+												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
+													Sexo
+												</label>
+												<Select
+													label=""
+													options={sexoOptions}
+													value={sexo}
+													onChange={(e) =>
+														setSexo(e.target.value)
+													}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
@@ -543,23 +572,10 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 														}
 														disabled={isSubmitting}
 														placeholder="Ej: Argentina, Colombia..."
-														className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 													/>
 												</div>
 											)}
-											<div className="z-30">
-												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
-													Sexo
-												</label>
-												<SearchableSelect
-													options={sexoOptions}
-													value={sexo}
-													onChange={setSexo}
-													placeholder="Seleccionar"
-													classes={selectClasses}
-												/>
-											</div>
-											
 										</div>
 									</div>
 									<div className="flex flex-col gap-4 pb-4">
@@ -571,10 +587,15 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mb-1 block">
 													Estado Civil
 												</label>
-												<SearchableSelect
+												<Select
+													label=""
 													options={estadoCivilOptions}
 													value={estadoCivil}
-													onChange={setEstadoCivil}
+													onChange={(e) =>
+														setEstadoCivil(
+															e.target.value,
+														)
+													}
 													placeholder="Seleccionar..."
 													classes={selectClasses}
 												/>
@@ -593,7 +614,7 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Ingeniero, Comerciante..."
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
 											</div>
 										</div>

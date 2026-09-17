@@ -1,7 +1,7 @@
 import type { ApiError } from "@/core/types";
 import { LeadListSkeleton } from "@/features/leads/components/LeadListSkeleton";
 import { ErrorState, EmptyState, Pagination } from "@/shared/components";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FiPlus, FiRefreshCw, FiSearch, FiUsers, FiX } from "react-icons/fi";
 import { useClients } from "../hooks/useClients";
@@ -12,7 +12,7 @@ import { classes, options } from "@/shared/constants";
 import { CreateClientModal } from "../components/CreateClientModal";
 import { ClientCard } from "../components/ClientCard";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const sexoOptions = options.sexo;
 const estadoCivilOptions = options.estadoCivil;
@@ -53,8 +53,7 @@ export const AllCustomers = () => {
 						Directorio de Clientes
 					</h1>
 					<p className="text-sm text-gray-500 dark:text-gray-400">
-						Gestiona todos los clientes activos en tu
-						CRM.
+						Gestiona todos los clientes activos en tu CRM.
 					</p>
 				</motion.div>
 				<div className="flex items-center gap-3">
@@ -116,41 +115,49 @@ export const AllCustomers = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-3">
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={solvenciaOptions}
 								value={filters.solvencia || ""}
-								onChange={(val) =>
-									updateFilter("solvencia", val)
+								onChange={(e) =>
+									updateFilter("solvencia", e.target.value)
 								}
 								placeholder="Solvencia"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={actitudOptions}
 								value={filters.actitud || ""}
-								onChange={(val) => updateFilter("actitud", val)}
+								onChange={(e) =>
+									updateFilter("actitud", e.target.value)
+								}
 								placeholder="Actitud"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-20">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoCivilOptions}
 								value={filters.estado_civil || ""}
-								onChange={(val) =>
-									updateFilter("estado_civil", val)
+								onChange={(e) =>
+									updateFilter("estado_civil", e.target.value)
 								}
 								placeholder="Estado Civil"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-10">
-							<SearchableSelect
+							<Select
+								label=""
 								options={sexoOptions}
 								value={filters.sexo || ""}
-								onChange={(val) => updateFilter("sexo", val)}
+								onChange={(e) =>
+									updateFilter("sexo", e.target.value)
+								}
 								placeholder="Sexo"
 								classes={selectClasses}
 							/>

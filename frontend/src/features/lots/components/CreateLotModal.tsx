@@ -288,6 +288,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}}
 												placeholder="Seleccionar..."
 												classes={selectClasses}
+												isClearable
 											/>
 										</div>
 										<div className="z-30">
@@ -317,6 +318,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 														placeholder="Seleccionar..."
 														disabled={!idProyecto}
 														classes={selectClasses}
+														isClearable
 													/>
 												</>
 											)}
@@ -345,6 +347,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 														placeholder="Seleccionar..."
 														disabled={!idEtapa}
 														classes={selectClasses}
+														isClearable
 													/>
 												</>
 											)}

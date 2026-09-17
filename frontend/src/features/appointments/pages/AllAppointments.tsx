@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { FiPlus, FiRefreshCw, FiCalendar, FiX } from "react-icons/fi";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { useAppointments } from "../hooks/useAppointments";
 import { useAppointmentsModals } from "../hooks/useAppointmentsModals";
 import { AppointmentCard } from "../components/AppointmentCard";
@@ -13,7 +13,7 @@ import { CreateAppointmentModal } from "../components/CreateAppointmentModal";
 import { DeleteAppointmentModal } from "../components/DeleteAppointmentModal";
 import { classes, options } from "@/shared/constants";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const estadoOpciones = options.estadoCita;
 
@@ -118,11 +118,12 @@ export const AllAppointments = () => {
 							<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
 								Estado
 							</label>
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoOpciones}
 								value={filters.estado_cita || ""}
-								onChange={(val) =>
-									updateFilter("estado_cita", val)
+								onChange={(e) =>
+									updateFilter("estado_cita", e.target.value)
 								}
 								placeholder="Todos"
 								classes={selectClasses}

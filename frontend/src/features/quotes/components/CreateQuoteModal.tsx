@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { FiX, FiFileText, FiAlertCircle, FiCreditCard, FiUser } from "react-icons/fi";
-import { SearchableSelect as Select } from "dialca-ui";
+import { SearchableSelect } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
 import { useQuotes } from "../hooks/useQuotes";
@@ -14,13 +14,12 @@ import { formatCurrency } from "@/features/sales/utils/salesFormatters";
 import { classes } from "@/shared/constants";
 import { useDocTypes } from "@/core/hooks";
 
-const selectClasses = classes.searchableSelect;
+const searchableSelectClasses = classes.searchableSelect;
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
 }
-
 
 export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
   const { docTypesQuery } = useDocTypes()
@@ -96,8 +95,6 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 
 	const precioLote = selectedLoteData ? Number(selectedLoteData.precio_total) : 0;
 
-	// Mismo criterio visual del resumen de crédito que ya tienes en ventas,
-	// pero aquí es solo estimado — el cálculo real y autoritativo lo hace el backend.
 	const estimadoCredito = useMemo(() => {
 		if (tipoPago !== "CREDITO" || !precioLote || !meses || Number(meses) <= 0) return null;
 		const cuotaInicial = Number(cuotaInicialDeseada) || precioLote * 0.1;
@@ -246,7 +243,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 											</h3>
 											<div className="grid grid-cols-2 gap-3 relative">
 												<div className="z-50 col-span-2">
-													<Select
+													<SearchableSelect
 														options={proyectoOptions}
 														value={idProyecto}
 														onChange={(val) => {
@@ -257,11 +254,13 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="1. Proyecto"
 														required
-														classes={selectClasses}
+														placeholder="Buscar..."
+														classes={searchableSelectClasses}
+														isClearable
 													/>
 												</div>
 												<div className="z-40 col-span-2">
-													<Select
+													<SearchableSelect
 														options={etapaOptions}
 														value={idEtapa}
 														onChange={(val) => {
@@ -271,12 +270,14 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="2. Etapa"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idProyecto}
+														placeholder="Buscar..."
+														isClearable
 													/>
 												</div>
 												<div className="z-30">
-													<Select
+													<SearchableSelect
 														options={manzanaOptions}
 														value={idManzana}
 														onChange={(val) => {
@@ -285,19 +286,23 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="3. Mz"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idEtapa}
+														placeholder="Buscar..."
+														isClearable
 													/>
 												</div>
 												<div className="z-20">
-													<Select
+													<SearchableSelect
 														options={loteOptions}
 														value={idLote}
 														onChange={(val) => setIdLote(String(val))}
 														label="4. Lote"
 														required
-														classes={selectClasses}
+														classes={searchableSelectClasses}
 														disabled={!idManzana}
+														placeholder="Buscar..."
+														isClearable
 													/>
 												</div>
 												{precioLote > 0 && (
@@ -323,24 +328,27 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 											</h3>
 											<div className="grid grid-cols-2 gap-3">
 												<div className="z-30 col-span-1">
-													<Select
+													<SearchableSelect
 														options={tipoDocOptions}
 														value={idTipoDoc}
 														onChange={(val) => setIdTipoDoc(String(val))}
 														label="Tipo Doc."
 														required
-														classes={selectClasses}
+														placeholder="Buscar..."
+														isClearable
+														classes={searchableSelectClasses}
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
 													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-														Número <span className="text-red-500 ml-1">*</span>
+														Número de Doc. <span className="text-red-500 ml-1">*</span>
 													</label>
 													<input
 														type="text"
 														value={documento}
 														onChange={(e) => setDocumento(e.target.value)}
 														disabled={isSubmitting}
+														placeholder="12345678"
 														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
 													/>
 												</div>
@@ -351,6 +359,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														value={nombres}
 														onChange={(e) => setNombres(e.target.value)}
 														disabled={isSubmitting}
+														placeholder="Jhon"
 														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
 													/>
 												</div>
@@ -361,17 +370,18 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														value={apellidos}
 														onChange={(e) => setApellidos(e.target.value)}
 														disabled={isSubmitting}
+														placeholder="Doe"
 														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
-													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Teléfono</label>
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Teléfono (WhatsApp)</label>
 													<input
 														type="tel"
 														value={telefono}
 														onChange={(e) => setTelefono(e.target.value)}
 														disabled={isSubmitting}
-														placeholder="Para envío por WhatsApp"
+														placeholder="987654321"
 														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
 													/>
 												</div>
@@ -382,6 +392,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														value={email}
 														onChange={(e) => setEmail(e.target.value)}
 														disabled={isSubmitting}
+														placeholder="jhondoe@gmail.com"
 														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
 													/>
 												</div>

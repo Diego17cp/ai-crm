@@ -486,6 +486,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 															classes={
 																selectClasses
 															}
+															isClearable
 														/>
 													</div>
 													<div className="z-40">
@@ -510,6 +511,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 															disabled={
 																!idProyecto
 															}
+															isClearable
 														/>
 													</div>
 													<div className="z-30">
@@ -529,6 +531,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																selectClasses
 															}
 															disabled={!idEtapa}
+															isClearable
 														/>
 													</div>
 													<div className="z-20">
@@ -549,6 +552,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 															disabled={
 																!idManzana
 															}
+															isClearable
 														/>
 													</div>
 												</div>

@@ -153,6 +153,7 @@ export const EditUserModal = ({ isOpen, onClose, user }: Props) => {
                                                 maxLength={11}
                                                 type="tel"
                                                 value={formData.telefono || ""}
+                                                placeholder="987654321"
                                                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                                                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-blue-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
                                             />

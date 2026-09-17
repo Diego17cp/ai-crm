@@ -6,7 +6,7 @@ import {
 	FiSearch,
 	FiX,
 } from "react-icons/fi";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { useSales } from "../hooks/useSales";
 import { Pagination } from "@/shared/components/Pagination";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -18,7 +18,7 @@ import { useVentaModals } from "../hooks/useSalesModal";
 import { CreateSaleModal } from "../components/CreateSaleModal";
 import { classes } from "@/shared/constants";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const estadoVentaOptions = [
 	{ value: "PENDIENTE", label: "Pendiente" },
@@ -144,33 +144,36 @@ export const AllSales = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoVentaOptions}
 								value={filters.estado_venta || ""}
-								onChange={(val) =>
-									updateFilter("estado_venta", val)
+								onChange={(e) =>
+									updateFilter("estado_venta", e.target.value)
 								}
 								placeholder="Estado Venta"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoContratoOptions}
 								value={filters.estado_contrato || ""}
-								onChange={(val) =>
-									updateFilter("estado_contrato", val)
+								onChange={(e) =>
+									updateFilter("estado_contrato", e.target.value)
 								}
 								placeholder="Estado Contrato"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-20">
-							<SearchableSelect
+							<Select
+								label=""
 								options={tipoPagoOptions}
 								value={filters.tipo_pago || ""}
-								onChange={(val) =>
-									updateFilter("tipo_pago", val)
+								onChange={(e) =>
+									updateFilter("tipo_pago", e.target.value)
 								}
 								placeholder="Tipo Pago"
 								classes={selectClasses}

@@ -1,5 +1,5 @@
 import { classes } from "@/shared/constants";
-import { SearchableSelect } from "dialca-ui";
+import { Select } from "dialca-ui";
 import { AnimatePresence, motion } from "motion/react";
 import { FiInbox, FiPlus, FiRefreshCw, FiSearch, FiX } from "react-icons/fi";
 import { TfiReceipt } from "react-icons/tfi";
@@ -10,7 +10,7 @@ import { useQuoteModals } from "../hooks/useQuoteModals";
 import { QuoteDetailModal } from "../components/QuoteDetailModal";
 import { CreateQuoteModal } from "../components/CreateQuoteModal";
 
-const selectClasses = classes.searchableSelect;
+const selectClasses = classes.select;
 
 const estadoOptions = [
 	{ value: "BORRADOR", label: "Borrador" },
@@ -140,20 +140,22 @@ export const QuotesHistory = () => {
 					</div>
 					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={estadoOptions}
 								value={filters.state || ""}
-								onChange={(val) => updateFilter("state", val)}
+								onChange={(e) => updateFilter("state", e.target.value)}
 								placeholder="Estado de Cotización"
 								classes={selectClasses}
 							/>
 						</div>
 						<div className="z-30">
-							<SearchableSelect
+							<Select
+								label=""
 								options={generadoPorOptions}
 								value={filters.generatedBy || ""}
-								onChange={(val) =>
-									updateFilter("generatedBy", val)
+								onChange={(e) =>
+									updateFilter("generatedBy", e.target.value)
 								}
 								placeholder="Generado por"
 								classes={selectClasses}
