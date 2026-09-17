@@ -177,23 +177,28 @@ export const AllAppointments = () => {
 					<div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4 mt-6">
 						<AnimatePresence mode="popLayout">
 							{appointments.map((cita) => (
-								<div key={cita.id} className="break-inside-avoid mb-4">
-								<AppointmentCard
+								<div
 									key={cita.id}
-									cita={cita}
-									onEdit={() =>
-										openModal("edit_appointment", cita)
-									}
-									onMarkAttended={() =>
-										openModal("mark_attended", cita)
-									}
-									onMarkCanceled={() =>
-										openModal("mark_canceled", cita)
-									}
-									onDelete={() =>
-										openModal("delete_appointment", cita)
-									}
-								/>
+									className="break-inside-avoid mb-4"
+								>
+									<AppointmentCard
+										cita={cita}
+										onEdit={() =>
+											openModal("edit_appointment", cita)
+										}
+										onMarkAttended={() =>
+											openModal("mark_attended", cita)
+										}
+										onMarkCanceled={() =>
+											openModal("mark_canceled", cita)
+										}
+										onDelete={() =>
+											openModal(
+												"delete_appointment",
+												cita,
+											)
+										}
+									/>
 								</div>
 							))}
 						</AnimatePresence>

@@ -24,6 +24,19 @@ export const formatDate = (dateString?: string) => {
 };
 
 export const formatTime = (timeString?: string | null) => {
-    if (!timeString) return "Sin hora";
-    return timeString.slice(0, 5); 
+	if (!timeString) return "Sin hora";
+
+	const [horaStr, minutosStr] = timeString.split(":");
+	if (!horaStr || !minutosStr) return timeString.slice(0, 5); 
+
+	let hora = Number(horaStr);
+	const minutos = minutosStr.slice(0, 2);
+
+	const ampm = hora >= 12 ? "PM" : "AM";
+
+	hora = hora % 12;
+	hora = hora ? hora : 12;
+
+	const horaFormateada = String(hora).padStart(2, "0");
+	return `${horaFormateada}:${minutos} ${ampm}`;
 };
