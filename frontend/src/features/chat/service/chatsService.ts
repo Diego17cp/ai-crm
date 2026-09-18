@@ -15,6 +15,7 @@ export const chatsService = {
 		if (query.estado) params.append("estado", String(query.estado));
 		if (query.canal) params.append("canal", String(query.canal));
 		if (query.userId) params.append("id_asesor", String(query.userId));
+		if (query.date) params.append("fecha", String(query.date));
 		params.append("page", String(query.page));
 		params.append("limit", String(query.limit));
 		const response = await apiClient.get<AllChatsResponse>(

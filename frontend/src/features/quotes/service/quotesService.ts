@@ -23,6 +23,7 @@ export const quotesService = {
     if (filters.state) params.append("estado", String(filters.state));
     if (filters.generatedBy) params.append("generado_por", String(filters.generatedBy));
     if (filters.userId) params.append("id_usuario", String(filters.userId));
+		if (filters.date) params.append("fecha", String(filters.date));
     params.append("page", String(filters.page));
     params.append("limit", String(filters.limit));
     const response = await apiClient.get<AllQuotesResponse>(

@@ -34,6 +34,7 @@ export type EstadoCotizacion =
 export interface QuoteFilters {
 	q?: string;
 	state?: EstadoCotizacion;
+	date?: string;
 	generatedBy?: GeneradoPor;
 	page: number;
 	limit: number;

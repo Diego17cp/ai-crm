@@ -36,6 +36,7 @@ export const useQuotes = () => {
 	const [filters, setFilters] = useState({
 		state: undefined as EstadoCotizacion | undefined,
 		generatedBy: undefined as GeneradoPor | undefined,
+		date: undefined as string | undefined,
 	});
 	const handleSearch = (value: string) => setSearchTerm(value);
 	const clearSearch = () => {
@@ -54,10 +55,11 @@ export const useQuotes = () => {
 		setFilters({
 			state: undefined,
 			generatedBy: undefined,
+			date: undefined,
 		});
 		goToPage(1);
 	};
-	const hasActiveFilters = Boolean(filters.state || filters.generatedBy);
+	const hasActiveFilters = Boolean(filters.state || filters.generatedBy || filters.date);
 
 	const filtersPayload: QuoteFilters = {
 		page: currentPage,
@@ -76,6 +78,7 @@ export const useQuotes = () => {
 			filtersPayload.state,
 			filtersPayload.generatedBy,
 			filtersPayload.userId,
+			filtersPayload.date,
 		],
 		queryFn: () => quotesService.getAll(filtersPayload),
 	});

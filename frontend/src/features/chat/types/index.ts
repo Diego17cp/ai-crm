@@ -44,6 +44,7 @@ export interface ChatFilters {
 	q?: string;
 	estado?: EstadoChat;
 	canal?: CanalContacto;
+	date?: string;
 	userId?: string;
 	page: number;
 	limit: number;

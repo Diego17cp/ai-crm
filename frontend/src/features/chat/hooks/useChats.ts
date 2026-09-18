@@ -28,6 +28,7 @@ export const useChats = () => {
 	const [filters, setFilters] = useState({
 		estado: undefined as EstadoChat | undefined,
 		canal: undefined as CanalContacto | undefined,
+		date: undefined as string | undefined,
 	});
 	const handleSearch = (value: string) => setSearchTerm(value);
 	const clearSearch = () => {
@@ -46,10 +47,11 @@ export const useChats = () => {
 		setFilters({
 			estado: undefined,
 			canal: undefined,
+			date: undefined,
 		});
 		goToPage(1);
 	};
-	const hasActiveFilters = Boolean(filters.estado || filters.canal);
+	const hasActiveFilters = Boolean(filters.estado || filters.canal || filters.date);
 
 	const filtersPayload: ChatFilters = {
 		page: currentPage,
@@ -66,6 +68,7 @@ export const useChats = () => {
 			filtersPayload.limit,
 			filtersPayload.estado,
 			filtersPayload.canal,
+			filtersPayload.date,
 			!isAdmin ? userId : undefined,
 		],
 		queryFn: () => chatsService.getChats(filtersPayload),
