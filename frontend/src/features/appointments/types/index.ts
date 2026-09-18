@@ -59,6 +59,7 @@ export interface FiltersState {
 	puntuacion?: number;
 	id_proyecto?: number;
 	id_usuario_responsable?: string;
+	q?: string;
 }
 export interface EditAppointmentPayload {
 	id_proyecto?: number;

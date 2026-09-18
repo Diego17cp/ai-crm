@@ -1,6 +1,14 @@
 import { motion, AnimatePresence } from "motion/react";
-import { FiPlus, FiRefreshCw, FiCalendar, FiX } from "react-icons/fi";
-import { Select } from "dialca-ui";
+import {
+	FiPlus,
+	FiRefreshCw,
+	FiCalendar,
+	FiX,
+	FiSearch,
+	FiFilter,
+	FiStar,
+} from "react-icons/fi";
+import { SearchableSelect, Select } from "dialca-ui";
 import { useAppointments } from "../hooks/useAppointments";
 import { useAppointmentsModals } from "../hooks/useAppointmentsModals";
 import { AppointmentCard } from "../components/AppointmentCard";
@@ -12,9 +20,10 @@ import { UpdateAppointmentStatusModal } from "../components/UpdateAppointmentSta
 import { CreateAppointmentModal } from "../components/CreateAppointmentModal";
 import { DeleteAppointmentModal } from "../components/DeleteAppointmentModal";
 import { classes, options } from "@/shared/constants";
+import type { Proyecto } from "../types";
 
 const selectClasses = classes.select;
-
+const searchableSelectClasses = classes.searchableSelect;
 const estadoOpciones = options.estadoCita;
 
 export const AllAppointments = () => {
@@ -28,14 +37,25 @@ export const AllAppointments = () => {
 		isFetching,
 		page,
 		goToPage,
+		searchTerm,
+		handleSearch,
+		clearSearch,
 		filters,
 		updateFilter,
 		clearAllFilters,
 		hasActiveFilters,
+		projects,
+		loadingProjects,
 	} = useAppointments();
 
 	const { openModal, selectedCita, activeModal, closeModal } =
 		useAppointmentsModals();
+
+	const proyectoOptions =
+		projects?.map((p: Proyecto) => ({
+			value: String(p.id),
+			label: p.nombre,
+		})) || [];
 
 	return (
 		<div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
@@ -84,70 +104,159 @@ export const AllAppointments = () => {
 				transition={{ delay: 0.1 }}
 				className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col gap-4"
 			>
-				<div className="flex flex-col md:flex-row gap-4 items-center justify-between w-full">
-					<div className="flex gap-3 w-full md:w-auto">
-						<div className="flex flex-col w-1/2 md:w-auto z-10">
-							<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
-								Fecha Inicio
-							</label>
+				<div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+					<div className="relative w-full flex items-center">
+						<FiSearch
+							className="absolute left-4 text-gray-400 dark:text-gray-500 pointer-events-none"
+							size={18}
+						/>
+						<input
+							type="text"
+							placeholder="Buscar por cliente, asesor o DNI..."
+							value={searchTerm}
+							onChange={(e) => handleSearch(e.target.value)}
+							className="w-full pl-11 pr-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-teal-500/20 rounded-xl text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all outline-none"
+						/>
+						{searchTerm && (
+							<button
+								onClick={clearSearch}
+								className="absolute cursor-pointer right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-white dark:bg-gray-800 rounded-full"
+							>
+								<FiX size={16} />
+							</button>
+						)}
+					</div>
+					{hasActiveFilters && (
+						<button
+							onClick={clearAllFilters}
+							className="flex cursor-pointer items-center gap-1.5 shrink-0 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-medium border border-transparent"
+						>
+							<FiFilter size={16} />
+							<span className="hidden sm:inline">
+								Limpiar filtros
+							</span>
+						</button>
+					)}
+				</div>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 border-t border-gray-100 dark:border-gray-800/60 pt-3">
+					<div className="flex flex-col z-30">
+						<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
+							Proyecto Visitado
+						</label>
+						{loadingProjects ? (
+							<div className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-gray-400 text-xs animate-pulse">
+								Cargando proyectos...
+							</div>
+						) : (
+							<SearchableSelect
+								options={proyectoOptions}
+								value={
+									filters.id_proyecto
+										? String(filters.id_proyecto)
+										: ""
+								}
+								onChange={(val) =>
+									updateFilter(
+										"id_proyecto",
+										val ? Number(val) : undefined,
+									)
+								}
+								placeholder="Todos los Proyectos"
+								isClearable
+								classes={searchableSelectClasses}
+							/>
+						)}
+					</div>
+					<div className="flex flex-col z-20">
+						<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
+							Estado
+						</label>
+						<Select
+							label=""
+							options={estadoOpciones}
+							value={filters.estado_cita || ""}
+							onChange={(e) =>
+								updateFilter("estado_cita", e.target.value)
+							}
+							placeholder="Todos los estados"
+							classes={selectClasses}
+						/>
+					</div>
+					<div className="flex flex-col z-10">
+						<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
+							Rango de Fechas
+						</label>
+						<div className="flex items-center gap-1.5">
 							<input
 								type="date"
 								value={filters.fecha_inicio || ""}
 								onChange={(e) =>
 									updateFilter("fecha_inicio", e.target.value)
 								}
-								className="w-full md:w-40 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
+								title="Fecha Inicio"
+								className="w-1/2 px-3 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-xs text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
 							/>
-						</div>
-						<div className="flex flex-col w-1/2 md:w-auto z-10">
-							<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
-								Fecha Fin
-							</label>
+							<span className="text-gray-400 text-xs">-</span>
 							<input
 								type="date"
 								value={filters.fecha_fin || ""}
 								onChange={(e) =>
 									updateFilter("fecha_fin", e.target.value)
 								}
-								className="w-full md:w-40 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
+								title="Fecha Fin"
+								className="w-1/2 px-3 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-xs text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
 							/>
 						</div>
 					</div>
-					<div className="flex w-full md:w-1/3 gap-3">
-						<div className="w-full z-30">
-							<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1">
-								Estado
-							</label>
-							<Select
-								label=""
-								options={estadoOpciones}
-								value={filters.estado_cita || ""}
-								onChange={(e) =>
-									updateFilter("estado_cita", e.target.value)
-								}
-								placeholder="Todos"
-								classes={selectClasses}
-							/>
+					<div className="flex flex-col z-10">
+						<label className="text-[10px] font-bold text-gray-500 uppercase px-1 mb-1 flex items-center justify-between">
+							<span>Calificación</span>
+							{filters.puntuacion && (
+								<button
+									onClick={() =>
+										updateFilter("puntuacion", undefined)
+									}
+									className="text-[10px] text-teal-600 dark:text-teal-400 hover:underline cursor-pointer lowercase"
+								>
+									quitar
+								</button>
+							)}
+						</label>
+						<div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl border border-transparent">
+							{[1, 2, 3, 4, 5].map((star) => {
+								const isSelected = filters.puntuacion === star;
+								return (
+									<button
+										key={star}
+										type="button"
+										onClick={() =>
+											updateFilter(
+												"puntuacion",
+												isSelected ? undefined : star,
+											)
+										}
+										className={`flex items-center justify-center gap-1 p-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex-1 ${
+											isSelected
+												? "bg-amber-500 text-white shadow-sm shadow-amber-500/30 scale-105"
+												: "text-gray-600 dark:text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+										}`}
+										title={`${star} estrellas`}
+									>
+										<span>{star}</span>
+										<FiStar
+											size={11}
+											className={
+												isSelected
+													? "fill-white text-white"
+													: "fill-amber-400 text-amber-400"
+											}
+										/>
+									</button>
+								);
+							})}
 						</div>
 					</div>
 				</div>
-				<AnimatePresence>
-					{hasActiveFilters && (
-						<motion.div
-							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: "auto" }}
-							exit={{ opacity: 0, height: 0 }}
-							className="flex justify-start border-t border-gray-100 dark:border-gray-800/60 pt-3"
-						>
-							<button
-								onClick={clearAllFilters}
-								className="text-xs flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-1.5 rounded-lg transition-colors cursor-pointer font-medium"
-							>
-								<FiX size={14} /> Limpiar filtros
-							</button>
-						</motion.div>
-					)}
-				</AnimatePresence>
 			</motion.div>
 			<div className="w-full flex-1">
 				{isLoading ? (
@@ -160,18 +269,11 @@ export const AllAppointments = () => {
 					/>
 				) : appointments.length === 0 ? (
 					<EmptyState
-						title={
-							hasActiveFilters
-								? "No hay citas que coincidan"
-								: "No hay citas programadas"
-						}
+						title="No hay citas encontradas"
 						description={
 							hasActiveFilters
-								? "Intenta modificar el rango de fechas o el filtro de estado."
-								: "Aún no se ha registrado ninguna cita con clientes en el sistema."
-						}
-						icon={
-							<FiCalendar className="w-10 h-10 text-gray-400" />
+								? "No se encontraron citas con los filtros seleccionados."
+								: "No tienes citas programadas actualmente."
 						}
 					/>
 				) : (
@@ -206,19 +308,17 @@ export const AllAppointments = () => {
 					</div>
 				)}
 			</div>
-			{!isLoading && appointments.length > 0 && meta && (
-				<div className="mt-auto">
-					<Pagination
-						currentPage={page}
-						totalPages={meta.totalPages}
-						onPageChange={goToPage}
-						isLoading={isFetching}
-						perPage={meta.limit}
-						total={meta.total}
-						hasNext={meta.hasNextPage}
-						hasPrev={meta.hasPreviousPage}
-					/>
-				</div>
+			{meta && meta.totalPages > 1 && (
+				<Pagination
+					currentPage={page}
+					perPage={meta.limit}
+					total={meta.total}
+					totalPages={meta.totalPages}
+					hasNext={meta.hasNextPage}
+					hasPrev={meta.hasPreviousPage}
+					onPageChange={goToPage}
+					isLoading={isFetching}
+				/>
 			)}
 			<CreateAppointmentModal
 				isOpen={activeModal === "create_appointment"}
