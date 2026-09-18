@@ -14,17 +14,21 @@ export class AuthController {
 		accessToken: string,
 		refreshToken: string,
 	) {
+		const isTunnel = env.API_URL?.includes("devtunnels.ms") || env.API_URL?.includes("ngrok");
+		const useSecure = this.isProd || isTunnel;
+		const sameSitePolicy = useSecure ? "none" : "lax";
+
 		res.cookie("accessToken", accessToken, {
 			httpOnly: true,
-			secure: this.isProd,
-			sameSite: "strict",
+			secure: useSecure,
+			sameSite: sameSitePolicy,
 			maxAge: 15 * 60 * 1000, // 15 min
 			path: "/",
 		});
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
-			secure: this.isProd,
-			sameSite: "strict",
+			secure: useSecure,
+			sameSite: sameSitePolicy,
 			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
 			path: "/api/auth/refresh",
 		});
