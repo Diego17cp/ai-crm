@@ -16,6 +16,7 @@ import {
 	PaginatedLotesResult,
 	UpdateLoteDTO,
 } from "../../domain/dtos";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaLotesRepository implements ILotesRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -35,19 +36,19 @@ export class PrismaLotesRepository implements ILotesRepository {
 			whereCondition.manzana = { etapa: { id_proyecto: id_proyecto } };
 
 		if (q && q.trim() !== "") {
-			whereCondition.OR = [
-				{ numero_lote: { contains: q, mode: "insensitive" } },
-				{ numero_partida: { contains: q, mode: "insensitive" } },
-				{ ubicacion_referencial: { contains: q, mode: "insensitive" } },
+			whereCondition.AND = generateNestedSearchCondition(q, (word) => [
+				{ numero_lote: { contains: word, mode: "insensitive" } },
+				{ numero_partida: { contains: word, mode: "insensitive" } },
+				{ ubicacion_referencial: { contains: word, mode: "insensitive" } },
 				{
 					manzana: {
-						codigo: { contains: q, mode: "insensitive" },
+						codigo: { contains: word, mode: "insensitive" },
 					},
 				},
 				{
 					manzana: {
 						etapa: {
-							nombre: { contains: q, mode: "insensitive" },
+							nombre: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
@@ -55,12 +56,12 @@ export class PrismaLotesRepository implements ILotesRepository {
 					manzana: {
 						etapa: {
 							proyecto: {
-								nombre: { contains: q, mode: "insensitive" },
+								nombre: { contains: word, mode: "insensitive" },
 							},
 						},
 					},
 				},
-			];
+			]);
 		}
 		const [total, lotesData] = await Promise.all([
 			this.prisma.lotes.count({ where: whereCondition }),

@@ -8,6 +8,7 @@ import {
 	QuoteWithRelations,
 } from "../../domain/dtos";
 import { CotizacionesWhereInput } from "generated/prisma/models";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaQuoteRepository implements IQuoteRepository {
 	constructor(private prisma: PrismaClient) {}
@@ -204,21 +205,25 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 		const { q, estado, generado_por, id_usuario, page, limit } = query;
 		const skip = (page - 1) * limit;
 		const whereCondition: CotizacionesWhereInput = {};
-		if (q) {
-			whereCondition.OR = [
-				{ codigo: { contains: q, mode: "insensitive" } },
-				{ persona: { nombres: { contains: q, mode: "insensitive" } } },
+		if (q && q.trim() !== "") {
+			whereCondition.AND = generateNestedSearchCondition(q, (word) => [
+				{ codigo: { contains: word, mode: "insensitive" } },
 				{
 					persona: {
-						apellidos: { contains: q, mode: "insensitive" },
+						nombres: { contains: word, mode: "insensitive" },
 					},
 				},
-				{ asesor: { nombres: { contains: q, mode: "insensitive" } } },
-				{ asesor: { apellidos: { contains: q, mode: "insensitive" } } },
-				{ revisor: { nombres: { contains: q, mode: "insensitive" } } },
+				{
+					persona: {
+						apellidos: { contains: word, mode: "insensitive" },
+					},
+				},
+				{ asesor: { nombres: { contains: word, mode: "insensitive" } } },
+				{ asesor: { apellidos: { contains: word, mode: "insensitive" } } },
+				{ revisor: { nombres: { contains: word, mode: "insensitive" } } },
 				{
 					revisor: {
-						apellidos: { contains: q, mode: "insensitive" },
+						apellidos: { contains: word, mode: "insensitive" },
 					},
 				},
 				{
@@ -227,7 +232,7 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 							etapa: {
 								proyecto: {
 									nombre: {
-										contains: q,
+										contains: word,
 										mode: "insensitive",
 									},
 								},
@@ -238,12 +243,16 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 				{
 					lote: {
 						manzana: {
-							codigo: { contains: q, mode: "insensitive" },
+							codigo: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
-				{ lote: { numero_lote: { contains: q, mode: "insensitive" } } },
-			];
+				{
+					lote: {
+						numero_lote: { contains: word, mode: "insensitive" },
+					},
+				},
+			]);
 		}
 		if (estado) whereCondition.estado = estado;
 		if (generado_por) whereCondition.generado_por = generado_por;

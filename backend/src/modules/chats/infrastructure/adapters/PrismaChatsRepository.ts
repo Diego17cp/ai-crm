@@ -9,6 +9,7 @@ import {
 	AsignacionDTO,
 } from "../../domain/dtos";
 import { ConversacionesWhereInput } from "generated/prisma/models";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaChatsRepository implements IChatsRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -18,22 +19,36 @@ export class PrismaChatsRepository implements IChatsRepository {
 		const { q, estado, canal, page, limit, id_asesor } = query;
 		const skip = (page - 1) * limit;
 		const whereCondition: ConversacionesWhereInput = {};
-		if (q) {
-			whereCondition.OR = [
-				{ persona: { nombres: { contains: q, mode: "insensitive" } } },
+		if (q && q.trim() !== "") {
+			whereCondition.AND = generateNestedSearchCondition(q, (word) => [
 				{
 					persona: {
-						apellidos: { contains: q, mode: "insensitive" },
+						nombres: { contains: word, mode: "insensitive" },
 					},
 				},
-				{ asesor: { nombres: { contains: q, mode: "insensitive" } } },
-				{ asesor: { apellidos: { contains: q, mode: "insensitive" } } },
+				{
+					persona: {
+						apellidos: { contains: word, mode: "insensitive" },
+					},
+				},
 				{
 					asesor: {
-						rol: { nombre: { contains: q, mode: "insensitive" } },
+						nombres: { contains: word, mode: "insensitive" },
 					},
 				},
-			];
+				{
+					asesor: {
+						apellidos: { contains: word, mode: "insensitive" },
+					},
+				},
+				{
+					asesor: {
+						rol: {
+							nombre: { contains: word, mode: "insensitive" },
+						},
+					},
+				},
+			]);
 		}
 
 		if (estado) whereCondition.estado = estado;
@@ -468,19 +483,19 @@ export class PrismaChatsRepository implements IChatsRepository {
 		return msg?.created_at ?? null;
 	}
 	async forceAssignChat(chatId: string, asesorId: string): Promise<void> {
-		await this.prisma.$transaction(async tx => {
+		await this.prisma.$transaction(async (tx) => {
 			await tx.conversaciones.update({
 				where: { id: chatId },
 				data: {
 					estado: "ATENDIDO_HUMANO",
 					id_usuario_asignado: asesorId,
-					fecha_asignacion: new Date()
-				}
-			})
+					fecha_asignacion: new Date(),
+				},
+			});
 			await tx.conversacionAsignacion.updateMany({
 				where: { id_conversacion: chatId, fecha_fin: null },
-				data: { fecha_fin: new Date() }
-			})
+				data: { fecha_fin: new Date() },
+			});
 			await tx.conversacionAsignacion.create({
 				data: {
 					id_conversacion: chatId,
@@ -495,10 +510,10 @@ export class PrismaChatsRepository implements IChatsRepository {
 					tipo: "ASESOR_ASIGNADO",
 					id_usuario: asesorId,
 					metadata: {
-						origen: "cotizacion"
-					}
-				}
-			})
+						origen: "cotizacion",
+					},
+				},
+			});
 		});
 	}
 }

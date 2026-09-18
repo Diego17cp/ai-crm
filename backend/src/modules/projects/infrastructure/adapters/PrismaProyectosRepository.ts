@@ -1,228 +1,255 @@
-import { PrismaClient, EstadoGeneral, Prisma, Manzanas, Proyectos, Etapas } from "generated/prisma/client";
-import { IProyectosRepository, ProyectoWithDetails } from "../../application/ports/IProyectosRepository";
-import { CreateManzanaDTO, CreateManzanasBatchDTO, CreateProyectoDTO, GetProyectosQueryDTO, PaginatedResult, UpdateProyectoDTO } from "../../domain/dtos";
+import {
+	PrismaClient,
+	EstadoGeneral,
+	Prisma,
+	Manzanas,
+	Proyectos,
+	Etapas,
+} from "generated/prisma/client";
+import {
+	IProyectosRepository,
+	ProyectoWithDetails,
+} from "../../application/ports/IProyectosRepository";
+import {
+	CreateManzanaDTO,
+	CreateManzanasBatchDTO,
+	CreateProyectoDTO,
+	GetProyectosQueryDTO,
+	PaginatedResult,
+	UpdateProyectoDTO,
+} from "../../domain/dtos";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaProyectosRepository implements IProyectosRepository {
-    constructor(private readonly prisma: PrismaClient) {}
+	constructor(private readonly prisma: PrismaClient) {}
 
-    async findPaginated(queryDTO: GetProyectosQueryDTO): Promise<PaginatedResult<ProyectoWithDetails>> {
-        const { q, page, limit } = queryDTO;
-        const skip = (page - 1) * limit;
+	async findPaginated(
+		queryDTO: GetProyectosQueryDTO,
+	): Promise<PaginatedResult<ProyectoWithDetails>> {
+		const { q, page, limit } = queryDTO;
+		const skip = (page - 1) * limit;
 
-        const whereCondition: Prisma.ProyectosWhereInput = {
-            estado: EstadoGeneral.ACTIVO
-        };
-        if (q && q.trim() !== "") {
-            whereCondition.OR = [
-                { nombre: { contains: q, mode: 'insensitive' } },
-                { abreviatura: { contains: q, mode: 'insensitive' } },
-                {
-                    etapas: {
-                        some: {
-                            nombre: { contains: q, mode: 'insensitive' },
-                            estado: EstadoGeneral.ACTIVO
-                        }
-                    }
-                },
-                {
-                    etapas: {
-                        some: {
-                            estado: EstadoGeneral.ACTIVO,
-                            manzanas: {
-                                some: {
-                                    codigo: { contains: q, mode: 'insensitive' },
-                                    estado: EstadoGeneral.ACTIVO
-                                }
-                            }
-                        }
-                    }
-                }
-            ];
-        }
-        const [total, data] = await Promise.all([
-            this.prisma.proyectos.count({ where: whereCondition }),
-            this.prisma.proyectos.findMany({
-                where: whereCondition,
-                skip,
-                take: limit,
-                orderBy: { created_at: 'desc' },
-                include: {
-                    etapas: {
-                        where: { estado: EstadoGeneral.ACTIVO },
-                        include: {
-                            manzanas: {
-                                where: { estado: EstadoGeneral.ACTIVO }
-                            }
-                        }
-                    },
-                    ubigeo: {
-                        select: {
-                            nombre: true
-                        }
-                    }
-                }
-            })
-        ]);
-        const totalPages = Math.ceil(total / limit);
-        const hasNextPage = page < totalPages;
-        const hasPreviousPage = page > 1;
+		const whereCondition: Prisma.ProyectosWhereInput = {
+			estado: EstadoGeneral.ACTIVO,
+		};
+		if (q && q.trim() !== "") {
+			whereCondition.AND = generateNestedSearchCondition(q, (word) => [
+				{ nombre: { contains: word, mode: "insensitive" } },
+				{ abreviatura: { contains: word, mode: "insensitive" } },
+				{ descripcion: { contains: word, mode: "insensitive" } },
+				{ ubicacion: { contains: word, mode: "insensitive" } },
+				{ ubigeo: { id: { contains: word, mode: "insensitive" } } },
+				{ ubigeo: { nombre: { contains: word, mode: "insensitive" } } },
+				{
+					etapas: {
+						some: {
+							nombre: { contains: word, mode: "insensitive" },
+							estado: EstadoGeneral.ACTIVO,
+						},
+					},
+				},
+				{
+					etapas: {
+						some: {
+							estado: EstadoGeneral.ACTIVO,
+							manzanas: {
+								some: {
+									codigo: {
+										contains: word,
+										mode: "insensitive",
+									},
+									estado: EstadoGeneral.ACTIVO,
+								},
+							},
+						},
+					},
+				},
+			]);
+		}
+		const [total, data] = await Promise.all([
+			this.prisma.proyectos.count({ where: whereCondition }),
+			this.prisma.proyectos.findMany({
+				where: whereCondition,
+				skip,
+				take: limit,
+				orderBy: { created_at: "desc" },
+				include: {
+					etapas: {
+						where: { estado: EstadoGeneral.ACTIVO },
+						include: {
+							manzanas: {
+								where: { estado: EstadoGeneral.ACTIVO },
+							},
+						},
+					},
+					ubigeo: {
+						select: {
+							nombre: true,
+						},
+					},
+				},
+			}),
+		]);
+		const totalPages = Math.ceil(total / limit);
+		const hasNextPage = page < totalPages;
+		const hasPreviousPage = page > 1;
 
-        return {
-            data,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages,
-                hasNextPage,
-                hasPreviousPage
-            }
-        };
-    }
-    async findAll(): Promise<Proyectos[]> {
-        return this.prisma.proyectos.findMany({
-            where: { estado: EstadoGeneral.ACTIVO },
-            orderBy: { created_at: 'desc' }
-        });
-    }
+		return {
+			data,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages,
+				hasNextPage,
+				hasPreviousPage,
+			},
+		};
+	}
+	async findAll(): Promise<Proyectos[]> {
+		return this.prisma.proyectos.findMany({
+			where: { estado: EstadoGeneral.ACTIVO },
+			orderBy: { created_at: "desc" },
+		});
+	}
 
-    async findById(id: number): Promise<ProyectoWithDetails | null> {
-        return this.prisma.proyectos.findUnique({
-            where: { id },
-            include: {
-                etapas: {
-                    include: { manzanas: true }
-                },
-                ubigeo: {
-                    select: { nombre: true }
-                }
-            }
-        });
-    }
+	async findById(id: number): Promise<ProyectoWithDetails | null> {
+		return this.prisma.proyectos.findUnique({
+			where: { id },
+			include: {
+				etapas: {
+					include: { manzanas: true },
+				},
+				ubigeo: {
+					select: { nombre: true },
+				},
+			},
+		});
+	}
 
-    async create(data: CreateProyectoDTO): Promise<Proyectos> {
-        return this.prisma.proyectos.create({
-            data: { ...data, estado: EstadoGeneral.ACTIVO }
-        });
-    }
+	async create(data: CreateProyectoDTO): Promise<Proyectos> {
+		return this.prisma.proyectos.create({
+			data: { ...data, estado: EstadoGeneral.ACTIVO },
+		});
+	}
 
-    async update(id: number, data: UpdateProyectoDTO): Promise<Proyectos> {
-        return this.prisma.proyectos.update({
-            where: { id },
-            data
-        });
-    }
+	async update(id: number, data: UpdateProyectoDTO): Promise<Proyectos> {
+		return this.prisma.proyectos.update({
+			where: { id },
+			data,
+		});
+	}
 
-    async softDelete(id: number) {
-        return this.prisma.proyectos.update({
-            where: { id },
-            data: { estado: EstadoGeneral.INACTIVO }
-        });
-    }
+	async softDelete(id: number) {
+		return this.prisma.proyectos.update({
+			where: { id },
+			data: { estado: EstadoGeneral.INACTIVO },
+		});
+	}
 
-    async createEtapa(data: any) {
-        return this.prisma.etapas.create({
-            data: { ...data, estado: EstadoGeneral.ACTIVO }
-        });
-    }
+	async createEtapa(data: any) {
+		return this.prisma.etapas.create({
+			data: { ...data, estado: EstadoGeneral.ACTIVO },
+		});
+	}
 
-    async updateEtapa(id: number, data: any) {
-        return this.prisma.etapas.update({ where: { id }, data });
-    }
+	async updateEtapa(id: number, data: any) {
+		return this.prisma.etapas.update({ where: { id }, data });
+	}
 
-    async softDeleteEtapa(id: number) {
-        return this.prisma.etapas.update({
-            where: { id },
-            data: { estado: EstadoGeneral.INACTIVO }
-        });
-    }
-    async findAllEtapas(): Promise<Etapas[]> {
-        return this.prisma.etapas.findMany({
-            where: { estado: EstadoGeneral.ACTIVO },
-            orderBy: { created_at: 'desc' }
-        });
-    }
-    async findEtapasByProyectoId(id_proyecto: number): Promise<Etapas[]> {
-        return this.prisma.etapas.findMany({
-            where: { id_proyecto, estado: EstadoGeneral.ACTIVO },
-            orderBy: { created_at: 'desc' }
-        });
-    }
+	async softDeleteEtapa(id: number) {
+		return this.prisma.etapas.update({
+			where: { id },
+			data: { estado: EstadoGeneral.INACTIVO },
+		});
+	}
+	async findAllEtapas(): Promise<Etapas[]> {
+		return this.prisma.etapas.findMany({
+			where: { estado: EstadoGeneral.ACTIVO },
+			orderBy: { created_at: "desc" },
+		});
+	}
+	async findEtapasByProyectoId(id_proyecto: number): Promise<Etapas[]> {
+		return this.prisma.etapas.findMany({
+			where: { id_proyecto, estado: EstadoGeneral.ACTIVO },
+			orderBy: { created_at: "desc" },
+		});
+	}
 
-    async createManzana(data: CreateManzanaDTO): Promise<Manzanas> {
-        return this.prisma.manzanas.create({
-            data: { ...data, estado: EstadoGeneral.ACTIVO }
-        });
-    }
-    async createManzanasBatch(data: CreateManzanasBatchDTO): Promise<number> {
-        const payload = data.codigos.map(codigo => ({
-            id_etapa: data.id_etapa,
-            codigo,
-            estado: EstadoGeneral.ACTIVO
-        }));
-        const result = await this.prisma.manzanas.createMany({
-            data: payload,
-            skipDuplicates: true
-        })
-        return result.count;
-    }
+	async createManzana(data: CreateManzanaDTO): Promise<Manzanas> {
+		return this.prisma.manzanas.create({
+			data: { ...data, estado: EstadoGeneral.ACTIVO },
+		});
+	}
+	async createManzanasBatch(data: CreateManzanasBatchDTO): Promise<number> {
+		const payload = data.codigos.map((codigo) => ({
+			id_etapa: data.id_etapa,
+			codigo,
+			estado: EstadoGeneral.ACTIVO,
+		}));
+		const result = await this.prisma.manzanas.createMany({
+			data: payload,
+			skipDuplicates: true,
+		});
+		return result.count;
+	}
 
-    async updateManzana(id: number, data: any) {
-        return this.prisma.manzanas.update({ where: { id }, data });
-    }
+	async updateManzana(id: number, data: any) {
+		return this.prisma.manzanas.update({ where: { id }, data });
+	}
 
-    async softDeleteManzana(id: number) {
-        return this.prisma.manzanas.update({
-            where: { id },
-            data: { estado: EstadoGeneral.INACTIVO }
-        });
-    }
-    async findAllManzanas(): Promise<Manzanas[]> {
-        return this.prisma.manzanas.findMany({
-            where: { estado: EstadoGeneral.ACTIVO },
-            orderBy: { created_at: 'desc' }
-        });
-    }
-    async findManzanasByEtapaId(id_etapa: number): Promise<Manzanas[]> {
-        return this.prisma.manzanas.findMany({
-            where: { id_etapa, estado: EstadoGeneral.ACTIVO },
-            orderBy: { created_at: 'desc' }
-        });
-    }
-    async hasAssociatedSales(id_proyecto: number): Promise<boolean> {
-        const salesCount = await this.prisma.ventas.count({
-            where: {
-                lote: {
-                    manzana: {
-                        etapa: {
-                            id_proyecto
-                        }
-                    }
-                }
-            }
-        })
-        return salesCount > 0;
-    }
-    async hasAssociatedSalesForEtapa(id_etapa: number): Promise<boolean> {
-        const salesCount = await this.prisma.ventas.count({
-            where: {
-                lote: {
-                    manzana: {
-                        id_etapa
-                    }
-                }
-            }
-        });
-        return salesCount > 0;
-    }
-    async hasAssociatedSalesForManzana(id_manzana: number): Promise<boolean> {
-        const salesCount = await this.prisma.ventas.count({
-            where: {
-                lote: {
-                    id_manzana
-                }
-            }
-        });
-        return salesCount > 0;
-    }
+	async softDeleteManzana(id: number) {
+		return this.prisma.manzanas.update({
+			where: { id },
+			data: { estado: EstadoGeneral.INACTIVO },
+		});
+	}
+	async findAllManzanas(): Promise<Manzanas[]> {
+		return this.prisma.manzanas.findMany({
+			where: { estado: EstadoGeneral.ACTIVO },
+			orderBy: { created_at: "desc" },
+		});
+	}
+	async findManzanasByEtapaId(id_etapa: number): Promise<Manzanas[]> {
+		return this.prisma.manzanas.findMany({
+			where: { id_etapa, estado: EstadoGeneral.ACTIVO },
+			orderBy: { created_at: "desc" },
+		});
+	}
+	async hasAssociatedSales(id_proyecto: number): Promise<boolean> {
+		const salesCount = await this.prisma.ventas.count({
+			where: {
+				lote: {
+					manzana: {
+						etapa: {
+							id_proyecto,
+						},
+					},
+				},
+			},
+		});
+		return salesCount > 0;
+	}
+	async hasAssociatedSalesForEtapa(id_etapa: number): Promise<boolean> {
+		const salesCount = await this.prisma.ventas.count({
+			where: {
+				lote: {
+					manzana: {
+						id_etapa,
+					},
+				},
+			},
+		});
+		return salesCount > 0;
+	}
+	async hasAssociatedSalesForManzana(id_manzana: number): Promise<boolean> {
+		const salesCount = await this.prisma.ventas.count({
+			where: {
+				lote: {
+					id_manzana,
+				},
+			},
+		});
+		return salesCount > 0;
+	}
 }

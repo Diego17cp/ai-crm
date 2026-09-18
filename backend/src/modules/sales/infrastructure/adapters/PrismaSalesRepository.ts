@@ -14,6 +14,7 @@ import {
 	PaginatedResult,
 	ReminderLevel,
 } from "../../domain/dtos";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaSalesRepository implements ISalesRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -48,25 +49,25 @@ export class PrismaSalesRepository implements ISalesRepository {
 		}
 
 		if (q && q.trim() !== "") {
-			where.OR = [
+			where.AND = generateNestedSearchCondition(q, (word) => [
 				{
 					cliente: {
 						persona: {
-							nombres: { contains: q, mode: "insensitive" },
+							nombres: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
 				{
 					cliente: {
 						persona: {
-							apellidos: { contains: q, mode: "insensitive" },
+							apellidos: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
 				{
 					cliente: {
 						persona: {
-							numero: { contains: q, mode: "insensitive" },
+							numero: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
@@ -76,7 +77,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 							telefonos: {
 								some: {
 									numero: {
-										contains: q,
+										contains: word,
 										mode: "insensitive",
 									},
 								},
@@ -84,11 +85,11 @@ export class PrismaSalesRepository implements ISalesRepository {
 						},
 					},
 				},
-				{ lote: { numero_lote: { contains: q, mode: "insensitive" } } },
+				{ lote: { numero_lote: { contains: word, mode: "insensitive" } } },
 				{
 					lote: {
 						manzana: {
-							codigo: { contains: q, mode: "insensitive" },
+							codigo: { contains: word, mode: "insensitive" },
 						},
 					},
 				},
@@ -98,7 +99,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 							etapa: {
 								proyecto: {
 									nombre: {
-										contains: q,
+										contains: word,
 										mode: "insensitive",
 									},
 								},
@@ -106,7 +107,7 @@ export class PrismaSalesRepository implements ISalesRepository {
 						},
 					},
 				},
-			];
+			]);
 		}
 
 		const [total, data] = await Promise.all([

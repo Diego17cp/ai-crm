@@ -10,6 +10,7 @@ import {
 	UpdateLeadDTO,
 } from "../../domain/dtos";
 import { IdentityResolverService } from "../../../../core/identity/IdentityResolverService";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaLeadsRepository implements ILeadsRepository {
 	private identityResolver: IdentityResolverService;
@@ -58,18 +59,18 @@ export class PrismaLeadsRepository implements ILeadsRepository {
 
 		if (q && q.trim() !== "") {
 			hasPersonaFilter = true;
-			personaWhere.OR = [
-				{ nombres: { contains: q, mode: "insensitive" } },
-				{ apellidos: { contains: q, mode: "insensitive" } },
-				{ numero: { contains: q, mode: "insensitive" } },
-				{ email: { contains: q, mode: "insensitive" } },
-				{ direccion: { contains: q, mode: "insensitive" } },
+			personaWhere.AND = generateNestedSearchCondition(q, (word) => [
+				{ nombres: { contains: word, mode: "insensitive" } },
+				{ apellidos: { contains: word, mode: "insensitive" } },
+				{ numero: { contains: word, mode: "insensitive" } },
+				{ email: { contains: word, mode: "insensitive" } },
+				{ direccion: { contains: word, mode: "insensitive" } },
 				{
 					telefonos: {
-						some: { numero: { contains: q, mode: "insensitive" } },
+						some: { numero: { contains: word, mode: "insensitive" } },
 					},
 				},
-			];
+			]);
 		}
 
 		if (hasPersonaFilter) {

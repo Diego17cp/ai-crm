@@ -1,7 +1,12 @@
 import { Prisma, PrismaClient } from "generated/prisma/client";
 import { IUserRepository } from "../../application/ports/IUserRepository";
 import { User } from "../../domain/User";
-import { GetUsersQueryDTO, PaginatedUsersResult, UserDTO } from "../../application/dtos/UserDTOs";
+import {
+	GetUsersQueryDTO,
+	PaginatedUsersResult,
+	UserDTO,
+} from "../../application/dtos/UserDTOs";
+import { generateSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaUserRepository implements IUserRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -10,20 +15,22 @@ export class PrismaUserRepository implements IUserRepository {
 		return new User(record);
 	}
 
-	async findAll(query: GetUsersQueryDTO): Promise<PaginatedUsersResult<UserDTO>> {
+	async findAll(
+		query: GetUsersQueryDTO,
+	): Promise<PaginatedUsersResult<UserDTO>> {
 		const { page, limit, estado, id_rol, q } = query;
 		const skip = (page - 1) * limit;
 		const whereCondition: Prisma.UsuariosWhereInput = {};
 		if (estado) whereCondition.estado = estado;
 		if (id_rol) whereCondition.id_rol = id_rol;
 		if (q && q.trim() !== "") {
-			whereCondition.OR = [
-				{ nombres: { contains: q, mode: "insensitive" } },
-				{ apellidos: { contains: q, mode: "insensitive" } },
-				{ email: { contains: q, mode: "insensitive" } },
-				{ dni: { contains: q, mode: "insensitive" } },
-				{ telefono: { contains: q, mode: "insensitive" } },
-			]
+			whereCondition.AND = generateSearchCondition(q, [
+				"nombres",
+				"apellidos",
+				"email",
+				"dni",
+				"telefono"
+			])
 		}
 		const [total, records] = await Promise.all([
 			this.prisma.usuarios.count({ where: whereCondition }),
@@ -33,16 +40,16 @@ export class PrismaUserRepository implements IUserRepository {
 				take: limit,
 				orderBy: { created_at: "desc" },
 				include: {
-					rol: true
-				}
-			})
+					rol: true,
+				},
+			}),
 		]);
 		const totalPages = Math.ceil(total / limit);
-		const data = records.map(r => ({
+		const data = records.map((r) => ({
 			id: r.id,
 			rol: {
 				id: r.rol.id,
-				nombre: r.rol.nombre
+				nombre: r.rol.nombre,
 			},
 			dni: r.dni,
 			nombres: r.nombres,
@@ -53,7 +60,7 @@ export class PrismaUserRepository implements IUserRepository {
 			ultimo_login: r.ultimo_login,
 			created_at: r.created_at,
 			updated_at: r.updated_at,
-		}))
+		}));
 		return {
 			data,
 			meta: {
@@ -63,8 +70,8 @@ export class PrismaUserRepository implements IUserRepository {
 				totalPages,
 				hasNextPage: page < totalPages,
 				hasPreviousPage: page > 1,
-			}
-		}
+			},
+		};
 	}
 
 	async findById(id: string): Promise<User | null> {
