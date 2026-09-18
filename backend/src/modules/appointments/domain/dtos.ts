@@ -33,6 +33,7 @@ export interface GetAppointmentsQueryDTO {
 	puntuacion?: number | undefined;
 	id_proyecto?: number | undefined;
 	id_usuario_responsable?: string | undefined;
+	q?: string | undefined;
 }
 
 export interface PaginatedAppointmentsResult<T> {

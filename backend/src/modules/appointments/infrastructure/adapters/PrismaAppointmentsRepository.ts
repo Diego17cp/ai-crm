@@ -5,6 +5,7 @@ import {
 	GetAppointmentsQueryDTO,
 	UpdateAppointmentDTO,
 } from "../../domain/dtos";
+import { generateNestedSearchCondition } from "@/shared/utils/prismaSearch";
 
 export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -19,6 +20,7 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 			puntuacion,
 			id_proyecto,
 			id_usuario_responsable,
+			q
 		} = query;
 		const skip = (page - 1) * limit;
 
@@ -34,6 +36,19 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 				gte: new Date(fecha_inicio),
 				lte: new Date(fecha_fin),
 			};
+		}
+
+		if (q && q.trim() !== "") {
+			where.AND = generateNestedSearchCondition(q, (word) => [
+				{ persona: { nombres: { contains: word, mode: "insensitive" } } },
+				{ persona: { apellidos: { contains: word, mode: "insensitive" } } },
+				{ persona: { numero: { contains: word, mode: "insensitive" } } },
+				{ persona: { email: { contains: word, mode: "insensitive" } } },
+				{ asesor: { nombres: { contains: word, mode: "insensitive" } } },
+				{ asesor: { apellidos: { contains: word, mode: "insensitive" } } },
+				{ asesor: { email: { contains: word, mode: "insensitive" } } },
+				{ observaciones_visita: { contains: word, mode: "insensitive" } },
+			]);
 		}
 
 		const [total, data] = await Promise.all([

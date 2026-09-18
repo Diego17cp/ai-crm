@@ -45,6 +45,7 @@ export class AppointmentsController {
 					? parseInt(req.query.id_proyecto as string)
 					: undefined,
 				id_usuario_responsable,
+				q: req.query.q as string | undefined,
 			};
 
 			const result = await this.useCases.getAllAppointments(query);
