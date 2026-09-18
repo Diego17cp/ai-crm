@@ -53,6 +53,7 @@ export interface GetChatsQueryDTO {
 	q?: string | undefined;
 	estado?: EstadoChat | undefined;
 	canal?: CanalContacto | undefined;
+	fecha?: Date | undefined;
 	id_asesor?: string | undefined;
 	page: number;
 	limit: number;

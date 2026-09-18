@@ -46,6 +46,7 @@ export class QuotesController {
 				estado,
 				generado_por,
 				id_usuario,
+				fecha,
 				page = 1,
 				limit = 12,
 			} = req.query;
@@ -58,6 +59,7 @@ export class QuotesController {
 					? (generado_por as GetQuotesQueryDTO["generado_por"])
 					: undefined,
 				id_usuario: id_usuario ? String(id_usuario) : undefined,
+				fecha: fecha ? new Date(fecha as string) : undefined,
 				page: Number(page),
 				limit: Number(limit),
 			});

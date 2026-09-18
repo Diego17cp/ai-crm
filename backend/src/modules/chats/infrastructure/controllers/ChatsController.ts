@@ -14,12 +14,14 @@ export class ChatsController {
 				canal,
 				page = 1,
 				limit = 10,
+				fecha,
 				id_asesor,
 			} = req.query;
 			const query = {
 				q: q ? String(q) : undefined,
 				estado: estado ? (String(estado) as EstadoChat) : undefined,
 				canal: canal ? (String(canal) as CanalContacto) : undefined,
+				fecha: fecha ? new Date(String(fecha)) : undefined,
 				page: Number(page),
 				limit: Number(limit),
 				id_asesor: id_asesor ? String(id_asesor) : undefined,

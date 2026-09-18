@@ -202,7 +202,7 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 	async findQuotes(
 		query: GetQuotesQueryDTO,
 	): Promise<PaginatedResult<QuoteDTO>> {
-		const { q, estado, generado_por, id_usuario, page, limit } = query;
+		const { q, estado, generado_por, fecha, id_usuario, page, limit } = query;
 		const skip = (page - 1) * limit;
 		const whereCondition: CotizacionesWhereInput = {};
 		if (q && q.trim() !== "") {
@@ -256,6 +256,12 @@ export class PrismaQuoteRepository implements IQuoteRepository {
 		}
 		if (estado) whereCondition.estado = estado;
 		if (generado_por) whereCondition.generado_por = generado_por;
+		if (fecha) {
+			whereCondition.created_at = {
+				gte: new Date(fecha),
+				lt: new Date(fecha.getTime() + 24 * 60 * 60 * 1000),
+			};
+		}
 		if (id_usuario) {
 			whereCondition.OR = [
 				...(whereCondition.OR || []),

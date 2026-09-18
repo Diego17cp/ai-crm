@@ -16,7 +16,7 @@ export class PrismaChatsRepository implements IChatsRepository {
 	async findChats(
 		query: GetChatsQueryDTO,
 	): Promise<PaginatedChatResults<Omit<ChatDTO, "mensajes">>> {
-		const { q, estado, canal, page, limit, id_asesor } = query;
+		const { q, estado, canal, fecha, page, limit, id_asesor } = query;
 		const skip = (page - 1) * limit;
 		const whereCondition: ConversacionesWhereInput = {};
 		if (q && q.trim() !== "") {
@@ -54,6 +54,12 @@ export class PrismaChatsRepository implements IChatsRepository {
 		if (estado) whereCondition.estado = estado;
 		if (canal) whereCondition.canal = canal;
 		if (id_asesor) whereCondition.id_usuario_asignado = id_asesor;
+		if (fecha) {
+			whereCondition.created_at = {
+				gte: new Date(fecha),
+				lt: new Date(fecha.getTime() + 24 * 60 * 60 * 1000),
+			};
+		} 
 		const [total, chats] = await Promise.all([
 			this.prisma.conversaciones.count({ where: whereCondition }),
 			this.prisma.conversaciones.findMany({

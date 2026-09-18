@@ -116,6 +116,7 @@ export interface GetQuotesQueryDTO {
 	q?: string | undefined;
 	estado?: QuoteState | undefined;
 	generado_por?: QuoteGeneratedBy | undefined;
+	fecha?: Date | undefined;
 	id_usuario?: string | undefined;
 	page: number;
 	limit: number;
