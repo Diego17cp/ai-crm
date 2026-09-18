@@ -31,7 +31,7 @@ export const ClientSearchAutocomplete = ({
 	}, [searchTerm]);
 
 	const { data: persons, isFetching } = useQuery({
-		queryKey: ["leads_search", debouncedSearch],
+		queryKey: [isLead ? "leads_search" : "clientes_search", debouncedSearch],
 		queryFn: async () => {
 			if (!debouncedSearch.trim()) return [];
 			const response = await apiClient.get(
@@ -43,7 +43,7 @@ export const ClientSearchAutocomplete = ({
 	});
 
 	const handleSelect = (person: Lead | Client) => {
-		onSelectClient(person.id);
+		onSelectClient(person.id_persona ?? person.persona.id);
 		setSelectedClientName(
 			`${person.persona.nombres || ""} ${person.persona.apellidos || ""}`.trim() ||
 				person.persona.numero,

@@ -40,7 +40,7 @@ export const AppointmentCard = ({ cita, onEdit, onMarkAttended, onMarkCanceled, 
 	const isAtendida = cita.estado_cita === "ATENDIDA";
 	const status = STATUS_META[cita.estado_cita] ?? STATUS_META.PROGRAMADA;
 
-	const clienteNombre = cita.persona ? `${cita.persona.nombres} ${cita.persona.apellidos}`.trim() : "Cliente desconocido";
+	const clienteNombre = cita.persona ? `${cita.persona.nombres} ${cita.persona.apellidos ?? ""}`.trim() : "Cliente desconocido";
 	const asesorNombre = cita.asesor ? `${cita.asesor.nombres} ${cita.asesor.apellidos}`.trim() : "Sin asesor asignado";
 	const avatarInitials = cita.asesor ? `${cita.asesor.nombres?.[0] ?? ""}${cita.asesor.apellidos?.[0] ?? ""}`.toUpperCase() : "?";
 	const telefonoPrincipal = cita.persona?.telefonos?.[0];

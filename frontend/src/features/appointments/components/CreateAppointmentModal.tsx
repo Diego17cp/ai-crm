@@ -645,11 +645,12 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														clientMode ===
 														"existing_client"
 													}
-													onChange={() =>
+													onChange={() => {
 														setClientMode(
 															"existing_client",
-														)
-													}
+														);
+														setSelectedLeadId(null);
+													}}
 													title="Cliente existente"
 													icon={FaHandshake}
 													className="p-3!"
@@ -660,11 +661,14 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														clientMode ===
 														"existing_lead"
 													}
-													onChange={() =>
+													onChange={() => {
 														setClientMode(
 															"existing_lead",
-														)
-													}
+														);
+														setSelectedClientId(
+															null,
+														);
+													}}
 													title="Lead existente"
 													icon={FiUser}
 													className="p-3!"
@@ -675,11 +679,15 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														clientMode ===
 														"new_lead"
 													}
-													onChange={() =>
+													onChange={() => {
 														setClientMode(
 															"new_lead",
-														)
-													}
+														);
+														setSelectedClientId(
+															null,
+														);
+														setSelectedLeadId(null);
+													}}
 													title="Nuevo Lead"
 													icon={FiTarget}
 													className="p-3!"
@@ -699,7 +707,8 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														}
 													/>
 												</div>
-											) : clientMode === "existing_lead" ? (
+											) : clientMode ===
+											  "existing_lead" ? (
 												<div className="flex flex-col gap-2 min-h-75">
 													<ClientSearchAutocomplete
 														isLead

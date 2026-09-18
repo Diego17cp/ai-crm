@@ -193,6 +193,8 @@ export class PrismaAppointmentsRepository implements IAppointmentsRepository {
 
 		if (data.id_cliente) {
 			personaId = data.id_cliente;
+		} else if (data.id_lead) {
+			personaId = data.id_lead
 		} else if (data.nuevo_lead) {
 			const {
 				telefonos,
