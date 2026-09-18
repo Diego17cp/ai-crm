@@ -18,6 +18,14 @@ export const lotsService = {
 		if (filters.id_manzana)
 			queryParams.append("id_manzana", String(filters.id_manzana));
 		if (filters.estado) queryParams.append("estado", filters.estado);
+		if (filters.precio_total_min)
+			queryParams.append(
+				"precio_total_min",
+				String(filters.precio_total_min),
+			);
+		if (filters.precio_m2_min)
+			queryParams.append("precio_m2_min", String(filters.precio_m2_min));
+		if (filters.area) queryParams.append("area", String(filters.area));
 		queryParams.append("page", String(filters.page));
 		queryParams.append("limit", String(filters.limit));
 		const response = await apiClient.get<LotesResponse>(

@@ -50,6 +50,9 @@ export interface FiltrosState {
 	id_etapa?: number;
 	id_manzana?: number;
 	estado?: EstadoLote;
+	precio_total_min?: number;
+	precio_m2_min?: number;
+	area?: number;
 	page: number;
 	limit: number;
 }

@@ -157,7 +157,7 @@ export const AllLots = () => {
 						)}
 					</div>
 				</div>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-gray-100 dark:border-gray-800/60 pt-3">
+				<div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-100 dark:border-gray-800/60 pt-3">
 					<div className="flex flex-col z-30">
 						{loadingProyectos ? (
 							<div className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-gray-500 text-sm animate-pulse">
@@ -187,7 +187,7 @@ export const AllLots = () => {
 							/>
 						)}
 					</div>
-					<div className="flex flex-col z-30">
+					<div className="flex flex-col z-20">
 						{loadingEtapas ? (
 							<div className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-gray-500 text-sm animate-pulse">
 								Cargando etapas...
@@ -217,7 +217,7 @@ export const AllLots = () => {
 							/>
 						)}
 					</div>
-					<div className="flex flex-col z-20">
+					<div className="flex flex-col z-10">
 						{loadingManzanas ? (
 							<div className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-gray-500 text-sm animate-pulse">
 								Cargando manzanas...
@@ -247,16 +247,77 @@ export const AllLots = () => {
 							/>
 						)}
 					</div>
-					<div className="flex flex-col z-10">
+					<div className="flex flex-col z-5">
 						<Select
 							label=""
 							options={estadoOptions}
 							value={filters.estado || ""}
 							onChange={(e) =>
-								updateFilter("estado", e.target.value || undefined)
+								updateFilter(
+									"estado",
+									e.target.value || undefined,
+								)
 							}
 							placeholder="Todos los Estados"
 							classes={selectClasses}
+						/>
+					</div>
+					<div className="flex flex-col z-5 gap-2">
+						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+							Área (m²)
+						</label>
+						<input
+							type="number"
+							
+							value={filters.area || ""}
+							onChange={(e) =>
+								updateFilter(
+									"area",
+									e.target.value
+										? Number(e.target.value)
+										: undefined,
+								)
+							}
+							placeholder="Ej: 120"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+						/>
+					</div>
+					<div className="flex flex-col z-5 gap-2">
+						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+							Precio por m²
+						</label>
+						<input
+							type="number"
+							value={filters.precio_m2_min || ""}
+							onChange={(e) =>
+								updateFilter(
+									"precio_m2_min",
+									e.target.value
+										? Number(e.target.value)
+										: undefined,
+								)
+							}
+							placeholder="Ej: 100"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+						/>
+					</div>
+					<div className="flex flex-col z-5 gap-2">
+						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+							Precio total
+						</label>
+						<input
+							type="number"
+							value={filters.precio_total_min || ""}
+							onChange={(e) =>
+								updateFilter(
+									"precio_total_min",
+									e.target.value
+										? Number(e.target.value)
+										: undefined,
+								)
+							}
+							placeholder="Ej: 100000"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 						/>
 					</div>
 				</div>
