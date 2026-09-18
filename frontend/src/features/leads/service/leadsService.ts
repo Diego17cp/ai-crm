@@ -16,9 +16,7 @@ export const leadsService = {
 			queryParams.append("estado_civil", filters.estado_civil);
 		if (filters.es_peruano !== undefined)
 			queryParams.append("es_peruano", String(filters.es_peruano));
-		if (filters.solvencia)
-			queryParams.append("solvencia", filters.solvencia);
-		if (filters.actitud) queryParams.append("actitud", filters.actitud);
+		if (filters.estado_lead) queryParams.append("estado", filters.estado_lead);
 		queryParams.append("page", String(filters.page));
 		queryParams.append("limit", String(filters.limit));
 		const response = await apiClient.get<LeadsResponse>(

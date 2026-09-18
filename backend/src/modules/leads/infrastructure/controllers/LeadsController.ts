@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { LeadsUseCases } from "../../application/use-cases/LeadsUseCases";
-import { EstadoCivil, SexoPersona } from "generated/prisma/client";
+import { EstadoCivil, EstadoLead, SexoPersona } from "generated/prisma/client";
 import { AuthRequest } from "@/app/middlewares/authGuard";
 
 export class LeadsController {
@@ -21,6 +21,8 @@ export class LeadsController {
 			if (req.query.es_peruano === "true") es_peruano = true;
 			if (req.query.es_peruano === "false") es_peruano = false;
 
+			const estado = req.query.estado as EstadoLead | undefined;
+
 			const result = await this.leadsUseCases.getAllLeads({
 				...(q ? { q } : {}),
 				page,
@@ -28,6 +30,7 @@ export class LeadsController {
 				...(sexo ? { sexo } : {}),
 				...(es_peruano !== undefined ? { es_peruano } : {}),
 				...(estado_civil ? { estado_civil } : {}),
+				...(estado ? { estado } : {}),
 			});
 
 			res.status(200).json({

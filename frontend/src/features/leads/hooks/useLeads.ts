@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type {
 	CreateLeadPayload,
+	EstadoLead,
 	FiltersState,
 	UpdateLeadPayload,
 	UpdateLeadStatusPayload,
@@ -24,6 +25,7 @@ export const useLeads = () => {
 		sexo: undefined as Sexo | undefined,
 		estado_civil: undefined as EstadoCivil | undefined,
 		es_peruano: undefined as boolean | undefined,
+		estado_lead: undefined as EstadoLead | undefined
 	});
 	useEffect(() => {
 		const handler = setTimeout(() => {
@@ -56,6 +58,7 @@ export const useLeads = () => {
 			sexo: undefined,
 			estado_civil: undefined,
 			es_peruano: undefined,
+			estado_lead: undefined
 		});
 		goToPage(1);
 	};
@@ -63,7 +66,8 @@ export const useLeads = () => {
 		debouncedSearch ||
 		filters.sexo ||
 		filters.estado_civil ||
-		filters.es_peruano !== undefined
+		filters.es_peruano !== undefined ||
+		filters.estado_lead !== undefined
 	);
 
 	const filtersPayload: FiltersState = {
@@ -82,6 +86,7 @@ export const useLeads = () => {
 			filtersPayload.sexo,
 			filtersPayload.estado_civil,
 			filtersPayload.es_peruano,
+			filtersPayload.estado_lead,
 		],
 		queryFn: () => leadsService.findAll(filtersPayload),
 		placeholderData: (previousData) => previousData,

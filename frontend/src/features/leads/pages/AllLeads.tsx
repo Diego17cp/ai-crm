@@ -13,12 +13,24 @@ import { DeleteLeadModal } from "../components/DeleteLeadModal";
 import { classes, options } from "@/shared/constants";
 import { ChangeLeadStatusModal } from "../components/ChangeLeadStatusModal";
 import { useState } from "react";
-import type { ManualStatus } from "../types";
+import type { EstadoLead, ManualStatus } from "../types";
 
 const selectClasses = classes.select;
 
 const sexoOptions = options.sexo;
 const estadoCivilOptions = options.estadoCivil;
+const booleanOptions = options.boolean;
+
+const estadoLeadOptions: { value: EstadoLead; label: string }[] = [
+	{ value: "NUEVO", label: "Nuevo" },
+	{ value: "CONTACTADO", label: "Contactado" },
+	{ value: "CALIFICADO", label: "Calificado" },
+	{ value: "INTERESADO", label: "Interesado" },
+	{ value: "CITA_AGENDADA", label: "Cita Agendada" },
+	{ value: "NEGOCIACION", label: "Negociación" },
+	{ value: "GANADO", label: "Ganado" },
+	{ value: "PERDIDO", label: "Perdido" },
+]; 
 
 export const AllLeads = () => {
 	const {
@@ -132,6 +144,18 @@ export const AllLeads = () => {
 								classes={selectClasses}
 							/>
 						</div>
+						<div className="z-20">
+							<Select
+								label=""
+								options={booleanOptions}
+								value={String(filters.es_peruano) || ""}
+								onChange={(e) =>
+									updateFilter("es_peruano", e.target.value)
+								}
+								placeholder="Nacionalidad"
+								classes={selectClasses}
+							/>
+						</div>
 						<div className="z-10">
 							<Select
 								label=""
@@ -139,6 +163,16 @@ export const AllLeads = () => {
 								value={filters.sexo || ""}
 								onChange={(e) => updateFilter("sexo", e.target.value)}
 								placeholder="Sexo"
+								classes={selectClasses}
+							/>
+						</div>
+						<div className="z-10">
+							<Select
+								label=""
+								options={estadoLeadOptions}
+								value={filters.estado_lead || ""}
+								onChange={(e) => updateFilter("estado_lead", e.target.value)}
+								placeholder="Estado"
 								classes={selectClasses}
 							/>
 						</div>

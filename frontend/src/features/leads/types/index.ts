@@ -42,6 +42,7 @@ export interface FiltersState {
 	q?: string;
 	solvencia?: Solvencia;
 	actitud?: Actitud;
+	estado_lead?: EstadoLead
 	page: number;
 	limit: number;
 }
