@@ -115,7 +115,7 @@ export const QuotesHistory = () => {
 							placeholder="Buscar cliente, asesor o ID..."
 							value={searchTerm}
 							onChange={(e) => handleSearch(e.target.value)}
-							className="w-full px-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+							className="w-full px-10 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
 						/>
 						<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-6">
 							{isRefetching && searchTerm ? (
@@ -138,7 +138,7 @@ export const QuotesHistory = () => {
 							)}
 						</div>
 					</div>
-					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+					<div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
 						<div className="z-30">
 							<Select
 								label=""
@@ -159,6 +159,18 @@ export const QuotesHistory = () => {
 								}
 								placeholder="Generado por"
 								classes={selectClasses}
+							/>
+						</div>
+						<div className="flex flex-col w-full z-10">
+							<input
+								type="date"
+								title="Fecha de cotización"
+								placeholder="Fecha de cotización"
+								value={filters.date || ""}
+								onChange={(e) =>
+									updateFilter("date", e.target.value)
+								}
+								className="w-full px-3 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-500 dark:text-gray-400 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
 							/>
 						</div>
 					</div>
