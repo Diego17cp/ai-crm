@@ -177,7 +177,7 @@ Si como administrador necesitas insertar registros directamente mediante comando
 -- Ejemplo para la tabla `clientes`:
 SELECT setval(pg_get_serial_sequence('clientes', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM clientes;
 ```
-
+ 
 ---
 
 # English Technical Documentation
