@@ -33,6 +33,9 @@ export interface GetLotesQueryDTO {
 	id_etapa?: number | undefined;
 	id_manzana?: number | undefined;
 	estado?: EstadoLote | undefined;
+	precio_total_min?: number | undefined;
+	precio_m2_min?: number | undefined;
+	area?: number | undefined;
 }
 
 export interface PaginatedLotesResult<T> {

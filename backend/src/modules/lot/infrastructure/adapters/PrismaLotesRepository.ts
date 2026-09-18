@@ -24,8 +24,18 @@ export class PrismaLotesRepository implements ILotesRepository {
 	async findPaginated(
 		queryDTO: GetLotesQueryDTO,
 	): Promise<PaginatedLotesResult<LoteWithRelationsDTO>> {
-		const { q, page, limit, id_proyecto, id_etapa, id_manzana, estado } =
-			queryDTO;
+		const {
+			q,
+			page,
+			limit,
+			id_proyecto,
+			id_etapa,
+			id_manzana,
+			estado,
+			area,
+			precio_total_min,
+			precio_m2_min,
+		} = queryDTO;
 		const skip = (page - 1) * limit;
 
 		const whereCondition: Prisma.LotesWhereInput = {};
@@ -35,11 +45,32 @@ export class PrismaLotesRepository implements ILotesRepository {
 		if (id_proyecto)
 			whereCondition.manzana = { etapa: { id_proyecto: id_proyecto } };
 
+		if (precio_total_min) {
+			whereCondition.precio_total = {
+				gte: String(precio_total_min),
+			};
+		}
+
+		if (precio_m2_min) {
+			whereCondition.precio_m2 = {
+				gte: String(precio_m2_min),
+			};
+		}
+
+		if (area) {
+			whereCondition.area_m2 = { gte: String(area) };
+		}
+
 		if (q && q.trim() !== "") {
 			whereCondition.AND = generateNestedSearchCondition(q, (word) => [
 				{ numero_lote: { contains: word, mode: "insensitive" } },
 				{ numero_partida: { contains: word, mode: "insensitive" } },
-				{ ubicacion_referencial: { contains: word, mode: "insensitive" } },
+				{
+					ubicacion_referencial: {
+						contains: word,
+						mode: "insensitive",
+					},
+				},
 				{
 					manzana: {
 						codigo: { contains: word, mode: "insensitive" },

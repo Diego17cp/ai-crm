@@ -27,6 +27,15 @@ export class LotesController {
 				? Number(req.query.id_manzana)
 				: undefined;
 			const estado = req.query.estado as EstadoLote | undefined;
+			const precio_total_min = req.query.precio_total_min
+				? Number(req.query.precio_total_min)
+				: undefined;
+			const precio_m2_min = req.query.precio_m2_min
+				? Number(req.query.precio_m2_min)
+				: undefined;
+			const area = req.query.area
+				? Number(req.query.area)
+				: undefined;
 
 			const result = await this.lotesUseCases.getAllLotes({
 				q,
@@ -36,6 +45,9 @@ export class LotesController {
 				id_etapa,
 				id_manzana,
 				estado,
+				precio_total_min,
+				precio_m2_min,
+				area,
 			});
 
 			res.status(200).json({
