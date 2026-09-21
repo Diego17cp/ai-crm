@@ -150,7 +150,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 	const mutation = useCreateQuoteMutation(payload);
 	const isSubmitting = mutation.isPending;
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: React.SubmitEvent) => {
 		e.preventDefault();
 		setError(null);
 
@@ -327,7 +327,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 												<FiUser className="text-teal-500" /> Datos del Cliente
 											</h3>
 											<div className="grid grid-cols-2 gap-3">
-												<div className="z-30 col-span-1">
+												<div className="z-20 col-span-1">
 													<SearchableSelect
 														options={tipoDocOptions}
 														value={idTipoDoc}
