@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	FiX,
@@ -8,11 +7,10 @@ import {
 	FiLock,
 	FiCreditCard,
 } from "react-icons/fi";
-import { useUsers } from "../hooks/useUsers";
 import { useRoles } from "@/features/roles/hooks/useRoles";
-import type { CreateUserPayload } from "../types";
 import { Select } from "dialca-ui";
 import { classes } from "@/shared/constants";
+import { useCreateUser } from "../hooks/useCreateUser";
 
 interface Props {
 	isOpen: boolean;
@@ -20,38 +18,14 @@ interface Props {
 }
 
 export const CreateUserModal = ({ isOpen, onClose }: Props) => {
-	const { useCreateUserMutation } = useUsers();
 	const { roles } = useRoles();
 
-	const [formData, setFormData] = useState<CreateUserPayload>({
-		nombres: "",
-		apellidos: "",
-		dni: "",
-		email: "",
-		telefono: "",
-		id_rol: 0,
-		password_plain: "",
-	});
-
-	const mutation = useCreateUserMutation(formData);
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		mutation.mutate(undefined, {
-			onSuccess: () => {
-				onClose();
-				setFormData({
-					nombres: "",
-					apellidos: "",
-					dni: "",
-					email: "",
-					telefono: "",
-					id_rol: 0,
-					password_plain: "",
-				});
-			},
-		});
-	};
+	const {
+		mutation,
+		formData,
+		setFormData,
+		handleSubmit,
+	} = useCreateUser(onClose);
 
 	return (
 		<AnimatePresence>
