@@ -134,12 +134,18 @@ export const EditLotModal = ({ isOpen, onClose, lot }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!numeroLote.trim())
+		if (!numeroLote.trim()) {
+			toast.error("El número de lote es obligatorio.");
 			return setError("El número de lote es obligatorio.");
-		if (!areaM2 || isNaN(Number(areaM2)))
+		}
+		if (!areaM2 || isNaN(Number(areaM2))) {
+			toast.error("Área m² inválida.");
 			return setError("Área m² inválida.");
-		if (!precioM2 || isNaN(Number(precioM2)))
+		}
+		if (!precioM2 || isNaN(Number(precioM2))) {
+			toast.error("Precio m² inválido.");
 			return setError("Precio m² inválido.");
+		}
 
 		updateLoteMutation.mutate(undefined, {
 			onSuccess: () => {

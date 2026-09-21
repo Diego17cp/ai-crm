@@ -176,13 +176,22 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!idManzana) return setError("Debes asignar el lote a una manzana.");
-		if (!numeroLote.trim())
+		if (!idManzana) {
+			toast.error("Debes asignar el lote a una manzana.");
+			return setError("Debes asignar el lote a una manzana.");
+		}
+		if (!numeroLote.trim()) {
+			toast.error("El número de lote es obligatorio.");
 			return setError("El número de lote es obligatorio.");
-		if (!areaM2 || isNaN(Number(areaM2)))
+		}
+		if (!areaM2 || isNaN(Number(areaM2))) {
+			toast.error("Área m² inválida.");
 			return setError("Área m² inválida.");
-		if (!precioM2 || isNaN(Number(precioM2)))
+		}
+		if (!precioM2 || isNaN(Number(precioM2))) {
+			toast.error("Precio m² inválido.");
 			return setError("Precio m² inválido.");
+		}
 
 		createLoteMutation.mutate(undefined, {
 			onSuccess: () => {

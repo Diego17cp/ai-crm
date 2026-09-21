@@ -23,6 +23,7 @@ import { formatCurrency } from "../utils/salesFormatters";
 import { classes } from "@/shared/constants";
 import { CardCheckbox } from "@/shared/components/CardCheckbox";
 import { FaHandshake } from "react-icons/fa";
+import { toast } from "sonner";
 
 const searchableSelectClasses = classes.searchableSelect;
 const selectClasses = classes.select
@@ -219,26 +220,49 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!idLote) return setError("Debes seleccionar un Lote disponible.");
-		if (!selectedClientId)
+		if (!idLote) {
+			toast.error("Debes seleccionar un Lote disponible.")
+			return setError("Debes seleccionar un Lote disponible.");
+		}
+		if (!selectedClientId) {
+			toast.error("Debes buscar y seleccionar un cliente.")
 			return setError("Debes buscar y seleccionar un cliente.");
-		if (!fechaVenta) return setError("La fecha de venta es obligatoria.");
+		}
+		if (!fechaVenta) {
+			toast.error("La fecha de venta es obligatoria.")
+			return setError("La fecha de venta es obligatoria.");
+		}
 
 		if (tipoPago === "CREDITO") {
-			if (!numCuotas || numCuotas <= 0)
+			if (!numCuotas || numCuotas <= 0) {
+				toast.error("Especifica un número válido de cuotas.")
 				return setError("Especifica un número válido de cuotas.");
-			if (!diaPago || diaPago < 1 || diaPago > 28)
+			}
+			if (!diaPago || diaPago < 1 || diaPago > 28) {
+				toast.error("El día de pago debe ser entre el 1 y el 28.")
 				return setError("El día de pago debe ser entre el 1 y el 28.");
+			}
 		}
 
 		try {
-			mutation.mutate();
-			onClose();
+			mutation.mutate(undefined, {
+				onSuccess: () => {
+					onClose();
+				},
+				onError: (err: unknown) => {
+					const message =
+						(err as ApiError)?.response?.data?.message ||
+						"Error al registrar la venta";
+					toast.error(message);
+					setError(message);
+				},
+			});
 		} catch (err: unknown) {
-			setError(
+			const message =
 				(err as ApiError)?.response?.data?.message ||
-					"Error al registrar la venta",
-			);
+				"Error al registrar la venta";
+			toast.error(message);
+			setError(message);
 		}
 	};
 
