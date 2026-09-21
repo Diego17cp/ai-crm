@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	FiX,
@@ -16,26 +16,16 @@ import { useAppointments } from "../hooks/useAppointments";
 import { ClientSearchAutocomplete } from "./ClientSearchAutocomplete";
 import { useDocTypes, useUbigeos } from "@/core/hooks";
 
-import type { CreateAppointmentPayload } from "../types";
-
 import type { Lote } from "@/features/lots/types";
-import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import type { Etapa, Manzana, Proyecto } from "@/features/projects/types";
-import { useAuthStore } from "@/features/auth";
 import { classes, options } from "@/shared/constants";
-import { toast } from "sonner";
 import { CardCheckbox } from "@/shared/components/CardCheckbox";
 import { FaHandshake } from "react-icons/fa";
 import { NewLeadForAppointmentForm } from "./NewLeadAppointmentForm";
+import { useCreateAppointment } from "../hooks/useCreateAppointment";
 
 const selectClasses = classes.searchableSelect;
 const phoneTypeOptions = options.phoneType;
-
-interface PhoneUI {
-	uiId: string;
-	numero: string;
-	tipo: TipoTelefono;
-}
 
 interface Props {
 	isOpen: boolean;
@@ -43,46 +33,43 @@ interface Props {
 }
 
 export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
-	const [step, setStep] = useState<1 | 2>(1);
-	const [idProyecto, setIdProyecto] = useState("");
-	const [idEtapa, setIdEtapa] = useState("");
-	const [idManzana, setIdManzana] = useState("");
-	const [idLote, setIdLote] = useState("");
-	const [fechaCita, setFechaCita] = useState("");
-	const [horaCita, setHoraCita] = useState("");
-	const [observaciones, setObservaciones] = useState("");
+	const {
+		step,
+		idProyecto,
+		idEtapa,
+		idManzana,
+		idLote,
+		fechaCita,
+		horaCita,
+		observaciones,
+		clientMode,
+		selectedClientId,
+		selectedLeadId,
+		error,
+		setStep,
+		setIdProyecto,
+		setIdEtapa,
+		setIdManzana,
+		setIdLote,
+		setFechaCita,
+		setHoraCita,
+		setObservaciones,
+		setClientMode,
+		setSelectedClientId,
+		setSelectedLeadId,
+		handleAddPhone,
+		handleUpdatePhone,
+		handleRemovePhone,
+		handleFieldChange,
+		handleNextStep,
+		handleSubmit,
+		isSubmitting,
+		leadFieldsState
+	} = useCreateAppointment(isOpen, onClose);
 
-	const [clientMode, setClientMode] = useState<
-		"existing_client" | "new_lead" | "existing_lead"
-	>("existing_client");
-	const [selectedClientId, setSelectedClientId] = useState<number | null>(
-		null,
-	);
-	const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
-
-	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
-	const [numeroDoc, setNumeroDoc] = useState("");
-	const [nombres, setNombres] = useState("");
-	const [apellidos, setApellidos] = useState("");
-	const [email, setEmail] = useState("");
-	const [fechaNacimiento, setFechaNacimiento] = useState("");
-	const [direccion, setDireccion] = useState("");
-	const [ocupacion, setOcupacion] = useState("");
-
-	const [esPeruano, setEsPeruano] = useState<string>("true");
-	const [nacionalidad, setNacionalidad] = useState("");
-	const [sexo, setSexo] = useState<string>("");
-	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [idUbigeo, setIdUbigeo] = useState<string>("");
-
-	const [phones, setPhones] = useState<PhoneUI[]>([]);
-	const [error, setError] = useState<string | null>(null);
-
-	const { projects, useCreateAppointmentMutation } = useAppointments();
+	const { projects } = useAppointments();
 	const { ubigeosQuery } = useUbigeos();
 	const { docTypesQuery } = useDocTypes();
-
-	const { user } = useAuthStore();
 
 	const etapasQuery = useQuery({
 		queryKey: ["etapas", idProyecto],
@@ -150,218 +137,6 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
-
-	useEffect(() => {
-		if (isOpen) {
-			setStep(1);
-			setIdProyecto("");
-			setIdEtapa("");
-			setIdManzana("");
-			setIdLote("");
-			setFechaCita("");
-			setHoraCita("");
-			setObservaciones("");
-
-			setClientMode("existing_client");
-			setSelectedClientId(null);
-
-			setNumeroDoc("");
-			setNombres("");
-			setApellidos("");
-			setEmail("");
-			setFechaNacimiento("");
-			setDireccion("");
-			setOcupacion("");
-			setEsPeruano("true");
-			setSexo("");
-			setEstadoCivil("");
-			setIdUbigeo("");
-			setPhones([]);
-			setError(null);
-		}
-	}, [isOpen]);
-
-	const handleAddPhone = () => {
-		setPhones([
-			...phones,
-			{ uiId: crypto.randomUUID(), numero: "", tipo: "PERSONAL" },
-		]);
-	};
-	const handleUpdatePhone = (
-		uiId: string,
-		field: "numero" | "tipo",
-		value: string,
-	) => {
-		setPhones((prev) =>
-			prev.map((p) => (p.uiId === uiId ? { ...p, [field]: value } : p)),
-		);
-	};
-	const handleRemovePhone = (uiId: string) => {
-		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
-	};
-
-	const leadFieldsState = {
-		idTipoDoc,
-		numeroDoc,
-		nombres,
-		apellidos,
-		email,
-		fechaNacimiento,
-		esPeruano,
-		phones,
-		nacionalidad,
-		sexo,
-		idUbigeo,
-		direccion,
-		ocupacion,
-		estadoCivil,
-	};
-
-	const handleFieldChange = (field: string, value: string) => {
-		const setters: Record<string, (val: string) => void> = {
-			idTipoDoc: setIdTipoDoc,
-			numeroDoc: setNumeroDoc,
-			nombres: setNombres,
-			apellidos: setApellidos,
-			email: setEmail,
-			fechaNacimiento: setFechaNacimiento,
-			esPeruano: setEsPeruano,
-			nacionalidad: setNacionalidad,
-			sexo: setSexo,
-			idUbigeo: setIdUbigeo,
-			direccion: setDireccion,
-			ocupacion: setOcupacion,
-			estadoCivil: setEstadoCivil,
-		};
-		setters[field]?.(value);
-	};
-
-	const createPayload = useMemo((): CreateAppointmentPayload => {
-		const payload: CreateAppointmentPayload = {
-			id_proyecto: Number(idProyecto),
-			id_lote: idLote ? Number(idLote) : null,
-			id_usuario_responsable: user?.id || "",
-			fecha_cita: fechaCita,
-			hora_cita: horaCita,
-			observaciones_visita: observaciones.trim() || undefined,
-		};
-
-		if (clientMode === "existing_client" && selectedClientId) {
-			payload.id_cliente = selectedClientId;
-		} else if (clientMode === "existing_lead" && selectedLeadId) {
-			payload.id_lead = selectedLeadId;
-		} else if (clientMode === "new_lead") {
-			payload.nuevo_lead = {
-				id_tipo_doc_identidad: Number(idTipoDoc),
-				nombres: nombres.trim() || undefined,
-				apellidos: apellidos.trim() || undefined,
-				numero: numeroDoc.trim(),
-				email: email.trim() || undefined,
-				fecha_nacimiento: fechaNacimiento || undefined,
-				es_peruano: esPeruano === "true",
-				nacionalidad: nacionalidad.trim() || undefined,
-				direccion: direccion.trim() || undefined,
-				ocupacion: ocupacion.trim() || undefined,
-				sexo: (sexo as Sexo) || undefined,
-				estado_civil: (estadoCivil as EstadoCivil) || undefined,
-				id_ubigeo: idUbigeo || undefined,
-				telefonos: phones
-					.filter((p) => p.numero.trim())
-					.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
-			};
-		}
-
-		return payload;
-	}, [
-		idProyecto,
-		idLote,
-		fechaCita,
-		horaCita,
-		observaciones,
-		clientMode,
-		selectedClientId,
-		numeroDoc,
-		nombres,
-		apellidos,
-		email,
-		fechaNacimiento,
-		esPeruano,
-		direccion,
-		ocupacion,
-		sexo,
-		estadoCivil,
-		idUbigeo,
-		phones,
-		idTipoDoc,
-		nacionalidad,
-		selectedLeadId,
-	]);
-
-	const mutation = useCreateAppointmentMutation(createPayload);
-	const isSubmitting = mutation.isPending;
-
-	const handleNextStep = () => {
-		setError(null);
-		if (!idProyecto) return setError("Debes seleccionar un proyecto.");
-		if (!fechaCita) return setError("La fecha de la cita es obligatoria.");
-		if (!horaCita) return setError("La hora de la cita es obligatoria.");
-		setStep(2);
-	};
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-
-		if (clientMode === "existing_client" && !selectedClientId) {
-			toast.error(
-				"Debes buscar y seleccionar un cliente existente de la agenda.",
-			);
-			return setError(
-				"Debes buscar y seleccionar un cliente existente de la agenda.",
-			);
-		}
-		if (clientMode === "existing_lead" && !selectedLeadId) {
-			toast.error("Debes buscar y seleccionar un lead existente.");
-			return setError("Debes buscar y seleccionar un lead existente.");
-		}
-		if (clientMode === "new_lead" && !numeroDoc.trim()) {
-			toast.error(
-				"El número de documento del nuevo lead es obligatorio.",
-			);
-			return setError(
-				"El número de documento del nuevo lead es obligatorio.",
-			);
-		}
-		if (clientMode === "new_lead" && !idTipoDoc) {
-			toast.error("El tipo de documento del nuevo lead es obligatorio.");
-			return setError(
-				"El tipo de documento del nuevo lead es obligatorio.",
-			);
-		}
-		if (clientMode === "new_lead" && !nombres.trim()) {
-			toast.error("El nombre del nuevo lead es obligatorio.");
-			return setError("El nombre del nuevo lead es obligatorio.");
-		}
-		if (clientMode === "new_lead" && !apellidos.trim()) {
-			toast.error("El apellido del nuevo lead es obligatorio.");
-			return setError("El apellido del nuevo lead es obligatorio.");
-		}
-
-		try {
-			mutation.mutate(undefined, {
-				onSuccess: () => onClose(),
-			});
-		} catch (err: unknown) {
-			toast.error(
-				(err as ApiError)?.response?.data?.message ||
-					"Error al crear la cita.",
-			);
-			setError(
-				(err as ApiError)?.response?.data?.message ||
-					"Error al crear la cita.",
-			);
-		}
-	};
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {

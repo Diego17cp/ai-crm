@@ -155,7 +155,7 @@ export const NewLeadForAppointmentForm = ({
 							placeholder="DNI / Número Doc"
 							required
 							minLength={8}
-							maxLength={8}
+							maxLength={11}
 							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
 						/>
 					</div>
