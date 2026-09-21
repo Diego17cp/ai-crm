@@ -9,26 +9,32 @@ export class AuthController {
 
 	constructor(private readonly authUseCases: AuthUseCases) {}
 
+	private getCookieOptions() {
+		const isTunnel = env.API_URL?.includes("devtunnels.ms") || env.API_URL?.includes("ngrok");
+		const useSecure = this.isProd || isTunnel;
+		const sameSitePolicy = useSecure ? "none" : "lax";
+
+		return {
+			httpOnly: true,
+			secure: useSecure,
+			sameSite: sameSitePolicy as "none" | "lax" | "strict"
+		};
+	}
+
 	private setCookies(
 		res: Response,
 		accessToken: string,
 		refreshToken: string,
 	) {
-		const isTunnel = env.API_URL?.includes("devtunnels.ms") || env.API_URL?.includes("ngrok");
-		const useSecure = this.isProd || isTunnel;
-		const sameSitePolicy = useSecure ? "none" : "lax";
+		const baseOptions = this.getCookieOptions();
 
 		res.cookie("accessToken", accessToken, {
-			httpOnly: true,
-			secure: useSecure,
-			sameSite: sameSitePolicy,
+			...baseOptions,
 			maxAge: 15 * 60 * 1000, // 15 min
 			path: "/",
 		});
 		res.cookie("refreshToken", refreshToken, {
-			httpOnly: true,
-			secure: useSecure,
-			sameSite: sameSitePolicy,
+			...baseOptions,
 			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
 			path: "/api/auth/refresh",
 		});
@@ -87,17 +93,15 @@ export class AuthController {
 	};
 
 	logout = async (_: Request, res: Response) => {
+		const baseOptions = this.getCookieOptions();
+
 		res.clearCookie("accessToken", {
+			...baseOptions,
 			path: "/",
-			httpOnly: true,
-			secure: this.isProd,
-			sameSite: "strict",
 		});
 		res.clearCookie("refreshToken", {
+			...baseOptions,
 			path: "/api/auth/refresh",
-			httpOnly: true,
-			secure: this.isProd,
-			sameSite: "strict",
 		});
 		res.status(200).json({ success: true, message: "Sesión cerrada" });
 	};
