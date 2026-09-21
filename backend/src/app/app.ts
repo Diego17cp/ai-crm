@@ -6,8 +6,41 @@ import { env } from "@/config";
 import { errorHandler } from "./middlewares";
 import router from "./routes";
 import path from "node:path";
+import pinoHttp, { Options } from "pino-http";
 
 export const app: Application = express();
+
+const pinoOptions: Options = {
+	serializers: {
+		req: (req: any) => ({
+			method: req.method,
+			url: req.url,
+			headers: {
+				origin: req.headers?.origin,
+				cookie: req.headers?.cookie,
+			},
+		}),
+		res: (res: any) => {
+			const rawRes = res.raw || res;
+			return {
+				statusCode: rawRes.statusCode,
+				headers: {
+					"set-cookie": typeof rawRes.getHeader === "function" 
+						? rawRes.getHeader("set-cookie") 
+						: rawRes._headers?.["set-cookie"] || rawRes.headers?.["set-cookie"],
+				},
+			};
+		},
+	},
+};
+if (env.NODE_ENV !== "production") {
+	pinoOptions.transport = {
+		target: "pino-pretty",
+		options: { colorize: true },
+	};
+}
+
+app.use(pinoHttp(pinoOptions));
 
 app.use(
 	cors({
@@ -24,7 +57,7 @@ app.use(
 				"frame-ancestors": ["'self'", env.FRONTEND_URL],
 			},
 		},
-		crossOriginResourcePolicy: { policy: "cross-origin" }
+		crossOriginResourcePolicy: { policy: "cross-origin" },
 	}),
 );
 app.use(express.json());
