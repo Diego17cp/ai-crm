@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	FiX,
@@ -10,22 +10,14 @@ import {
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect, Select } from "dialca-ui";
-import { useLeads } from "../hooks/useLeads";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
-import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
-import type { CreateLeadPayload } from "../types";
 import { classes, options } from "@/shared/constants";
 import { useDocTypes } from "@/core/hooks";
+import { useCreateLead } from "../hooks/useCreateLead";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
-}
-
-interface PhoneUI {
-	uiId: string;
-	numero: string;
-	tipo: TipoTelefono;
 }
 
 const searchableSelectClasses = classes.searchableSelect;
@@ -37,106 +29,45 @@ const estadoCivilOptions = options.estadoCivil;
 const phoneTypeOptions = options.phoneType;
 
 export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
-	const [numeroDoc, setNumeroDoc] = useState("");
-	const [idTipoDoc, setIdTipoDoc] = useState("");
-	const [nombres, setNombres] = useState("");
-	const [apellidos, setApellidos] = useState("");
-	const [email, setEmail] = useState("");
-	const [fechaNacimiento, setFechaNacimiento] = useState("");
-	const [direccion, setDireccion] = useState("");
-	const [ocupacion, setOcupacion] = useState("");
-
-	const [esPeruano, setEsPeruano] = useState<string>("true");
-	const [nacionalidad, setNacionalidad] = useState<string>("");
-	const [sexo, setSexo] = useState<string>("");
-	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [idUbigeo, setIdUbigeo] = useState<string>("");
-
-	const [phones, setPhones] = useState<PhoneUI[]>([]);
-	const [error, setError] = useState<string | null>(null);
+	const {
+		nombres,
+		setNombres,
+		apellidos,
+		setApellidos,
+		email,
+		setEmail,
+		fechaNacimiento,
+		setFechaNacimiento,
+		direccion,
+		setDireccion,
+		ocupacion,
+		setOcupacion,
+		esPeruano,
+		setEsPeruano,
+		nacionalidad,
+		setNacionalidad,
+		sexo,
+		setSexo,
+		estadoCivil,
+		setEstadoCivil,
+		idUbigeo,
+		setIdUbigeo,
+		phones,
+		error,
+		isSubmitting,
+		handleAddPhone,
+		handleUpdatePhone,
+		handleRemovePhone,
+		handleSubmit,
+		idTipoDoc,
+		setIdTipoDoc,
+		numeroDoc,
+		setNumeroDoc,
+	} = useCreateLead(isOpen, onClose);
 
 	const { ubigeosQuery } = useUbigeos();
 	const { docTypesQuery } = useDocTypes();
-	const { useCreateLeadMutation } = useLeads();
 
-	useEffect(() => {
-		if (isOpen) {
-			setNumeroDoc("");
-			setNombres("");
-			setApellidos("");
-			setEmail("");
-			setFechaNacimiento("");
-			setDireccion("");
-			setOcupacion("");
-			setEsPeruano("true");
-			setNacionalidad("");
-			setSexo("");
-			setEstadoCivil("");
-			setIdUbigeo("");
-			setPhones([]);
-			setError(null);
-		}
-	}, [isOpen]);
-
-	const createPayload = useMemo((): CreateLeadPayload => {
-		return {
-			id_tipo_doc_identidad: Number(idTipoDoc),
-			nombres: nombres.trim() || undefined,
-			apellidos: apellidos.trim() || undefined,
-			numero: numeroDoc.trim(),
-			email: email.trim() || undefined,
-			fecha_nacimiento: fechaNacimiento || undefined,
-			es_peruano: esPeruano === "true",
-			nacionalidad: nacionalidad.trim() || undefined,
-			direccion: direccion.trim() || undefined,
-			ocupacion: ocupacion.trim() || undefined,
-			sexo: (sexo as Sexo) || undefined,
-			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			id_ubigeo: idUbigeo || undefined,
-			telefonos: phones
-				.filter((p) => p.numero.trim())
-				.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
-		};
-	}, [
-		nombres,
-		apellidos,
-		numeroDoc,
-		email,
-		fechaNacimiento,
-		esPeruano,
-		direccion,
-		ocupacion,
-		sexo,
-		estadoCivil,
-		idUbigeo,
-		phones,
-		nacionalidad,
-		idTipoDoc,
-	]);
-
-	const createLeadMutation = useCreateLeadMutation(createPayload);
-	const isSubmitting = createLeadMutation.isPending;
-
-	const handleAddPhone = () => {
-		setPhones([
-			...phones,
-			{ uiId: crypto.randomUUID(), numero: "", tipo: "PERSONAL" },
-		]);
-	};
-
-	const handleUpdatePhone = (
-		uiId: string,
-		field: "numero" | "tipo",
-		value: string,
-	) => {
-		setPhones((prev) =>
-			prev.map((p) => (p.uiId === uiId ? { ...p, [field]: value } : p)),
-		);
-	};
-
-	const handleRemovePhone = (uiId: string) => {
-		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
-	};
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -157,23 +88,6 @@ export const CreateLeadModal = ({ isOpen, onClose }: Props) => {
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-		if (!numeroDoc.trim())
-			return setError("El número de documento es requerido.");
-		try {
-			createLeadMutation.mutate(undefined, {
-				onSuccess: () => onClose(),
-			});
-		} catch (err: unknown) {
-			setError(
-				(err as ApiError)?.response?.data?.message ||
-					"Error al crear el lead.",
-			);
-		}
-	};
 
 	return (
 		<AnimatePresence>

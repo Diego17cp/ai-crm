@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	FiX,
@@ -10,24 +10,15 @@ import {
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect, Select } from "dialca-ui";
-import { useClients } from "../hooks/useClients";
 import { useUbigeos } from "@/core/hooks/useUbigeos";
-import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
 import { classes, options } from "@/shared/constants";
-import type { Actitud, Client, Solvencia, UpdateClientPayload } from "../types";
+import type { Client } from "../types";
 import { useDocTypes } from "@/core/hooks";
-
+import { useEditClient } from "../hooks/useEditClient";
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
 	client: Client | null;
-}
-
-interface PhoneUI {
-	uiId: string;
-	id?: number;
-	numero: string;
-	tipo: TipoTelefono;
 }
 
 const selectClasses = classes.select;
@@ -41,157 +32,48 @@ const actitudOptions = options.actitud;
 const phoneTypeOptions = options.phoneType;
 
 export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
-	const [numeroDoc, setNumeroDoc] = useState("");
-	const [nombres, setNombres] = useState("");
-	const [apellidos, setApellidos] = useState("");
-	const [email, setEmail] = useState("");
-	const [fechaNacimiento, setFechaNacimiento] = useState("");
-	const [direccion, setDireccion] = useState("");
-	const [ocupacion, setOcupacion] = useState("");
-
-	const [esPeruano, setEsPeruano] = useState<string>("true");
-	const [nacionalidad, setNacionalidad] = useState<string>("");
-	const [sexo, setSexo] = useState<string>("");
-	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [solvencia, setSolvencia] = useState<string>("");
-	const [actitud, setActitud] = useState<string>("");
-	const [idUbigeo, setIdUbigeo] = useState<string>("");
-	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
-
-	const [phones, setPhones] = useState<PhoneUI[]>([]);
-	const [deletedPhoneIds, setDeletedPhoneIds] = useState<number[]>([]);
-
-	const [error, setError] = useState<string | null>(null);
+	const {
+		numeroDoc,
+    setNumeroDoc,
+    nombres,
+    setNombres,
+    apellidos,
+    setApellidos,
+    email,
+    setEmail,
+    fechaNacimiento,
+    setFechaNacimiento,
+    direccion,
+    setDireccion,
+    ocupacion,
+    setOcupacion,
+    esPeruano,
+    setEsPeruano,
+    nacionalidad,
+    setNacionalidad,
+    sexo,
+    setSexo,
+    estadoCivil,
+    setEstadoCivil,
+    solvencia,
+    setSolvencia,
+    actitud,
+    setActitud,
+    idUbigeo,
+    setIdUbigeo,
+    idTipoDoc,
+    setIdTipoDoc,
+    phones,
+    error,
+    isSubmitting,
+    handleAddPhone,
+    handleUpdatePhone,
+    handleRemovePhone,
+    handleSubmit,
+	} = useEditClient(isOpen,client, onClose)
 
 	const { ubigeosQuery } = useUbigeos();
 	const { docTypesQuery } = useDocTypes();
-
-	const { useEditClientMutation } = useClients();
-
-	useEffect(() => {
-		if (isOpen && client) {
-			setNumeroDoc(client.persona.numero || "");
-			setNombres(client.persona.nombres || "");
-			setApellidos(client.persona.apellidos || "");
-			setEmail(client.persona.email || "");
-			setDireccion(client.persona.direccion || "");
-			setOcupacion(client.persona.ocupacion || "");
-			setNacionalidad(client.persona.nacionalidad || "");
-			setFechaNacimiento(
-				client.persona.fecha_nacimiento
-					? client.persona.fecha_nacimiento.split("T")[0]
-					: "",
-			);
-
-			setEsPeruano(
-				client.persona.es_peruano !== null
-					? String(client.persona.es_peruano)
-					: "true",
-			);
-			setSexo(client.persona.sexo || "");
-			setEstadoCivil(client.persona.estado_civil || "");
-			setSolvencia(client.solvencia || "");
-			setActitud(client.actitud || "");
-			setIdUbigeo(client.persona.id_ubigeo || "");
-			setIdTipoDoc(String(client.persona.id_tipo_doc) || "");
-
-			if (client.persona.telefonos) {
-				setPhones(
-					client.persona.telefonos.map((t) => ({
-						uiId: crypto.randomUUID(),
-						id: t.id,
-						numero: t.numero,
-						tipo: t.tipo,
-					})),
-				);
-			} else {
-				setPhones([]);
-			}
-			setDeletedPhoneIds([]);
-			setError(null);
-		}
-	}, [isOpen, client]);
-
-	const updatePayload = useMemo((): UpdateClientPayload => {
-		const payloadPhones = {
-			add: phones
-				.filter((p) => !p.id && p.numero.trim())
-				.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
-			update: phones
-				.filter((p) => p.id && p.numero.trim())
-				.map((p) => ({
-					id: p.id!,
-					numero: p.numero.trim(),
-					tipo: p.tipo,
-				})),
-			remove: deletedPhoneIds,
-		};
-
-		return {
-			id_tipo_doc_identidad: Number(idTipoDoc),
-			nombres: nombres.trim() || undefined,
-			apellidos: apellidos.trim() || undefined,
-			numero: numeroDoc.trim(),
-			email: email.trim() || undefined,
-			fecha_nacimiento: fechaNacimiento || undefined,
-			es_peruano: esPeruano === "true",
-			nacionalidad: nacionalidad.trim() || undefined,
-			direccion: direccion.trim() || undefined,
-			ocupacion: ocupacion.trim() || undefined,
-			sexo: (sexo as Sexo) || undefined,
-			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			solvencia: (solvencia as Solvencia) || undefined,
-			actitud: (actitud as Actitud) || undefined,
-			id_ubigeo: idUbigeo || undefined,
-			telefonos: payloadPhones,
-		};
-	}, [
-		nombres,
-		apellidos,
-		numeroDoc,
-		email,
-		fechaNacimiento,
-		esPeruano,
-		direccion,
-		ocupacion,
-		sexo,
-		estadoCivil,
-		solvencia,
-		actitud,
-		idUbigeo,
-		phones,
-		deletedPhoneIds,
-		nacionalidad,
-		idTipoDoc,
-	]);
-
-	const editClientMutation = useEditClientMutation(
-		client?.id || 0,
-		updatePayload,
-	);
-	const isSubmitting = editClientMutation.isPending;
-
-	const handleAddPhone = () => {
-		setPhones([
-			...phones,
-			{ uiId: crypto.randomUUID(), numero: "", tipo: "PERSONAL" },
-		]);
-	};
-
-	const handleUpdatePhone = (
-		uiId: string,
-		field: "numero" | "tipo",
-		value: string,
-	) => {
-		setPhones((prev) =>
-			prev.map((p) => (p.uiId === uiId ? { ...p, [field]: value } : p)),
-		);
-	};
-
-	const handleRemovePhone = (uiId: string, backId?: number) => {
-		if (backId) setDeletedPhoneIds((prev) => [...prev, backId]);
-		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
-	};
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -212,27 +94,6 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-
-		if (!numeroDoc.trim())
-			return setError("El número de documento es requerido.");
-
-		try {
-			editClientMutation.mutate(undefined, {
-				onSuccess: () => {
-					onClose();
-				},
-			});
-		} catch (err: unknown) {
-			const message =
-				(err as ApiError)?.response?.data?.message ||
-				"Error al actualizar el cliente.";
-			setError(message);
-		}
-	};
 
 	if (!client) return null;
 
@@ -316,6 +177,9 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
 													Nombres
+													<span className="text-red-500">
+														*
+													</span>
 												</label>
 												<input
 													type="text"
@@ -326,6 +190,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														)
 													}
 													disabled={isSubmitting}
+													required
 													placeholder="Ej: Juan Carlos"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
@@ -333,6 +198,9 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
 												<label className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1">
 													Apellidos
+													<span className="text-red-500">
+														*
+													</span>
 												</label>
 												<input
 													type="text"
@@ -343,6 +211,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 														)
 													}
 													disabled={isSubmitting}
+													required
 													placeholder="Ej: Pérez Gomez"
 													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 												/>
@@ -381,6 +250,7 @@ export const EditClientModal = ({ isOpen, onClose, client }: Props) => {
 															e.target.value,
 														)
 													}
+													required
 													maxLength={11}
 													minLength={8}
 													placeholder="Ej: 12345678"

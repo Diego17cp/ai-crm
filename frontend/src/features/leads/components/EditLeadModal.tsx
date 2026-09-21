@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
 	FiX,
@@ -10,23 +10,15 @@ import {
 } from "react-icons/fi";
 import { BiLoaderAlt } from "react-icons/bi";
 import { SearchableSelect, Select } from "dialca-ui";
-import { useLeads } from "../hooks/useLeads";
 import { useDocTypes, useUbigeos } from "@/core/hooks";
-import type { ApiError, EstadoCivil, Sexo, TipoTelefono } from "@/core/types";
-import type { Lead, UpdateLeadPayload } from "../types";
+import type { Lead } from "../types";
 import { classes, options } from "@/shared/constants";
+import { useEditLead } from "../hooks/useEditLead";
 
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
 	lead: Lead | null;
-}
-
-interface PhoneUI {
-	uiId: string;
-	id?: number;
-	numero: string;
-	tipo: TipoTelefono;
 }
 
 const selectClasses = classes.select;
@@ -38,146 +30,44 @@ const estadoCivilOptions = options.estadoCivil;
 const phoneTypeOptions = options.phoneType;
 
 export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
-	const [numeroDoc, setNumeroDoc] = useState("");
-	const [nombres, setNombres] = useState("");
-	const [apellidos, setApellidos] = useState("");
-	const [email, setEmail] = useState("");
-	const [fechaNacimiento, setFechaNacimiento] = useState("");
-	const [direccion, setDireccion] = useState("");
-	const [ocupacion, setOcupacion] = useState("");
-
-	const [esPeruano, setEsPeruano] = useState<string>("true");
-	const [nacionalidad, setNacionalidad] = useState<string>("");
-	const [sexo, setSexo] = useState<string>("");
-	const [estadoCivil, setEstadoCivil] = useState<string>("");
-	const [idUbigeo, setIdUbigeo] = useState<string>("");
-	const [idTipoDoc, setIdTipoDoc] = useState<string>("");
-
-	const [phones, setPhones] = useState<PhoneUI[]>([]);
-	const [deletedPhoneIds, setDeletedPhoneIds] = useState<number[]>([]);
-
-	const [error, setError] = useState<string | null>(null);
+	const {
+		nombres,
+		setNombres,
+		apellidos,
+		setApellidos,
+		setNumeroDoc,
+		email,
+		setEmail,
+		fechaNacimiento,
+		setFechaNacimiento,
+		direccion,
+		setDireccion,
+		ocupacion,
+		setOcupacion,
+		esPeruano,
+		setEsPeruano,
+		nacionalidad,
+		setNacionalidad,
+		sexo,
+		setSexo,
+		estadoCivil,
+		setEstadoCivil,
+		idUbigeo,
+		setIdUbigeo,
+		idTipoDoc,
+		setIdTipoDoc,
+		phones,
+		handleAddPhone,
+		handleUpdatePhone,
+		handleRemovePhone,
+		handleSubmit,
+		isSubmitting,
+		error,
+		numeroDoc
+	} = useEditLead(isOpen, lead, onClose)
 
 	const { ubigeosQuery } = useUbigeos();
 	const { docTypesQuery } = useDocTypes();
-
-	const { useEditLeadMutation } = useLeads();
-
-	useEffect(() => {
-		if (isOpen && lead) {
-			setNumeroDoc(lead.persona.numero || "");
-			setNombres(lead.persona.nombres || "");
-			setApellidos(lead.persona.apellidos || "");
-			setEmail(lead.persona.email || "");
-			setDireccion(lead.persona.direccion || "");
-			setOcupacion(lead.persona.ocupacion || "");
-			setFechaNacimiento(
-				lead.persona.fecha_nacimiento
-					? lead.persona.fecha_nacimiento.split("T")[0]
-					: "",
-			);
-
-			setEsPeruano(
-				lead.persona.es_peruano !== null
-					? String(lead.persona.es_peruano)
-					: "true",
-			);
-			setNacionalidad(lead.persona.nacionalidad || "");
-			setSexo(lead.persona.sexo || "");
-			setEstadoCivil(lead.persona.estado_civil || "");
-			setIdUbigeo(lead.persona.id_ubigeo || "");
-			setIdTipoDoc(String(lead.persona.id_tipo_doc) || "");
-
-			if (lead.persona.telefonos) {
-				setPhones(
-					lead.persona.telefonos.map((t) => ({
-						uiId: crypto.randomUUID(),
-						id: t.id,
-						numero: t.numero,
-						tipo: t.tipo,
-					})),
-				);
-			} else {
-				setPhones([]);
-			}
-			setDeletedPhoneIds([]);
-			setError(null);
-		}
-	}, [isOpen, lead]);
-
-	const updatePayload = useMemo((): UpdateLeadPayload => {
-		const payloadPhones = {
-			add: phones
-				.filter((p) => !p.id && p.numero.trim())
-				.map((p) => ({ numero: p.numero.trim(), tipo: p.tipo })),
-			update: phones
-				.filter((p) => p.id && p.numero.trim())
-				.map((p) => ({
-					id: p.id!,
-					numero: p.numero.trim(),
-					tipo: p.tipo,
-				})),
-			remove: deletedPhoneIds,
-		};
-
-		return {
-			id_tipo_doc_identidad: Number(idTipoDoc),
-			nombres: nombres.trim() || undefined,
-			apellidos: apellidos.trim() || undefined,
-			numero: numeroDoc.trim(),
-			email: email.trim() || undefined,
-			fecha_nacimiento: fechaNacimiento || undefined,
-			es_peruano: esPeruano === "true",
-			nacionalidad: nacionalidad.trim() || undefined,
-			direccion: direccion.trim() || undefined,
-			ocupacion: ocupacion.trim() || undefined,
-			sexo: (sexo as Sexo) || undefined,
-			estado_civil: (estadoCivil as EstadoCivil) || undefined,
-			id_ubigeo: idUbigeo || undefined,
-			telefonos: payloadPhones,
-		};
-	}, [
-		nombres,
-		apellidos,
-		numeroDoc,
-		email,
-		fechaNacimiento,
-		esPeruano,
-		direccion,
-		ocupacion,
-		sexo,
-		estadoCivil,
-		idUbigeo,
-		phones,
-		deletedPhoneIds,
-		nacionalidad,
-		idTipoDoc,
-	]);
-
-	const editLeadMutation = useEditLeadMutation(lead?.id || 0, updatePayload);
-	const isSubmitting = editLeadMutation.isPending;
-
-	const handleAddPhone = () => {
-		setPhones([
-			...phones,
-			{ uiId: crypto.randomUUID(), numero: "", tipo: "PERSONAL" },
-		]);
-	};
-
-	const handleUpdatePhone = (
-		uiId: string,
-		field: "numero" | "tipo",
-		value: string,
-	) => {
-		setPhones((prev) =>
-			prev.map((p) => (p.uiId === uiId ? { ...p, [field]: value } : p)),
-		);
-	};
-
-	const handleRemovePhone = (uiId: string, backId?: number) => {
-		if (backId) setDeletedPhoneIds((prev) => [...prev, backId]);
-		setPhones((prev) => prev.filter((p) => p.uiId !== uiId));
-	};
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -198,27 +88,6 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError(null);
-
-		if (!numeroDoc.trim())
-			return setError("El número de documento es requerido.");
-
-		try {
-			editLeadMutation.mutate(undefined, {
-				onSuccess: () => {
-					onClose();
-				},
-			});
-		} catch (err: unknown) {
-			const message =
-				(err as ApiError)?.response?.data?.message ||
-				"Error al actualizar el lead.";
-			setError(message);
-		}
-	};
 
 	if (!lead) return null;
 
