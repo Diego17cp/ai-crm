@@ -36,23 +36,30 @@ export const QuoteReview = () => {
 		});
 	};
 
+	const showPanelOnMobile = selectedQuoteId !== null;
+
 	return (
 		<div className="flex h-[calc(100vh-115px)] w-full mb-0 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-			<LiveSidebar
-				activeTab={activeTab}
-				setActiveTab={setActiveTab}
-				selectedQuoteId={selectedQuoteId}
-				setSelectedQuoteId={setSelectedQuoteId}
-				isLoading={isLoadingItems}
-			/>
-			<QuoteReviewPanel
-				quoteId={selectedQuoteId}
-				onTakeReview={handleTakeReview}
-				onApprove={handleApprove}
-				onReject={handleReject}
-				onChat={handleChat}
-				onClose={() => setSelectedQuoteId(null)}
-			/>
+			<div className={`${showPanelOnMobile ? "hidden" : "flex"} md:flex w-full md:w-80 lg:w-96 flex-col`}>
+				<LiveSidebar
+					activeTab={activeTab}
+					setActiveTab={setActiveTab}
+					selectedQuoteId={selectedQuoteId}
+					setSelectedQuoteId={setSelectedQuoteId}
+					isLoading={isLoadingItems}
+				/>
+			</div>
+			<div className={`${showPanelOnMobile ? "flex" : "hidden"} md:flex flex-1 flex-col min-w-0`}>
+				<QuoteReviewPanel
+					quoteId={selectedQuoteId}
+					onTakeReview={handleTakeReview}
+					onApprove={handleApprove}
+					onReject={handleReject}
+					onChat={handleChat}
+					onClose={() => setSelectedQuoteId(null)}
+					onBack={() => setSelectedQuoteId(null)}
+				/>
+			</div>
 		</div>
 	);
 };

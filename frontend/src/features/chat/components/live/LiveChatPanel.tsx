@@ -1,4 +1,4 @@
-import { FiSend, FiInbox, FiXCircle, FiUser } from "react-icons/fi";
+import { FiSend, FiInbox, FiXCircle, FiUser, FiArrowLeft } from "react-icons/fi";
 import { VscRobot } from "react-icons/vsc";
 import { useChats } from "../../hooks/useChats";
 import { getCanalIcon, getRelativeWaitTime } from "../../utils/chatFormatters";
@@ -14,6 +14,7 @@ interface Props {
 	onSendMessage: (chatId: string, message: string) => void;
 	onCloseChat: () => void;
 	onReassignBot?: (chatId: string) => void;
+	onBack?: () => void;
 }
 
 export const LiveChatPanel = ({
@@ -23,6 +24,7 @@ export const LiveChatPanel = ({
 	onSendMessage,
 	onCloseChat,
 	onReassignBot,
+	onBack,
 }: Props) => {
 	const { useChatByIdQuery } = useChats();
 	const { data, isLoading, isError, error, refetch } = useChatByIdQuery(
@@ -103,34 +105,46 @@ export const LiveChatPanel = ({
 
 	return (
 		<div className="flex-1 flex flex-col h-full bg-[#f8fafc] dark:bg-[#0b1120]">
-			<div className="h-20 px-6 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md flex items-center justify-between shrink-0">
-				<div>
-					<h3 className="font-bold text-gray-900 dark:text-white">
-						{nombreCliente}
-					</h3>
-					<p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
-						<span
-							className={`p-1.5 rounded-lg flex items-center gap-1.5 ${chatData?.canal === "WHATSAPP" ? "bg-green-50 dark:bg-green-900/20 text-green-600" : "bg-blue-50 dark:bg-blue-900/20 text-blue-600"}`}
+			<div className="h-20 px-6 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md flex items-center justify-between shrink-0 gap-2">
+				<div className="flex items-center gap-2 min-w-0">
+					{onBack && (
+						<button
+							onClick={onBack}
+							className="md:hidden p-2 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+							title="Volver"
 						>
-							<CanalIcon className="size-3.5" />
-							<span className="text-xs font-medium">
-								{chatData?.canal === "WHATSAPP"
-									? "WhatsApp"
-									: "Web"}
+							<FiArrowLeft size={18} />
+						</button>
+					)}
+					<div className="min-w-0">
+						<h3 className="font-bold text-gray-900 dark:text-white">
+							{nombreCliente}
+						</h3>
+						<p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
+							<span
+								className={`p-1.5 rounded-lg flex items-center gap-1.5 ${chatData?.canal === "WHATSAPP" ? "bg-green-50 dark:bg-green-900/20 text-green-600" : "bg-blue-50 dark:bg-blue-900/20 text-blue-600"}`}
+							>
+								<CanalIcon className="size-3.5" />
+								<span className="text-xs font-medium">
+									{chatData?.canal === "WHATSAPP"
+										? "WhatsApp"
+										: "Web"}
+								</span>
 							</span>
-						</span>
-					</p>
+						</p>
+					</div>
 				</div>
 				{!isQueue && (
 					<button
-						className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium transition-colors"
+						className="flex items-center gap-2 px-3 py-1.5 cursor-pointer rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium transition-colors shrink-0"
 						onClick={() => {
 							if (chatId && onReassignBot) {
 								onReassignBot(chatId);
 							}
 						}}
 					>
-						<FiXCircle /> Reasignar al Bot
+						<FiXCircle />
+						<span className="hidden sm:inline">Reasignar al Bot</span>
 					</button>
 				)}
 			</div>

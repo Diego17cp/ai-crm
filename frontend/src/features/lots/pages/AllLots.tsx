@@ -262,7 +262,7 @@ export const AllLots = () => {
 							classes={selectClasses}
 						/>
 					</div>
-					<div className="flex flex-col z-5 gap-2">
+					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
 							Área (m²)
 						</label>
@@ -282,7 +282,7 @@ export const AllLots = () => {
 							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 						/>
 					</div>
-					<div className="flex flex-col z-5 gap-2">
+					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
 							Precio por m²
 						</label>
@@ -301,7 +301,7 @@ export const AllLots = () => {
 							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
 						/>
 					</div>
-					<div className="flex flex-col z-5 gap-2">
+					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
 							Precio total
 						</label>
