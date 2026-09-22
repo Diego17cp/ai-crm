@@ -50,7 +50,8 @@ export const AdvisorLeaderboard = ({ items }: { items: LeaderboardItem[] }) => {
 		>
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-					<FiAward className="text-amber-500" size={18} /> Ranking de Asesores
+					<FiAward className="text-amber-500" size={18} /> Ranking de
+					Asesores
 				</h3>
 				<span className="text-xs text-gray-400 font-medium">
 					{ordered.length} asesores activos
@@ -68,10 +69,18 @@ export const AdvisorLeaderboard = ({ items }: { items: LeaderboardItem[] }) => {
 							<tr className="text-left text-xs text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800">
 								<th className="pb-3 font-medium">#</th>
 								<th className="pb-3 font-medium">Asesor</th>
-								<th className="pb-3 font-medium text-right">Ventas</th>
-								<th className="pb-3 font-medium text-right">Monto</th>
-								<th className="pb-3 font-medium text-right">T. Resp.</th>
-								<th className="pb-3 font-medium text-right">Rating</th>
+								<th className="pb-3 font-medium text-right">
+									Ventas
+								</th>
+								<th className="pb-3 font-medium text-right">
+									Monto
+								</th>
+								<th className="pb-3 font-medium text-right">
+									T. Resp.
+								</th>
+								<th className="pb-3 font-medium text-right">
+									Rating
+								</th>
 								<th className="pb-3 w-6"></th>
 							</tr>
 						</thead>
@@ -80,9 +89,12 @@ export const AdvisorLeaderboard = ({ items }: { items: LeaderboardItem[] }) => {
 								<tr
 									key={item.id_usuario}
 									onClick={() =>
-										navigate(`/admin/metrics/${item.id_usuario}`, {
-											state: { nombre: item.nombre },
-										})
+										navigate(
+											`/admin/metrics/${item.id_usuario}`,
+											{
+												state: { nombre: item.nombre },
+											},
+										)
 									}
 									className="group cursor-pointer hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors"
 								>
@@ -91,10 +103,12 @@ export const AdvisorLeaderboard = ({ items }: { items: LeaderboardItem[] }) => {
 									</td>
 									<td className="py-3 font-medium text-gray-800 dark:text-gray-200">
 										<div className="flex items-center gap-2">
-											<div className="size-7 rounded-full bg-linear-to-tr from-teal-500 to-teal-400 flex items-center justify-center text-white text-[11px] font-bold shadow-xs">
-												{item.nombre.charAt(0).toUpperCase()}
+											<div className="size-7 rounded-full bg-linear-to-tr from-pink-500 to-pink-400 flex items-center justify-center text-white text-[11px] font-bold shadow-xs">
+												{item.nombre
+													.charAt(0)
+													.toUpperCase()}
 											</div>
-											<span className="truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+											<span className="truncate group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
 												{item.nombre}
 											</span>
 										</div>
@@ -104,19 +118,26 @@ export const AdvisorLeaderboard = ({ items }: { items: LeaderboardItem[] }) => {
 											{item.ventas_cerradas}
 										</span>
 									</td>
-									<td className="py-3 text-right font-bold text-teal-600 dark:text-teal-400">
+									<td className="py-3 text-right font-bold text-pink-600 dark:text-pink-400">
 										{formatCurrency(item.monto_vendido)}
 									</td>
 									<td className="py-3 text-right text-xs text-gray-500 dark:text-gray-400">
-										{formatDuration(item.tiempo_respuesta_prom_seg)}
+										{formatDuration(
+											item.tiempo_respuesta_prom_seg,
+										)}
 									</td>
 									<td className="py-3 text-right">
 										<span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-500">
-											<FiStar size={12} className="fill-amber-400" />
-											{formatScore(item.puntuacion_atencion_prom)}
+											<FiStar
+												size={12}
+												className="fill-amber-400"
+											/>
+											{formatScore(
+												item.puntuacion_atencion_prom,
+											)}
 										</span>
 									</td>
-									<td className="py-3 text-right text-gray-300 dark:text-gray-600 group-hover:text-teal-500 transition-colors">
+									<td className="py-3 text-right text-gray-300 dark:text-gray-600 group-hover:text-pink-500 transition-colors">
 										<FiChevronRight size={16} />
 									</td>
 								</tr>

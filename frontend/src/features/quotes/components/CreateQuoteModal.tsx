@@ -1,6 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FiX, FiFileText, FiAlertCircle, FiCreditCard, FiUser } from "react-icons/fi";
+import {
+	FiX,
+	FiFileText,
+	FiAlertCircle,
+	FiCreditCard,
+	FiUser,
+} from "react-icons/fi";
 import { SearchableSelect } from "dialca-ui";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/core/api";
@@ -22,13 +28,13 @@ interface Props {
 }
 
 export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
-  const { docTypesQuery } = useDocTypes()
+	const { docTypesQuery } = useDocTypes();
 	const [idProyecto, setIdProyecto] = useState("");
 	const [idEtapa, setIdEtapa] = useState("");
 	const [idManzana, setIdManzana] = useState("");
 	const [idLote, setIdLote] = useState("");
-  
-  const [idTipoDoc, setIdTipoDoc] = useState("");
+
+	const [idTipoDoc, setIdTipoDoc] = useState("");
 	const [documento, setDocumento] = useState("");
 	const [nombres, setNombres] = useState("");
 	const [apellidos, setApellidos] = useState("");
@@ -37,8 +43,12 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 
 	const [tipoPago, setTipoPago] = useState<"CONTADO" | "CREDITO">("CONTADO");
 	const [meses, setMeses] = useState<number | "">("");
-	const [cuotaInicialDeseada, setCuotaInicialDeseada] = useState<number | "">("");
-	const [descuentoSolicitado, setDescuentoSolicitado] = useState<number | "">("");
+	const [cuotaInicialDeseada, setCuotaInicialDeseada] = useState<number | "">(
+		"",
+	);
+	const [descuentoSolicitado, setDescuentoSolicitado] = useState<number | "">(
+		"",
+	);
 
 	const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +73,9 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 		queryKey: ["manzanas", idEtapa],
 		queryFn: async () => {
 			if (!idEtapa) return [];
-			const res = await apiClient.get(`/projects/etapas/${idEtapa}/manzanas`);
+			const res = await apiClient.get(
+				`/projects/etapas/${idEtapa}/manzanas`,
+			);
 			return res.data.data;
 		},
 		enabled: Boolean(idEtapa),
@@ -72,7 +84,9 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 		queryKey: ["lotes_manzana", idManzana, "disponibles"],
 		queryFn: async () => {
 			if (!idManzana) return [];
-			const res = await apiClient.get(`/lotes?id_manzana=${idManzana}&estado=Disponible&limit=50`);
+			const res = await apiClient.get(
+				`/lotes?id_manzana=${idManzana}&estado=Disponible&limit=50`,
+			);
 			return res.data.data;
 		},
 		enabled: Boolean(idManzana),
@@ -83,20 +97,44 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
-	const proyectoOptions = projectsQuery.data?.map((p: Proyecto) => ({ value: String(p.id), label: p.nombre })) || [];
-	const etapaOptions = etapasQuery.data?.map((e: Etapa) => ({ value: String(e.id), label: e.nombre })) || [];
-	const manzanaOptions = manzanasQuery.data?.map((m: Manzana) => ({ value: String(m.id), label: `Mz ${m.codigo}` })) || [];
-	const loteOptions = lotesQuery.data?.map((l: Lote) => ({ value: String(l.id), label: `Lote ${l.numero_lote} - $${l.precio_total}` })) || [];
+	const proyectoOptions =
+		projectsQuery.data?.map((p: Proyecto) => ({
+			value: String(p.id),
+			label: p.nombre,
+		})) || [];
+	const etapaOptions =
+		etapasQuery.data?.map((e: Etapa) => ({
+			value: String(e.id),
+			label: e.nombre,
+		})) || [];
+	const manzanaOptions =
+		manzanasQuery.data?.map((m: Manzana) => ({
+			value: String(m.id),
+			label: `Mz ${m.codigo}`,
+		})) || [];
+	const loteOptions =
+		lotesQuery.data?.map((l: Lote) => ({
+			value: String(l.id),
+			label: `Lote ${l.numero_lote} - $${l.precio_total}`,
+		})) || [];
 
 	const selectedLoteData = useMemo(() => {
 		if (!idLote || !lotesQuery.data) return null;
 		return lotesQuery.data.find((l: Lote) => String(l.id) === idLote);
 	}, [idLote, lotesQuery.data]);
 
-	const precioLote = selectedLoteData ? Number(selectedLoteData.precio_total) : 0;
+	const precioLote = selectedLoteData
+		? Number(selectedLoteData.precio_total)
+		: 0;
 
 	const estimadoCredito = useMemo(() => {
-		if (tipoPago !== "CREDITO" || !precioLote || !meses || Number(meses) <= 0) return null;
+		if (
+			tipoPago !== "CREDITO" ||
+			!precioLote ||
+			!meses ||
+			Number(meses) <= 0
+		)
+			return null;
 		const cuotaInicial = Number(cuotaInicialDeseada) || precioLote * 0.1;
 		const cuotaMensual = (precioLote - cuotaInicial) / Number(meses);
 		return { cuotaInicial, cuotaMensual };
@@ -137,14 +175,30 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 			return {
 				...base,
 				meses: Number(meses),
-				...(cuotaInicialDeseada !== "" && { cuota_inicial_deseada: Number(cuotaInicialDeseada) }),
+				...(cuotaInicialDeseada !== "" && {
+					cuota_inicial_deseada: Number(cuotaInicialDeseada),
+				}),
 			};
 		}
 		return {
 			...base,
-			...(descuentoSolicitado !== "" && { descuento_solicitado: Number(descuentoSolicitado) }),
+			...(descuentoSolicitado !== "" && {
+				descuento_solicitado: Number(descuentoSolicitado),
+			}),
 		};
-	}, [idTipoDoc, documento, nombres, apellidos, telefono, email, idLote, tipoPago, meses, cuotaInicialDeseada, descuentoSolicitado]);
+	}, [
+		idTipoDoc,
+		documento,
+		nombres,
+		apellidos,
+		telefono,
+		email,
+		idLote,
+		tipoPago,
+		meses,
+		cuotaInicialDeseada,
+		descuentoSolicitado,
+	]);
 
 	const { useCreateQuoteMutation } = useQuotes();
 	const mutation = useCreateQuoteMutation(payload);
@@ -154,16 +208,22 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!idTipoDoc || !documento.trim()) return setError("El tipo y número de documento son obligatorios.");
+		if (!idTipoDoc || !documento.trim())
+			return setError("El tipo y número de documento son obligatorios.");
 		if (!idLote) return setError("Debes seleccionar un lote disponible.");
 		if (tipoPago === "CREDITO" && (!meses || Number(meses) <= 0)) {
-			return setError("Especifica un número válido de meses para el crédito.");
+			return setError(
+				"Especifica un número válido de meses para el crédito.",
+			);
 		}
 
 		mutation.mutate(undefined, {
 			onSuccess: () => onClose(),
 			onError: (err: unknown) => {
-				setError((err as ApiError)?.response?.data?.message || "Error al crear la cotización");
+				setError(
+					(err as ApiError)?.response?.data?.message ||
+						"Error al crear la cotización",
+				);
 			},
 		});
 	};
@@ -194,12 +254,16 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 							initial={{ opacity: 0, scale: 0.95, y: 15 }}
 							animate={{ opacity: 1, scale: 1, y: 0 }}
 							exit={{ opacity: 0, scale: 0.95, y: 15 }}
-							transition={{ type: "spring", stiffness: 300, damping: 30 }}
+							transition={{
+								type: "spring",
+								stiffness: 300,
+								damping: 30,
+							}}
 							className="bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[95vh] flex flex-col rounded-3xl shadow-2xl pointer-events-auto border border-gray-100 dark:border-gray-800 overflow-hidden"
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiFileText size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -207,7 +271,8 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 											Nueva Cotización Manual
 										</h2>
 										<p className="text-xs text-gray-500 dark:text-gray-400">
-											Genera una cotización directamente desde el panel
+											Genera una cotización directamente
+											desde el panel
 										</p>
 									</div>
 								</div>
@@ -221,17 +286,27 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 								</button>
 							</div>
 
-							<form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+							<form
+								onSubmit={handleSubmit}
+								className="flex flex-col flex-1 overflow-hidden min-h-0"
+							>
 								<div className="p-6 flex-1 overflow-y-auto main-scrollbar flex flex-col gap-8">
 									<AnimatePresence>
 										{error && (
 											<motion.div
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: "auto" }}
+												initial={{
+													opacity: 0,
+													height: 0,
+												}}
+												animate={{
+													opacity: 1,
+													height: "auto",
+												}}
 												exit={{ opacity: 0, height: 0 }}
 												className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
 											>
-												<FiAlertCircle className="shrink-0" /> <span>{error}</span>
+												<FiAlertCircle className="shrink-0" />{" "}
+												<span>{error}</span>
 											</motion.div>
 										)}
 									</AnimatePresence>
@@ -244,10 +319,14 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 											<div className="grid grid-cols-2 gap-3 relative">
 												<div className="z-50 col-span-2">
 													<SearchableSelect
-														options={proyectoOptions}
+														options={
+															proyectoOptions
+														}
 														value={idProyecto}
 														onChange={(val) => {
-															setIdProyecto(String(val));
+															setIdProyecto(
+																String(val),
+															);
 															setIdEtapa("");
 															setIdManzana("");
 															setIdLote("");
@@ -255,7 +334,9 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														label="1. Proyecto"
 														required
 														placeholder="Buscar..."
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														isClearable
 													/>
 												</div>
@@ -264,13 +345,17 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														options={etapaOptions}
 														value={idEtapa}
 														onChange={(val) => {
-															setIdEtapa(String(val));
+															setIdEtapa(
+																String(val),
+															);
 															setIdManzana("");
 															setIdLote("");
 														}}
 														label="2. Etapa"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idProyecto}
 														placeholder="Buscar..."
 														isClearable
@@ -281,12 +366,16 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														options={manzanaOptions}
 														value={idManzana}
 														onChange={(val) => {
-															setIdManzana(String(val));
+															setIdManzana(
+																String(val),
+															);
 															setIdLote("");
 														}}
 														label="3. Mz"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idEtapa}
 														placeholder="Buscar..."
 														isClearable
@@ -296,10 +385,16 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 													<SearchableSelect
 														options={loteOptions}
 														value={idLote}
-														onChange={(val) => setIdLote(String(val))}
+														onChange={(val) =>
+															setIdLote(
+																String(val),
+															)
+														}
 														label="4. Lote"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idManzana}
 														placeholder="Buscar..."
 														isClearable
@@ -309,13 +404,15 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 													<motion.div
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
-														className="col-span-2 mt-1 px-4 py-3 bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-800/30 rounded-xl flex items-center justify-between"
+														className="col-span-2 mt-1 px-4 py-3 bg-pink-50 dark:bg-pink-900/10 border border-pink-100 dark:border-pink-800/30 rounded-xl flex items-center justify-between"
 													>
-														<span className="text-xs font-semibold text-teal-700 dark:text-teal-500 uppercase">
+														<span className="text-xs font-semibold text-pink-700 dark:text-pink-500 uppercase">
 															Valor del Lote:
 														</span>
-														<span className="text-lg font-bold text-teal-800 dark:text-teal-400">
-															{formatCurrency(precioLote)}
+														<span className="text-lg font-bold text-pink-800 dark:text-pink-400">
+															{formatCurrency(
+																precioLote,
+															)}
 														</span>
 													</motion.div>
 												)}
@@ -324,76 +421,114 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 
 										<div className="flex flex-col gap-4">
 											<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 pb-2 flex items-center gap-2">
-												<FiUser className="text-teal-500" /> Datos del Cliente
+												<FiUser className="text-pink-500" />{" "}
+												Datos del Cliente
 											</h3>
 											<div className="grid grid-cols-2 gap-3">
 												<div className="z-20 col-span-1">
 													<SearchableSelect
 														options={tipoDocOptions}
 														value={idTipoDoc}
-														onChange={(val) => setIdTipoDoc(String(val))}
+														onChange={(val) =>
+															setIdTipoDoc(
+																String(val),
+															)
+														}
 														label="Tipo Doc."
 														required
 														placeholder="Buscar..."
 														isClearable
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
 													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-														Número de Doc. <span className="text-red-500 ml-1">*</span>
+														Número de Doc.{" "}
+														<span className="text-red-500 ml-1">
+															*
+														</span>
 													</label>
 													<input
 														type="text"
 														value={documento}
-														onChange={(e) => setDocumento(e.target.value)}
+														onChange={(e) =>
+															setDocumento(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="12345678"
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all"
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
-													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Nombres</label>
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Nombres
+													</label>
 													<input
 														type="text"
 														value={nombres}
-														onChange={(e) => setNombres(e.target.value)}
+														onChange={(e) =>
+															setNombres(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="Jhon"
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all"
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
-													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Apellidos</label>
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Apellidos
+													</label>
 													<input
 														type="text"
 														value={apellidos}
-														onChange={(e) => setApellidos(e.target.value)}
+														onChange={(e) =>
+															setApellidos(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="Doe"
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all"
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
-													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Teléfono (WhatsApp)</label>
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Teléfono (WhatsApp)
+													</label>
 													<input
 														type="tel"
 														value={telefono}
-														onChange={(e) => setTelefono(e.target.value)}
+														onChange={(e) =>
+															setTelefono(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="987654321"
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all"
 													/>
 												</div>
 												<div className="flex flex-col gap-1.5 col-span-1">
-													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Email</label>
+													<label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+														Email
+													</label>
 													<input
 														type="email"
 														value={email}
-														onChange={(e) => setEmail(e.target.value)}
+														onChange={(e) =>
+															setEmail(
+																e.target.value,
+															)
+														}
 														disabled={isSubmitting}
 														placeholder="jhondoe@gmail.com"
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all"
 													/>
 												</div>
 											</div>
@@ -402,29 +537,44 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 
 									<div className="flex flex-col gap-4 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-2xl border border-gray-100 dark:border-gray-800/60">
 										<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-											<FiCreditCard className="text-teal-500" /> Condiciones de la Cotización
+											<FiCreditCard className="text-pink-500" />{" "}
+											Condiciones de la Cotización
 										</h3>
 										<div className="grid grid-cols-2 gap-4">
 											<div
-												onClick={() => setTipoPago("CONTADO")}
-												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CONTADO" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 shadow-sm shadow-teal-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-300"}`}
+												onClick={() =>
+													setTipoPago("CONTADO")
+												}
+												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CONTADO" ? "border-pink-500 bg-pink-50/50 dark:bg-pink-900/20 shadow-sm shadow-pink-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-pink-300"}`}
 											>
 												<div className="flex flex-col gap-1">
-													<span className={`font-bold ${tipoPago === "CONTADO" ? "text-teal-700 dark:text-teal-400" : "text-gray-700 dark:text-gray-300"}`}>
+													<span
+														className={`font-bold ${tipoPago === "CONTADO" ? "text-pink-700 dark:text-pink-400" : "text-gray-700 dark:text-gray-300"}`}
+													>
 														Al Contado
 													</span>
-													<span className="text-xs text-gray-500">Aplica descuento sobre el precio de lista.</span>
+													<span className="text-xs text-gray-500">
+														Aplica descuento sobre
+														el precio de lista.
+													</span>
 												</div>
 											</div>
 											<div
-												onClick={() => setTipoPago("CREDITO")}
+												onClick={() =>
+													setTipoPago("CREDITO")
+												}
 												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CREDITO" ? "border-purple-500 bg-purple-50/50 dark:bg-purple-900/20 shadow-sm shadow-purple-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-purple-300"}`}
 											>
 												<div className="flex flex-col gap-1">
-													<span className={`font-bold ${tipoPago === "CREDITO" ? "text-purple-700 dark:text-purple-400" : "text-gray-700 dark:text-gray-300"}`}>
+													<span
+														className={`font-bold ${tipoPago === "CREDITO" ? "text-purple-700 dark:text-purple-400" : "text-gray-700 dark:text-gray-300"}`}
+													>
 														Al Crédito
 													</span>
-													<span className="text-xs text-gray-500">Inicial + cuotas mensuales.</span>
+													<span className="text-xs text-gray-500">
+														Inicial + cuotas
+														mensuales.
+													</span>
 												</div>
 											</div>
 										</div>
@@ -433,38 +583,74 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 											{tipoPago === "CONTADO" ? (
 												<motion.div
 													key="contado"
-													initial={{ opacity: 0, height: 0 }}
-													animate={{ opacity: 1, height: "auto" }}
-													exit={{ opacity: 0, height: 0 }}
+													initial={{
+														opacity: 0,
+														height: 0,
+													}}
+													animate={{
+														opacity: 1,
+														height: "auto",
+													}}
+													exit={{
+														opacity: 0,
+														height: 0,
+													}}
 													className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-2 overflow-hidden"
 												>
 													<div className="flex flex-col gap-1.5 max-w-xs">
 														<label className="text-xs font-semibold text-gray-500">
-															Descuento a aplicar (%)
+															Descuento a aplicar
+															(%)
 														</label>
 														<input
 															type="number"
 															step="0.01"
 															min="0"
 															placeholder="Vacío = descuento oficial del proyecto"
-															value={descuentoSolicitado}
-															onChange={(e) => setDescuentoSolicitado(e.target.value === "" ? "" : Number(e.target.value))}
-															className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+															value={
+																descuentoSolicitado
+															}
+															onChange={(e) =>
+																setDescuentoSolicitado(
+																	e.target
+																		.value ===
+																		""
+																		? ""
+																		: Number(
+																				e
+																					.target
+																					.value,
+																			),
+																)
+															}
+															className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
 														/>
 													</div>
 												</motion.div>
 											) : (
 												<motion.div
 													key="credito"
-													initial={{ opacity: 0, height: 0 }}
-													animate={{ opacity: 1, height: "auto" }}
-													exit={{ opacity: 0, height: 0 }}
+													initial={{
+														opacity: 0,
+														height: 0,
+													}}
+													animate={{
+														opacity: 1,
+														height: "auto",
+													}}
+													exit={{
+														opacity: 0,
+														height: 0,
+													}}
 													className="flex flex-col gap-4 pt-4 border-t border-gray-200 dark:border-gray-700 mt-2 overflow-hidden"
 												>
 													<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 														<div className="flex flex-col gap-1.5">
 															<label className="text-xs font-semibold text-gray-500">
-																Plazo (meses) <span className="text-red-500 ml-1">*</span>
+																Plazo (meses){" "}
+																<span className="text-red-500 ml-1">
+																	*
+																</span>
 															</label>
 															<input
 																type="number"
@@ -472,18 +658,47 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 																max="48"
 																placeholder="Ej: 24"
 																value={meses}
-																onChange={(e) => setMeses(e.target.value === "" ? "" : Number(e.target.value))}
+																onChange={(e) =>
+																	setMeses(
+																		e.target
+																			.value ===
+																			""
+																			? ""
+																			: Number(
+																					e
+																						.target
+																						.value,
+																				),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
 														<div className="flex flex-col gap-1.5">
-															<label className="text-xs font-semibold text-gray-500">Cuota inicial deseada</label>
+															<label className="text-xs font-semibold text-gray-500">
+																Cuota inicial
+																deseada
+															</label>
 															<input
 																type="number"
 																min="0"
 																placeholder="Vacío = 10% por defecto"
-																value={cuotaInicialDeseada}
-																onChange={(e) => setCuotaInicialDeseada(e.target.value === "" ? "" : Number(e.target.value))}
+																value={
+																	cuotaInicialDeseada
+																}
+																onChange={(e) =>
+																	setCuotaInicialDeseada(
+																		e.target
+																			.value ===
+																			""
+																			? ""
+																			: Number(
+																					e
+																						.target
+																						.value,
+																				),
+																	)
+																}
 																className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
 															/>
 														</div>
@@ -492,18 +707,25 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 														<div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800/50 p-4 rounded-xl grid grid-cols-2 divide-x divide-purple-200 dark:divide-purple-800/30">
 															<div className="flex flex-col items-center">
 																<span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-widest">
-																	Inicial Estimada
+																	Inicial
+																	Estimada
 																</span>
 																<span className="text-xl font-bold text-gray-900 dark:text-white mt-1">
-																	{formatCurrency(estimadoCredito.cuotaInicial)}
+																	{formatCurrency(
+																		estimadoCredito.cuotaInicial,
+																	)}
 																</span>
 															</div>
 															<div className="flex flex-col items-center">
 																<span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-widest">
-																	Cuota Mensual Estimada
+																	Cuota
+																	Mensual
+																	Estimada
 																</span>
 																<span className="text-xl font-bold text-gray-900 dark:text-white mt-1">
-																	{formatCurrency(estimadoCredito.cuotaMensual)}
+																	{formatCurrency(
+																		estimadoCredito.cuotaMensual,
+																	)}
 																</span>
 															</div>
 														</div>
@@ -526,8 +748,10 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 										</button>
 										<button
 											type="submit"
-											disabled={isSubmitting || precioLote === 0}
-											className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+											disabled={
+												isSubmitting || precioLote === 0
+											}
+											className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{isSubmitting ? (
 												<>
@@ -536,7 +760,8 @@ export const CreateQuoteModal = ({ isOpen, onClose }: Props) => {
 												</>
 											) : (
 												<>
-													<FiFileText /> Generar Cotización
+													<FiFileText /> Generar
+													Cotización
 												</>
 											)}
 										</button>

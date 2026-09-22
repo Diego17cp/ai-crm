@@ -129,7 +129,7 @@ export const ProjectDetailsModal = ({
 							<div className="p-6 overflow-y-auto main-scrollbar flex flex-col gap-6">
 								<div className="grid md:grid-cols-2 gap-4">
 									<div className="flex items-start gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 shrink-0">
-										<div className="p-2 bg-white dark:bg-gray-900 rounded-xl text-teal-600 dark:text-teal-400 shadow-sm">
+										<div className="p-2 bg-white dark:bg-gray-900 rounded-xl text-pink-600 dark:text-pink-400 shadow-sm">
 											<FiMapPin size={20} />
 										</div>
 										<div className="flex flex-col">
@@ -199,7 +199,7 @@ export const ProjectDetailsModal = ({
 										</h4>
 										{isAdmin && (
 											<button
-												className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1 cursor-pointer"
+												className="text-xs font-semibold text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1 cursor-pointer"
 												onClick={() =>
 													onAddEtapa?.(project)
 												}
@@ -218,12 +218,12 @@ export const ProjectDetailsModal = ({
 											{project.etapas.map((etapa) => (
 												<div
 													key={etapa.id}
-													className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex flex-col gap-3 group/etapa transition-colors hover:border-teal-500/30 shadow-sm relative"
+													className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex flex-col gap-3 group/etapa transition-colors hover:border-pink-500/30 shadow-sm relative"
 												>
 													{isAdmin && (
 														<div className="absolute top-3 right-3 opacity-0 group-hover/etapa:opacity-100 transition-opacity flex items-center gap-1 bg-white dark:bg-gray-900 pl-2">
 															<button
-																className="p-1.5 text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+																className="p-1.5 text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
 																title="Agregar Manzana"
 																onClick={() =>
 																	onCreateManzana &&
@@ -287,12 +287,12 @@ export const ProjectDetailsModal = ({
 													)}
 													<div className="flex items-center gap-3">
 														<div className="flex items-center gap-2">
-															<FiLayers className="text-teal-500" />
+															<FiLayers className="text-pink-500" />
 															<span className="font-semibold text-gray-900 dark:text-gray-100">
 																{etapa.nombre}
 															</span>
 														</div>
-														<span className="text-[10px] uppercase font-bold tracking-wider bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400 px-2 py-0.5 rounded-md">
+														<span className="text-[10px] uppercase font-bold tracking-wider bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-400 px-2 py-0.5 rounded-md">
 															{etapa.estado}
 														</span>
 													</div>

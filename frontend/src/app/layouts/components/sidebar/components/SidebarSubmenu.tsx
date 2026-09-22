@@ -97,13 +97,13 @@ export const SidebarSubmenu = ({
                       flex items-center py-2 px-3 rounded-lg transition-all duration-200 text-sm relative
 											${
 												isActive
-													? "bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 font-medium"
+													? "bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 font-medium"
 													: "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50"
 											}
                     `}
 									>
 										<div
-											className={`absolute -left-3.5 size-1.25 rounded-full transition-all duration-200 ${location.pathname === item.to ? "bg-teal-500" : "bg-transparent scale-0"}`}
+											className={`absolute -left-3.5 size-1.25 rounded-full transition-all duration-200 ${location.pathname === item.to ? "bg-pink-500" : "bg-transparent scale-0"}`}
 										/>
 										<div className="flex items-center min-w-0 flex-1">
 											<div className="text-base mr-2 shrink-0">

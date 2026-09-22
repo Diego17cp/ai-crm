@@ -9,281 +9,352 @@ import type { Proyecto } from "../types";
 import { SearchableSelect } from "dialca-ui";
 
 interface Props {
-    isOpen: boolean;
-    onClose: () => void;
-    project: Proyecto | null;
+	isOpen: boolean;
+	onClose: () => void;
+	project: Proyecto | null;
 }
 
 export const EditProjectModal = ({ isOpen, onClose, project }: Props) => {
-    const [nombre, setNombre] = useState("");
-    const [abreviatura, setAbreviatura] = useState("");
-    const [ubicacion, setUbicacion] = useState("");
-    const [descripcion, setDescripcion] = useState("");
-    const [idUbigeo, setIdUbigeo] = useState<string>("");
-    const [descuentoStr, setDescuentoStr] = useState("");
-    
-    const [error, setError] = useState<string | null>(null);
+	const [nombre, setNombre] = useState("");
+	const [abreviatura, setAbreviatura] = useState("");
+	const [ubicacion, setUbicacion] = useState("");
+	const [descripcion, setDescripcion] = useState("");
+	const [idUbigeo, setIdUbigeo] = useState<string>("");
+	const [descuentoStr, setDescuentoStr] = useState("");
 
-    const { ubigeosQuery } = useUbigeos();
-    const { useEditProjectMutation } = useProjects();
+	const [error, setError] = useState<string | null>(null);
 
-    const descuentoNum = descuentoStr.trim() !== "" ? parseFloat(descuentoStr) / 100 : undefined;
-    
-    const editProjectMutation = useEditProjectMutation(
-        project?.id || 0,
-        idUbigeo, 
-        nombre, 
-        abreviatura, 
-        ubicacion, 
-        descripcion,
-        descuentoNum
-    );
-    
-    const isSubmitting = editProjectMutation.isPending;
+	const { ubigeosQuery } = useUbigeos();
+	const { useEditProjectMutation } = useProjects();
 
-    useEffect(() => {
-        if (isOpen && project) {
-            setNombre(project.nombre || "");
-            setAbreviatura(project.abreviatura || "");
-            setUbicacion(project.ubicacion || "");
-            setDescripcion(project.descripcion || "");
-            setIdUbigeo(String(project.id_ubigeo || ""));
-            const desc = project.porcentaje_descuento !== null ? String(Math.round(parseFloat(project.porcentaje_descuento as string) * 100)) : "";
-            setDescuentoStr(desc);
-            setError(null);
-        }
-    }, [isOpen, project]);
+	const descuentoNum =
+		descuentoStr.trim() !== "" ? parseFloat(descuentoStr) / 100 : undefined;
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isOpen && !isSubmitting) onClose();
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, onClose, isSubmitting]);
+	const editProjectMutation = useEditProjectMutation(
+		project?.id || 0,
+		idUbigeo,
+		nombre,
+		abreviatura,
+		ubicacion,
+		descripcion,
+		descuentoNum,
+	);
 
-    const ubigeoOptions = ubigeosQuery.data?.map((u: {
-        id: string;
-        nombre: string;
-    }) => ({
-        value: String(u.id),
-        label: `${u.id} - ${u.nombre}` 
-    })) || [];
+	const isSubmitting = editProjectMutation.isPending;
 
-    if (!project) return null;
+	useEffect(() => {
+		if (isOpen && project) {
+			setNombre(project.nombre || "");
+			setAbreviatura(project.abreviatura || "");
+			setUbicacion(project.ubicacion || "");
+			setDescripcion(project.descripcion || "");
+			setIdUbigeo(String(project.id_ubigeo || ""));
+			const desc =
+				project.porcentaje_descuento !== null
+					? String(
+							Math.round(
+								parseFloat(
+									project.porcentaje_descuento as string,
+								) * 100,
+							),
+						)
+					: "";
+			setDescuentoStr(desc);
+			setError(null);
+		}
+	}, [isOpen, project]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        const trimmedNombre = nombre.trim();
-        if (!trimmedNombre) {
-            setError("El nombre del proyecto es obligatorio.");
-            return;
-        }
-        if (!idUbigeo) {
-            setError("Debes seleccionar un ubigeo válido.");
-            return;
-        }
-        if (descuentoStr.trim() !== "") {
-            const num = parseFloat(descuentoStr);
-            if (isNaN(num) || num < 0 || num > 100) {
-                setError("El descuento debe ser un porcentaje válido entre 0 y 100%.");
-                return;
-            }
-        }
-        try {
-            editProjectMutation.mutate();
-            onClose();
-        } catch (err: unknown) {
-            const message = (err as ApiError)?.response?.data?.message || "Error al editar el proyecto.";
-            setError(message);
-        }
-    };
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && isOpen && !isSubmitting) onClose();
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, onClose, isSubmitting]);
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-110"
-                        onClick={() => !isSubmitting && onClose()}
-                    />
-                    <div className="fixed inset-0 z-115 flex items-center justify-center p-4 pointer-events-none">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 15 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl pointer-events-auto border border-gray-100 dark:border-gray-800 overflow-hidden"
-                        >
-                            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
-                                        <FiEdit size={20} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-                                            Editar Proyecto
-                                        </h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            Actualiza los datos del inmueble
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    disabled={isSubmitting}
-                                    className="p-2 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 rounded-full transition-colors disabled:opacity-50"
-                                >
-                                    <FiX size={20} />
-                                </button>
-                            </div>
-                            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
-                                <div className="p-6 flex-1 overflow-y-auto main-scrollbar flex flex-col gap-5">
-                                    <AnimatePresence>
-                                        {error && (
-                                            <motion.div 
-                                                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                                                className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm overflow-hidden"
-                                            >
-                                                <FiAlertCircle className="shrink-0" /><span>{error}</span>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                                Nombre <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={nombre}
-                                                onChange={(e) => { setNombre(e.target.value); setError(null); }}
-                                                disabled={isSubmitting}
-                                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                                Abreviatura
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={abreviatura}
-                                                onChange={(e) => setAbreviatura(e.target.value)}
-                                                disabled={isSubmitting}
-                                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60 uppercase"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-1.5 z-50 md:col-span-2">
-                                            {ubigeosQuery.isLoading ? (
-                                                <div className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 animate-pulse">
-                                                    Cargando ubigeos...
-                                                </div>
-                                            ): ubigeosQuery.isError ? (
-                                                <div className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-red-500">
-                                                    Error al cargar ubigeos
-                                                    </div>
-                                            ) : (
-                                                <SearchableSelect 
-                                                    options={ubigeoOptions}
-                                                    value={idUbigeo}
-                                                    onChange={(val) => { setIdUbigeo(val); setError(null); }}
-                                                    placeholder="Buscar distrito, provincia..."
-                                                    label="Ubigeo"
-                                                    required
-                                                    disabled={isSubmitting || ubigeosQuery.isError}
-                                                    isClearable
-                                                    classes={{
-                                                        label: "dark:text-gray-300! text-gray-700!",
-                                                        input: "bg-gray-50! dark:bg-gray-800/50! border-gray-200! dark:border-gray-700! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! focus:ring-2! rounded-xl! disabled:opacity-60!",
-                                                        option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40!",
-                                                        dropdown: "dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
-                                                        clearButton: "dark:text-gray-400! dark:hover:text-gray-200!"
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col gap-1.5 md:col-span-2">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                                Porcentaje Max % Descuento
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="number"
-                                                    step="1"
-                                                    min="0"
-                                                    max="100"
-                                                    value={descuentoStr}
-                                                    onChange={(e) => setDescuentoStr(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === '-' || e.key === '+') {
-                                                            e.preventDefault();
-                                                        }
-                                                    }}
-                                                    disabled={isSubmitting}
-                                                    placeholder="Ej: 10"
-                                                    className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
-                                                />
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">%</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col gap-1.5 md:col-span-2 xl:col-span-2">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                                Ubicación
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={ubicacion}
-                                                onChange={(e) => setUbicacion(e.target.value)}
-                                                disabled={isSubmitting}
-                                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
-                                            />
-                                        </div>
+	const ubigeoOptions =
+		ubigeosQuery.data?.map((u: { id: string; nombre: string }) => ({
+			value: String(u.id),
+			label: `${u.id} - ${u.nombre}`,
+		})) || [];
 
-                                        <div className="flex flex-col gap-1.5 md:col-span-2">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                                Descripción
-                                            </label>
-                                            <textarea
-                                                value={descripcion}
-                                                onChange={(e) => setDescripcion(e.target.value)}
-                                                disabled={isSubmitting}
-                                                rows={3}
-                                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60 resize-none"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+	if (!project) return null;
 
-                                <div className="p-6 pt-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 shrink-0">
-                                    <div className="flex justify-end gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={onClose}
-                                            disabled={isSubmitting}
-                                            className="px-6 cursor-pointer py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-colors disabled:opacity-50"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                            className="px-8 cursor-pointer py-3 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                                        >
-                                            {isSubmitting ? (
-                                                <><BiLoaderAlt className="animate-spin text-lg" /><span>Guardando...</span></>
-                                            ) : (
-                                                "Guardar Cambios"
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                </>
-            )}
-        </AnimatePresence>
-    );
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
+		const trimmedNombre = nombre.trim();
+		if (!trimmedNombre) {
+			setError("El nombre del proyecto es obligatorio.");
+			return;
+		}
+		if (!idUbigeo) {
+			setError("Debes seleccionar un ubigeo válido.");
+			return;
+		}
+		if (descuentoStr.trim() !== "") {
+			const num = parseFloat(descuentoStr);
+			if (isNaN(num) || num < 0 || num > 100) {
+				setError(
+					"El descuento debe ser un porcentaje válido entre 0 y 100%.",
+				);
+				return;
+			}
+		}
+		try {
+			editProjectMutation.mutate();
+			onClose();
+		} catch (err: unknown) {
+			const message =
+				(err as ApiError)?.response?.data?.message ||
+				"Error al editar el proyecto.";
+			setError(message);
+		}
+	};
+
+	return (
+		<AnimatePresence>
+			{isOpen && (
+				<>
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-110"
+						onClick={() => !isSubmitting && onClose()}
+					/>
+					<div className="fixed inset-0 z-115 flex items-center justify-center p-4 pointer-events-none">
+						<motion.div
+							initial={{ opacity: 0, scale: 0.95, y: 15 }}
+							animate={{ opacity: 1, scale: 1, y: 0 }}
+							exit={{ opacity: 0, scale: 0.95, y: 15 }}
+							transition={{
+								type: "spring",
+								stiffness: 300,
+								damping: 30,
+							}}
+							className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl pointer-events-auto border border-gray-100 dark:border-gray-800 overflow-hidden"
+						>
+							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
+								<div className="flex items-center gap-3">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
+										<FiEdit size={20} />
+									</div>
+									<div className="flex flex-col">
+										<h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+											Editar Proyecto
+										</h2>
+										<p className="text-xs text-gray-500 dark:text-gray-400">
+											Actualiza los datos del inmueble
+										</p>
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={onClose}
+									disabled={isSubmitting}
+									className="p-2 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 rounded-full transition-colors disabled:opacity-50"
+								>
+									<FiX size={20} />
+								</button>
+							</div>
+							<form
+								onSubmit={handleSubmit}
+								className="flex flex-col flex-1 overflow-hidden min-h-0"
+							>
+								<div className="p-6 flex-1 overflow-y-auto main-scrollbar flex flex-col gap-5">
+									<AnimatePresence>
+										{error && (
+											<motion.div
+												initial={{
+													opacity: 0,
+													height: 0,
+												}}
+												animate={{
+													opacity: 1,
+													height: "auto",
+												}}
+												exit={{ opacity: 0, height: 0 }}
+												className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm overflow-hidden"
+											>
+												<FiAlertCircle className="shrink-0" />
+												<span>{error}</span>
+											</motion.div>
+										)}
+									</AnimatePresence>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+										<div className="flex flex-col gap-1.5">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Nombre{" "}
+												<span className="text-red-500">
+													*
+												</span>
+											</label>
+											<input
+												type="text"
+												value={nombre}
+												onChange={(e) => {
+													setNombre(e.target.value);
+													setError(null);
+												}}
+												disabled={isSubmitting}
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
+											/>
+										</div>
+										<div className="flex flex-col gap-1.5">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Abreviatura
+											</label>
+											<input
+												type="text"
+												value={abreviatura}
+												onChange={(e) =>
+													setAbreviatura(
+														e.target.value,
+													)
+												}
+												disabled={isSubmitting}
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60 uppercase"
+											/>
+										</div>
+										<div className="flex flex-col gap-1.5 z-50 md:col-span-2">
+											{ubigeosQuery.isLoading ? (
+												<div className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 animate-pulse">
+													Cargando ubigeos...
+												</div>
+											) : ubigeosQuery.isError ? (
+												<div className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-red-500">
+													Error al cargar ubigeos
+												</div>
+											) : (
+												<SearchableSelect
+													options={ubigeoOptions}
+													value={idUbigeo}
+													onChange={(val) => {
+														setIdUbigeo(val);
+														setError(null);
+													}}
+													placeholder="Buscar distrito, provincia..."
+													label="Ubigeo"
+													required
+													disabled={
+														isSubmitting ||
+														ubigeosQuery.isError
+													}
+													isClearable
+													classes={{
+														label: "dark:text-gray-300! text-gray-700!",
+														input: "bg-gray-50! dark:bg-gray-800/50! border-gray-200! dark:border-gray-700! focus:border-pink-500! focus:ring-pink-500/20! text-gray-900! dark:text-white! focus:outline-none! focus:ring-2! rounded-xl! disabled:opacity-60!",
+														option: "hover:bg-pink-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-pink-500/40!",
+														dropdown:
+															"dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
+														clearButton:
+															"dark:text-gray-400! dark:hover:text-gray-200!",
+													}}
+												/>
+											)}
+										</div>
+										<div className="flex flex-col gap-1.5 md:col-span-2">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Porcentaje Max % Descuento
+											</label>
+											<div className="relative">
+												<input
+													type="number"
+													step="1"
+													min="0"
+													max="100"
+													value={descuentoStr}
+													onChange={(e) =>
+														setDescuentoStr(
+															e.target.value,
+														)
+													}
+													onKeyDown={(e) => {
+														if (
+															e.key === "." ||
+															e.key === "," ||
+															e.key === "e" ||
+															e.key === "-" ||
+															e.key === "+"
+														) {
+															e.preventDefault();
+														}
+													}}
+													disabled={isSubmitting}
+													placeholder="Ej: 10"
+													className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
+												/>
+												<span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+													%
+												</span>
+											</div>
+										</div>
+										<div className="flex flex-col gap-1.5 md:col-span-2 xl:col-span-2">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Ubicación
+											</label>
+											<input
+												type="text"
+												value={ubicacion}
+												onChange={(e) =>
+													setUbicacion(e.target.value)
+												}
+												disabled={isSubmitting}
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
+											/>
+										</div>
+
+										<div className="flex flex-col gap-1.5 md:col-span-2">
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+												Descripción
+											</label>
+											<textarea
+												value={descripcion}
+												onChange={(e) =>
+													setDescripcion(
+														e.target.value,
+													)
+												}
+												disabled={isSubmitting}
+												rows={3}
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60 resize-none"
+											/>
+										</div>
+									</div>
+								</div>
+
+								<div className="p-6 pt-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 shrink-0">
+									<div className="flex justify-end gap-3">
+										<button
+											type="button"
+											onClick={onClose}
+											disabled={isSubmitting}
+											className="px-6 cursor-pointer py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-colors disabled:opacity-50"
+										>
+											Cancelar
+										</button>
+										<button
+											type="submit"
+											disabled={isSubmitting}
+											className="px-8 cursor-pointer py-3 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+										>
+											{isSubmitting ? (
+												<>
+													<BiLoaderAlt className="animate-spin text-lg" />
+													<span>Guardando...</span>
+												</>
+											) : (
+												"Guardar Cambios"
+											)}
+										</button>
+									</div>
+								</div>
+							</form>
+						</motion.div>
+					</div>
+				</>
+			)}
+		</AnimatePresence>
+	);
 };

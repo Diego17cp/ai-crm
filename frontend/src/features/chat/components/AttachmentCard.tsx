@@ -14,7 +14,7 @@ export const AttachmentCard = ({ attachment }: AttachmentCardProps) => {
 		<>
 			<div className="rounded-xl overflow-hidden bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 shadow-sm max-w-sm p-2">
 				<div className="flex items-center gap-3 p-3">
-					<div className="shrink-0 size-11 rounded-lg bg-linear-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white shadow-sm">
+					<div className="shrink-0 size-11 rounded-lg bg-linear-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white shadow-sm">
 						<FiFileText size={20} />
 					</div>
 					<div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ export const AttachmentCard = ({ attachment }: AttachmentCardProps) => {
 						download={attachment.filename}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors"
+						className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors"
 					>
 						<FiDownload size={14} />
 						Descargar

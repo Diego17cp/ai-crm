@@ -173,7 +173,7 @@ export const ProjectCard = ({
 					</div>
 				</div>
 				<button
-					className="text-sm cursor-pointer font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-500 dark:hover:text-teal-400 transition-colors"
+					className="text-sm cursor-pointer font-semibold text-pink-600 hover:text-pink-700 dark:text-pink-500 dark:hover:text-pink-400 transition-colors"
 					onClick={onViewDetails}
 				>
 					Ver detalle &rarr;

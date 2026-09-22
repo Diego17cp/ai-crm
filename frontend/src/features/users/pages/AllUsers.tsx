@@ -60,7 +60,7 @@ export const AllUsers = () => {
 					className="flex flex-col gap-1"
 				>
 					<h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-						<FiUsers className="text-teal-600 dark:text-teal-500" />
+						<FiUsers className="text-pink-600 dark:text-pink-500" />
 						Gestión de Usuarios
 					</h1>
 					<p className="text-sm text-gray-500 dark:text-gray-400">
@@ -74,7 +74,7 @@ export const AllUsers = () => {
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						onClick={() => openModal("create_user")}
-						className="flex items-center cursor-pointer gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-teal-500/30 transition-all focus:ring-2 focus:ring-teal-500 focus:outline-none shrink-0"
+						className="flex items-center cursor-pointer gap-2 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-pink-500/30 transition-all focus:ring-2 focus:ring-pink-500 focus:outline-none shrink-0"
 					>
 						<FiPlus size={18} />
 						<span className="hidden sm:inline">Nuevo Usuario</span>
@@ -84,7 +84,7 @@ export const AllUsers = () => {
 						onClick={() => refetch()}
 						disabled={isFetching}
 						title="Recargar datos"
-						className="p-3 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-teal-600 dark:hover:text-teal-500 transition-all disabled:opacity-50"
+						className="p-3 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-500 transition-all disabled:opacity-50"
 					>
 						<FiRefreshCw
 							className={isFetching ? "animate-spin" : ""}
@@ -110,11 +110,11 @@ export const AllUsers = () => {
 							placeholder="Buscar por nombre, email o DNI..."
 							value={searchTerm}
 							onChange={(e) => handleSearch(e.target.value)}
-							className="w-full px-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors"
+							className="w-full px-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors"
 						/>
 						<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-6">
 							{isFetching && searchTerm ? (
-								<div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+								<div className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
 							) : (
 								<AnimatePresence>
 									{searchTerm && !isFetching && (
@@ -139,7 +139,9 @@ export const AllUsers = () => {
 								label=""
 								options={estadoOptions}
 								value={filters.estado || ""}
-								onChange={(e) => updateFilter("estado", e.target.value)}
+								onChange={(e) =>
+									updateFilter("estado", e.target.value)
+								}
 								placeholder="Estado"
 								classes={selectClasses}
 							/>
@@ -154,7 +156,9 @@ export const AllUsers = () => {
 								onChange={(e) =>
 									updateFilter(
 										"id_rol",
-										e.target.value ? Number(e.target.value) : undefined,
+										e.target.value
+											? Number(e.target.value)
+											: undefined,
 									)
 								}
 								placeholder="Rol del Sistema"

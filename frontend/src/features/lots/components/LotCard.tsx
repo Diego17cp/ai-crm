@@ -22,7 +22,7 @@ interface Props {
 
 const statusConfig: Record<EstadoLote, { color: string; label: string }> = {
 	Disponible: {
-		color: "bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 border-teal-200 dark:border-teal-800",
+		color: "bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400 border-pink-200 dark:border-pink-800",
 		label: "Disponible",
 	},
 	Vendido: {
@@ -35,9 +35,8 @@ const statusConfig: Record<EstadoLote, { color: string; label: string }> = {
 	},
 };
 
-
 export const LotCard = ({ lote, onEdit, onDelete }: Props) => {
-	const { isAdmin } = useAuthStore()
+	const { isAdmin } = useAuthStore();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [currentImageIdx, setCurrentImageIdx] = useState(0);
 	const menuRef = useRef<HTMLDivElement>(null);
@@ -76,7 +75,7 @@ export const LotCard = ({ lote, onEdit, onDelete }: Props) => {
 	return (
 		<motion.div
 			whileHover={{ y: -4 }}
-			className="flex flex-col bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-teal-500/5 transition-all overflow-hidden relative group"
+			className="flex flex-col bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-pink-500/5 transition-all overflow-hidden relative group"
 		>
 			<div className="relative h-60 bg-gray-100 dark:bg-gray-800 w-full overflow-hidden flex items-center justify-center">
 				{hasImages ? (

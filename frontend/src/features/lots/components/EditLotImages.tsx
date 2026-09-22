@@ -39,7 +39,7 @@ export const EditLotImages = ({
 	return (
 		<div className="flex flex-col gap-4 z-10 w-full">
 			<label className="text-sm font-semibold text-gray-800 dark:text-gray-200 ml-1 flex items-center gap-2">
-				<FiImage className="text-teal-500" /> Imágenes del Terreno
+				<FiImage className="text-pink-500" /> Imágenes del Terreno
 			</label>
 			<DropImages
 				onClick={() => fileInputRef.current?.click()}
@@ -101,7 +101,7 @@ export const EditLotImages = ({
 						marcadaParaEliminar
 							? "border-red-500/50 bg-red-50/10 dark:bg-red-950/5"
 							: esPrincipal
-								? "border-teal-500 ring-2 ring-teal-500/20"
+								? "border-pink-500 ring-2 ring-pink-500/20"
 								: "border-gray-200 dark:border-gray-700/70 hover:border-gray-300"
 					}
                   `}
@@ -162,7 +162,7 @@ export const EditLotImages = ({
 									</div>
 									<div className="absolute top-1.5 left-1.5 flex flex-col gap-1 pointer-events-none">
 										{esPrincipal && (
-											<span className="bg-teal-500 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">
+											<span className="bg-pink-500 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">
 												Principal
 											</span>
 										)}
@@ -204,8 +204,8 @@ export const EditLotImages = ({
                     relative h-24 rounded-xl overflow-hidden border-2 bg-gray-50 dark:bg-gray-800 transition-all group shadow-xs
                     ${
 						esPrincipalNueva
-							? "border-teal-500 ring-2 ring-teal-500/20"
-							: "border-teal-200 border-dashed dark:border-teal-900/60"
+							? "border-pink-500 ring-2 ring-pink-500/20"
+							: "border-pink-200 border-dashed dark:border-pink-900/60"
 					}
                   `}
 								>
@@ -248,7 +248,7 @@ export const EditLotImages = ({
 										</button>
 									</div>
 									<div className="absolute top-1.5 left-1.5 flex flex-col gap-1 pointer-events-none">
-										<span className="bg-teal-500 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">
+										<span className="bg-pink-500 text-white font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">
 											Nueva
 										</span>
 										{esPrincipalNueva && (

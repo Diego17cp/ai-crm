@@ -1,7 +1,13 @@
 import { useDashboard } from "../hooks/useDashboard";
 import { StatCard } from "../components/StatCard";
 import { AppointmentsCalendar } from "../components/AppointmentsCalendar";
-import { FiUsers, FiUserCheck, FiHome, FiMapPin, FiRefreshCw } from "react-icons/fi";
+import {
+	FiUsers,
+	FiUserCheck,
+	FiHome,
+	FiMapPin,
+	FiRefreshCw,
+} from "react-icons/fi";
 import { motion } from "motion/react";
 import { useDateRangeLast7Days } from "@/features/metrics/hooks/useDateRange";
 import { useAdminOverview } from "@/features/metrics/hooks/useMetrics";
@@ -25,11 +31,12 @@ export const Dashboard = () => {
 					className="flex flex-col gap-1"
 				>
 					<h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-						<RiDashboardHorizontalLine  className="text-teal-600 dark:text-teal-500" />{" "}
+						<RiDashboardHorizontalLine className="text-pink-600 dark:text-pink-500" />{" "}
 						Panel General
 					</h1>
 					<p className="text-sm text-gray-500 dark:text-gray-400">
-						Monitorea el rendimiento del CRM, leads, citas, asesores, métricas y más en tiempo real.
+						Monitorea el rendimiento del CRM, leads, citas,
+						asesores, métricas y más en tiempo real.
 					</p>
 				</motion.div>
 				<div className="flex items-center gap-3">
@@ -37,7 +44,7 @@ export const Dashboard = () => {
 						onClick={() => refetch()}
 						disabled={isRefetching || isLoading}
 						title="Recargar datos"
-						className="p-3 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-teal-600 dark:hover:text-teal-500 transition-all disabled:opacity-50 flex items-center gap-2"
+						className="p-3 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-500 transition-all disabled:opacity-50 flex items-center gap-2"
 					>
 						<FiRefreshCw
 							className={isRefetching ? "animate-spin" : ""}
@@ -54,7 +61,7 @@ export const Dashboard = () => {
 					title="Leads Totales"
 					value={stats?.leads || 0}
 					icon={<FiUsers />}
-					colorClass="bg-teal-500"
+					colorClass="bg-pink-500"
 					delay={0.1}
 				/>
 				<StatCard

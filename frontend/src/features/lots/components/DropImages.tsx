@@ -59,7 +59,7 @@ export const DropImages = ({ onClick, onFilesDropped }: Props) => {
 				cursor-pointer transition-colors mt-2 group relative overflow-hidden
 				${
 					isDragging
-						? "bg-teal-50/50 dark:bg-teal-950/20 border-teal-500"
+						? "bg-pink-50/50 dark:bg-pink-950/20 border-pink-500"
 						: "border-gray-200 dark:border-gray-700/60! hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
 				}
 			`}
@@ -68,7 +68,7 @@ export const DropImages = ({ onClick, onFilesDropped }: Props) => {
 				<motion.div
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
-					className="absolute inset-0 bg-teal-500/5 pointer-events-none"
+					className="absolute inset-0 bg-pink-500/5 pointer-events-none"
 				/>
 			)}
 
@@ -78,8 +78,8 @@ export const DropImages = ({ onClick, onFilesDropped }: Props) => {
 					p-4 rounded-2xl shadow-xs transition-colors mb-3
 					${
 						isDragging
-							? "bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400"
-							: "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-teal-500 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/10"
+							? "bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400"
+							: "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 group-hover:text-pink-500 group-hover:bg-pink-50 dark:group-hover:bg-pink-500/10"
 					}
 				`}
 			>

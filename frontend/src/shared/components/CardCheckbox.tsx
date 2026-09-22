@@ -62,14 +62,14 @@ export const CardCheckbox = ({
 
 					${
 						value
-							? "border-teal-500 bg-teal-50 dark:border-teal-500 dark:bg-teal-900/20"
+							? "border-pink-500 bg-pink-50 dark:border-pink-500 dark:bg-pink-900/20"
 							: "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
 					}
 
 					${
 						disabled
 							? "cursor-not-allowed opacity-50"
-							: "hover:border-teal-400 dark:hover:border-teal-600"
+							: "hover:border-pink-400 dark:hover:border-pink-600"
 					}
 
 					${className}
@@ -85,7 +85,7 @@ export const CardCheckbox = ({
 
 							${
 								value
-									? "bg-teal-600 text-white dark:bg-teal-500"
+									? "bg-pink-600 text-white dark:bg-pink-500"
 									: "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
 							}
 						`}
@@ -101,7 +101,7 @@ export const CardCheckbox = ({
 								text-sm font-semibold
 								${
 									value
-										? "text-teal-700 dark:text-teal-400"
+										? "text-pink-700 dark:text-pink-400"
 										: "text-gray-700 dark:text-gray-200"
 								}
 							`}
@@ -125,7 +125,7 @@ export const CardCheckbox = ({
 
 						${
 							value
-								? "border-teal-600 bg-teal-600 dark:border-teal-500 dark:bg-teal-500"
+								? "border-pink-600 bg-pink-600 dark:border-pink-500 dark:bg-pink-500"
 								: "border-gray-300 dark:border-gray-600"
 						}
 					`}
@@ -136,11 +136,10 @@ export const CardCheckbox = ({
 				</div>
 
 				<motion.div
-					className="pointer-events-none absolute inset-0 rounded-xl bg-teal-500/5"
+					className="pointer-events-none absolute inset-0 rounded-xl bg-pink-500/5"
 					initial={false}
 					animate={{
-						opacity:
-							isHovered && !disabled && !value ? 1 : 0,
+						opacity: isHovered && !disabled && !value ? 1 : 0,
 					}}
 				/>
 			</motion.div>
@@ -152,14 +151,16 @@ export const CardCheckbox = ({
 		<motion.div
 			className={`
           relative rounded-xl border-2 p-6 transition-all duration-200 ease-in-out cursor-pointer
-          ${value
-            ? "border-teal-600 bg-linear-to-br from-teal-600/5 to-teal-600/10 dark:from-teal-600/10 dark:to-teal-600/20"
-            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-          }
-          ${disabled
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:border-teal-600/50 hover:shadow-lg"
-          }
+          ${
+				value
+					? "border-pink-600 bg-linear-to-br from-pink-600/5 to-pink-600/10 dark:from-pink-600/10 dark:to-pink-600/20"
+					: "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+			}
+          ${
+				disabled
+					? "opacity-50 cursor-not-allowed"
+					: "hover:border-pink-600/50 hover:shadow-lg"
+			}
           ${className}
       `}
 			onClick={handleClick}
@@ -183,10 +184,10 @@ export const CardCheckbox = ({
 								className={`
                     relative flex items-center justify-center w-20 h-20 rounded-2xl mb-4 transition-all duration-200 ease-in-out
                     ${
-                      value
-                        ? "bg-teal-600 dark:bg-teal-500 text-white shadow-lg shadow-teal-500/30"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    }
+						value
+							? "bg-pink-600 dark:bg-pink-500 text-white shadow-lg shadow-pink-500/30"
+							: "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+					}
                   `}
 								animate={{
 									scale: value ? 1.05 : 1,
@@ -196,7 +197,7 @@ export const CardCheckbox = ({
 								<Icon className="w-10 h-10" />
 								{value && (
 									<motion.div
-										className="absolute inset-0 rounded-2xl border-2 border-teal-600"
+										className="absolute inset-0 rounded-2xl border-2 border-pink-600"
 										initial={{ scale: 1, opacity: 1 }}
 										animate={{
 											scale: [1, 1.2, 1],
@@ -215,10 +216,11 @@ export const CardCheckbox = ({
 							<h3
 								className={`
                     text-lg font-bold mb-2 transition-colors duration-200 ease-in-out
-                    ${value
-                      ? "text-muni-primary"
-                      : "text-gray-900 dark:text-gray-100"
-                    }
+                    ${
+						value
+							? "text-muni-primary"
+							: "text-gray-900 dark:text-gray-100"
+					}
                   `}
 							>
 								{title}
@@ -233,7 +235,7 @@ export const CardCheckbox = ({
 				)}
 			</div>
 			<motion.div
-				className="absolute inset-0 rounded-xl bg-teal-600/5 pointer-events-none"
+				className="absolute inset-0 rounded-xl bg-pink-600/5 pointer-events-none"
 				initial={false}
 				animate={{
 					opacity: isHovered && !disabled && !value ? 1 : 0,
@@ -269,7 +271,7 @@ export const CardCheckbox = ({
 						damping: 20,
 					}}
 				>
-					<div className="w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center shadow-lg">
+					<div className="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center shadow-lg">
 						<IoMdCheckmark className="w-4 h-4 text-white" />
 					</div>
 				</motion.div>

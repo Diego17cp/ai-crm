@@ -24,8 +24,8 @@ interface Props {
 	cita: Cita | null;
 }
 
-const selectClasses = classes.select
-const searchableSelectClasses = classes.searchableSelect
+const selectClasses = classes.select;
+const searchableSelectClasses = classes.searchableSelect;
 
 const estadoOptions = options.estadoCita;
 
@@ -91,7 +91,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 			const response = await apiClient.get("/users?id_rol=2"); // Solo vendedores
 			return response.data.data;
 		},
-	})
+	});
 
 	useEffect(() => {
 		if (isOpen && cita) {
@@ -223,7 +223,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiCalendar size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -285,7 +285,12 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													label=""
 													options={estadoOptions}
 													value={estadoCita}
-													onChange={(e) => setEstadoCita(e.target.value as EstadoCita)}
+													onChange={(e) =>
+														setEstadoCita(
+															e.target
+																.value as EstadoCita,
+														)
+													}
 													placeholder="Seleccionar"
 													classes={selectClasses}
 												/>
@@ -300,9 +305,13 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 												<input
 													type="date"
 													value={fechaCita}
-													onChange={(e) => setFechaCita(e.target.value)}
+													onChange={(e) =>
+														setFechaCita(
+															e.target.value,
+														)
+													}
 													disabled={isSubmitting}
-													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
+													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 transition-all scheme-light dark:scheme-dark"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -315,9 +324,13 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 												<input
 													type="time"
 													value={horaCita}
-													onChange={(e) => setHoraCita(e.target.value)}
+													onChange={(e) =>
+														setHoraCita(
+															e.target.value,
+														)
+													}
 													disabled={isSubmitting}
-													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
+													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 transition-all scheme-light dark:scheme-dark"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 z-30 md:col-span-3">
@@ -329,7 +342,9 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 													value={idResponsable}
 													onChange={setIdResponsable}
 													placeholder="Seleccionar asesor"
-													classes={searchableSelectClasses}
+													classes={
+														searchableSelectClasses
+													}
 													isClearable
 												/>
 											</div>
@@ -415,7 +430,8 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 														placeholder="Indica Lote"
 														disabled={
 															!idManzana &&
-															loteOptions.length === 0
+															loteOptions.length ===
+																0
 														}
 														classes={selectClasses}
 													/>
@@ -435,9 +451,12 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 												</label>
 												<div
 													className="flex gap-1"
-													onMouseLeave={() => setHoverRating(0)}
+													onMouseLeave={() =>
+														setHoverRating(0)
+													}
 												>
-													{[1, 2, 3, 4, 5].map((star) => (
+													{[1, 2, 3, 4, 5].map(
+														(star) => (
 															<button
 																key={star}
 																type="button"
@@ -445,14 +464,24 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 																	isSubmitting ||
 																	isProgramada
 																}
-																onClick={() => setPuntuacion(star)}
-																onMouseEnter={() => setHoverRating(star)}
+																onClick={() =>
+																	setPuntuacion(
+																		star,
+																	)
+																}
+																onMouseEnter={() =>
+																	setHoverRating(
+																		star,
+																	)
+																}
 																className="p-1 cursor-pointer transition-transform hover:scale-110 active:scale-95 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
 															>
 																<FiStar
 																	size={24}
 																	className={`transition-colors duration-200 ${
-																		(hoverRating || puntuacion) >= star
+																		(hoverRating ||
+																			puntuacion) >=
+																		star
 																			? "fill-amber-400 text-amber-400"
 																			: "fill-transparent text-gray-300 dark:text-gray-600"
 																	}`}
@@ -475,11 +504,15 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 												</label>
 												<textarea
 													value={observaciones}
-													onChange={(e) => setObservaciones(e.target.value)}
+													onChange={(e) =>
+														setObservaciones(
+															e.target.value,
+														)
+													}
 													disabled={isSubmitting}
 													rows={4}
 													placeholder="Anota comportamientos financieros, objeciones u horas donde prefiere que se le devuelva la llamada."
-													className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none main-scrollbar"
+													className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all resize-none main-scrollbar"
 												/>
 											</div>
 										</div>
@@ -498,7 +531,7 @@ export const EditAppointmentModal = ({ isOpen, onClose, cita }: Props) => {
 										<button
 											type="submit"
 											disabled={isSubmitting}
-											className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors disabled:opacity-50"
+											className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors disabled:opacity-50"
 										>
 											{isSubmitting ? (
 												<>

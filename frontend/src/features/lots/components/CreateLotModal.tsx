@@ -232,7 +232,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiMapPin size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -380,7 +380,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: L-01, 15"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5">
@@ -397,7 +397,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: 11029304"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5">
@@ -416,7 +416,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: 120.5"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5">
@@ -435,7 +435,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: 1500"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5 md:col-span-2">
@@ -452,7 +452,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: En una esquina"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 											/>
 										</div>
 										<div className="md:col-span-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 p-4 rounded-xl flex justify-between items-center">
@@ -489,7 +489,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 												onClick={() =>
 													fileInputRef.current?.click()
 												}
-												className="text-xs bg-teal-50 cursor-pointer hover:bg-teal-100 dark:bg-teal-500/10 dark:hover:bg-teal-500/20 text-teal-700 dark:text-teal-400 font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+												className="text-xs bg-pink-50 cursor-pointer hover:bg-pink-100 dark:bg-pink-500/10 dark:hover:bg-pink-500/20 text-pink-700 dark:text-pink-400 font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
 											>
 												<FiUploadCloud size={16} />
 												Subir imágenes
@@ -543,7 +543,7 @@ export const CreateLotModal = ({ isOpen, onClose, proyectos }: Props) => {
 										<button
 											type="submit"
 											disabled={isSubmitting}
-											className="px-8 cursor-pointer py-3 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors"
+											className="px-8 cursor-pointer py-3 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors"
 										>
 											{isSubmitting ? (
 												<>

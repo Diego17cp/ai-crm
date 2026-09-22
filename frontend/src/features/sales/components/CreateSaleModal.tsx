@@ -26,7 +26,7 @@ import { FaHandshake } from "react-icons/fa";
 import { toast } from "sonner";
 
 const searchableSelectClasses = classes.searchableSelect;
-const selectClasses = classes.select
+const selectClasses = classes.select;
 
 const estadoContratoOptions = [
 	{ value: "ADENDA", label: "Adenda" },
@@ -210,7 +210,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		numCuotas,
 		diaPago,
 		calculosCredito.cuotaInicial,
-		isNewLead
+		isNewLead,
 	]);
 
 	const mutation = useCreateSaleMutation(createPayload);
@@ -221,25 +221,25 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 		setError(null);
 
 		if (!idLote) {
-			toast.error("Debes seleccionar un Lote disponible.")
+			toast.error("Debes seleccionar un Lote disponible.");
 			return setError("Debes seleccionar un Lote disponible.");
 		}
 		if (!selectedClientId) {
-			toast.error("Debes buscar y seleccionar un cliente.")
+			toast.error("Debes buscar y seleccionar un cliente.");
 			return setError("Debes buscar y seleccionar un cliente.");
 		}
 		if (!fechaVenta) {
-			toast.error("La fecha de venta es obligatoria.")
+			toast.error("La fecha de venta es obligatoria.");
 			return setError("La fecha de venta es obligatoria.");
 		}
 
 		if (tipoPago === "CREDITO") {
 			if (!numCuotas || numCuotas <= 0) {
-				toast.error("Especifica un número válido de cuotas.")
+				toast.error("Especifica un número válido de cuotas.");
 				return setError("Especifica un número válido de cuotas.");
 			}
 			if (!diaPago || diaPago < 1 || diaPago > 28) {
-				toast.error("El día de pago debe ser entre el 1 y el 28.")
+				toast.error("El día de pago debe ser entre el 1 y el 28.");
 				return setError("El día de pago debe ser entre el 1 y el 28.");
 			}
 		}
@@ -301,7 +301,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiCheckCircle size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -369,7 +369,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="1. Proyecto"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														isClearable
 													/>
 												</div>
@@ -386,7 +388,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="2. Etapa"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idProyecto}
 														isClearable
 													/>
@@ -403,7 +407,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}}
 														label="3. Mz"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idEtapa}
 														isClearable
 													/>
@@ -419,7 +425,9 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														}
 														label="4. Lote"
 														required
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														disabled={!idManzana}
 														isClearable
 													/>
@@ -428,13 +436,13 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 													<motion.div
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
-														className="col-span-2 mt-1 px-4 py-3 bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-800/30 rounded-xl flex items-center justify-between"
+														className="col-span-2 mt-1 px-4 py-3 bg-pink-50 dark:bg-pink-900/10 border border-pink-100 dark:border-pink-800/30 rounded-xl flex items-center justify-between"
 													>
-														<span className="text-xs font-semibold text-teal-700 dark:text-teal-500 uppercase">
+														<span className="text-xs font-semibold text-pink-700 dark:text-pink-500 uppercase">
 															Valor Total del
 															Lote:
 														</span>
-														<span className="text-lg font-bold text-teal-800 dark:text-teal-400">
+														<span className="text-lg font-bold text-pink-800 dark:text-pink-400">
 															{formatCurrency(
 																montoTotal,
 															)}
@@ -502,7 +510,8 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 														value={estadoContrato}
 														onChange={(e) =>
 															setEstadoContrato(
-																e.target.value as EstadoContrato,
+																e.target
+																	.value as EstadoContrato,
 															)
 														}
 														placeholder="Estado"
@@ -525,7 +534,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 															)
 														}
 														disabled={isSubmitting}
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-teal-500 transition-all scheme-light dark:scheme-dark"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-1 focus:ring-pink-500 transition-all scheme-light dark:scheme-dark"
 													/>
 												</div>
 											</div>
@@ -533,7 +542,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 									</div>
 									<div className="flex flex-col gap-4 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-2xl border border-gray-100 dark:border-gray-800/60">
 										<h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-											<FiCreditCard className="text-teal-500" />{" "}
+											<FiCreditCard className="text-pink-500" />{" "}
 											Condiciones de Pago
 										</h3>
 										<div className="grid grid-cols-2 gap-4">
@@ -541,11 +550,11 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 												onClick={() =>
 													setTipoPago("CONTADO")
 												}
-												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CONTADO" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 shadow-sm shadow-teal-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-300"}`}
+												className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${tipoPago === "CONTADO" ? "border-pink-500 bg-pink-50/50 dark:bg-pink-900/20 shadow-sm shadow-pink-500/10" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-pink-300"}`}
 											>
 												<div className="flex flex-col gap-1">
 													<span
-														className={`font-bold ${tipoPago === "CONTADO" ? "text-teal-700 dark:text-teal-400" : "text-gray-700 dark:text-gray-300"}`}
+														className={`font-bold ${tipoPago === "CONTADO" ? "text-pink-700 dark:text-pink-400" : "text-gray-700 dark:text-gray-300"}`}
 													>
 														Al Contado
 													</span>
@@ -797,7 +806,7 @@ export const CreateSaleModal = ({ isOpen, onClose }: Props) => {
 											disabled={
 												isSubmitting || montoTotal === 0
 											}
-											className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+											className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{isSubmitting ? (
 												<>

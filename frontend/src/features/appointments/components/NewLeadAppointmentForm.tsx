@@ -104,7 +104,7 @@ export const NewLeadForAppointmentForm = ({
 							disabled={isSubmitting}
 							placeholder="Nombres. Ej: Juan Carlos"
 							required
-							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
@@ -121,7 +121,7 @@ export const NewLeadForAppointmentForm = ({
 							disabled={isSubmitting}
 							placeholder="Apellidos. Ej: Pérez Gomez"
 							required
-							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -156,7 +156,7 @@ export const NewLeadForAppointmentForm = ({
 							required
 							minLength={8}
 							maxLength={11}
-							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
@@ -180,7 +180,7 @@ export const NewLeadForAppointmentForm = ({
 									.split("T")[0]
 							}
 							max={new Date().toISOString().split("T")[0]}
-							className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 scheme-light dark:scheme-dark"
+							className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 scheme-light dark:scheme-dark"
 						/>
 					</div>
 				</div>
@@ -194,7 +194,7 @@ export const NewLeadForAppointmentForm = ({
 						type="button"
 						onClick={onAddPhone}
 						disabled={isSubmitting}
-						className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400 bg-teal-50 hover:bg-teal-100 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 px-3 py-1.5 rounded-lg transition-colors"
+						className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 hover:bg-pink-100 dark:bg-pink-900/20 dark:hover:bg-pink-900/40 px-3 py-1.5 rounded-lg transition-colors"
 					>
 						<FiPlus /> Agregar
 					</button>
@@ -209,7 +209,7 @@ export const NewLeadForAppointmentForm = ({
 							}
 							disabled={isSubmitting}
 							placeholder="Correo electrónico (Opcional)"
-							className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 					<AnimatePresence>
@@ -267,7 +267,7 @@ export const NewLeadForAppointmentForm = ({
 										minLength={9}
 										maxLength={11}
 										placeholder="Ej: 999888777"
-										className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+										className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 									/>
 								</div>
 								<button
@@ -321,7 +321,7 @@ export const NewLeadForAppointmentForm = ({
 								}
 								disabled={isSubmitting}
 								placeholder="Ej: Argentina, Colombia..."
-								className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+								className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 							/>
 						</div>
 					)}
@@ -358,7 +358,7 @@ export const NewLeadForAppointmentForm = ({
 							}
 							disabled={isSubmitting}
 							placeholder="Dirección exacta"
-							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 				</div>
@@ -392,7 +392,7 @@ export const NewLeadForAppointmentForm = ({
 							}
 							disabled={isSubmitting}
 							placeholder="Ocupación / Trabajo"
-							className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20"
+							className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20"
 						/>
 					</div>
 				</div>

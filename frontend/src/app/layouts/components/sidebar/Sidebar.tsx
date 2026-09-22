@@ -42,7 +42,7 @@ export const Sidebar = ({ onLogoutClick }: Props) => {
 					>
 						<Link
 							to="/admin/dashboard"
-							className="shrink-0 flex items-center justify-center w-8 h-8 bg-linear-to-tr from-teal-600 to-teal-400 rounded-lg shadow-sm shadow-teal-500/30"
+							className="shrink-0 flex items-center justify-center w-8 h-8 bg-linear-to-tr from-pink-600 to-pink-400 rounded-lg shadow-sm shadow-pink-500/30"
 						>
 							<span className="text-white text-xs font-black">
 								{INICIALES_EMPRESA}

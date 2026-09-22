@@ -37,8 +37,8 @@ export const ProtectedRoute: React.FC<Props> = ({
 			<div className="flex justify-center items-center dark:bg-gray-950 h-screen">
 				<Loader
 					classes={{
-						innerRing: "border-t-teal-500 dark:border-t-teal-500",
-						outerRing: "border-t-teal-500 dark:border-t-teal-500",
+						innerRing: "border-t-pink-500 dark:border-t-pink-500",
+						outerRing: "border-t-pink-500 dark:border-t-pink-500",
 					}}
 				/>
 			</div>

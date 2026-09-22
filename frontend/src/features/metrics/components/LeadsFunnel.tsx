@@ -13,15 +13,35 @@ import {
 
 const ESTADO_CONFIG: Record<
 	string,
-	{ label: string; color: string; icon: React.ComponentType<{ size?: number; className?: string }> }
+	{
+		label: string;
+		color: string;
+		icon: React.ComponentType<{ size?: number; className?: string }>;
+	}
 > = {
 	NUEVO: { label: "Nuevo", color: "bg-slate-400", icon: FiUserPlus },
-	CONTACTADO: { label: "Contactado", color: "bg-blue-500", icon: FiPhoneCall },
-	CALIFICADO: { label: "Calificado", color: "bg-indigo-500", icon: FiCheckCircle },
+	CONTACTADO: {
+		label: "Contactado",
+		color: "bg-blue-500",
+		icon: FiPhoneCall,
+	},
+	CALIFICADO: {
+		label: "Calificado",
+		color: "bg-indigo-500",
+		icon: FiCheckCircle,
+	},
 	INTERESADO: { label: "Interesado", color: "bg-purple-500", icon: FiHeart },
-	CITA_AGENDADA: { label: "Cita Agendada", color: "bg-amber-500", icon: FiCalendar },
-	NEGOCIACION: { label: "Negociación", color: "bg-orange-500", icon: FiDollarSign },
-	GANADO: { label: "Ganado", color: "bg-teal-500", icon: FiAward },
+	CITA_AGENDADA: {
+		label: "Cita Agendada",
+		color: "bg-amber-500",
+		icon: FiCalendar,
+	},
+	NEGOCIACION: {
+		label: "Negociación",
+		color: "bg-orange-500",
+		icon: FiDollarSign,
+	},
+	GANADO: { label: "Ganado", color: "bg-pink-500", icon: FiAward },
 	PERDIDO: { label: "Perdido", color: "bg-rose-500", icon: FiXCircle },
 };
 
@@ -39,7 +59,7 @@ export const LeadsFunnel = ({ items }: { items: LeadsByStateItem[] }) => {
 				<h3 className="text-sm font-bold text-gray-900 dark:text-white">
 					Funnel de Leads
 				</h3>
-				<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400">
+				<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
 					{total} Total
 				</span>
 			</div>
@@ -52,7 +72,8 @@ export const LeadsFunnel = ({ items }: { items: LeadsByStateItem[] }) => {
 						icon: FiUserPlus,
 					};
 					const Icon = config.icon;
-					const percentage = total > 0 ? Math.round((item._count / total) * 100) : 0;
+					const percentage =
+						total > 0 ? Math.round((item._count / total) * 100) : 0;
 
 					return (
 						<div key={item.estado} className="flex flex-col gap-1">
@@ -75,7 +96,11 @@ export const LeadsFunnel = ({ items }: { items: LeadsByStateItem[] }) => {
 								<motion.div
 									initial={{ width: 0 }}
 									animate={{ width: `${percentage}%` }}
-									transition={{ duration: 0.8, delay: 0.1 * index, ease: "easeOut" }}
+									transition={{
+										duration: 0.8,
+										delay: 0.1 * index,
+										ease: "easeOut",
+									}}
 									className={`h-full rounded-full ${config.color}`}
 								/>
 							</div>

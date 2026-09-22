@@ -1,4 +1,10 @@
-import { FiSend, FiInbox, FiXCircle, FiUser, FiArrowLeft } from "react-icons/fi";
+import {
+	FiSend,
+	FiInbox,
+	FiXCircle,
+	FiUser,
+	FiArrowLeft,
+} from "react-icons/fi";
 import { VscRobot } from "react-icons/vsc";
 import { useChats } from "../../hooks/useChats";
 import { getCanalIcon, getRelativeWaitTime } from "../../utils/chatFormatters";
@@ -144,7 +150,9 @@ export const LiveChatPanel = ({
 						}}
 					>
 						<FiXCircle />
-						<span className="hidden sm:inline">Reasignar al Bot</span>
+						<span className="hidden sm:inline">
+							Reasignar al Bot
+						</span>
 					</button>
 				)}
 			</div>
@@ -160,7 +168,7 @@ export const LiveChatPanel = ({
 							className={`flex w-full ${!isClient ? "justify-end" : "justify-start"}`}
 						>
 							{!isClient && (
-								<div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white mr-2 shrink-0 mt-1">
+								<div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white mr-2 shrink-0 mt-1">
 									{isBot ? (
 										<VscRobot size={18} />
 									) : isAsesor ? (
@@ -173,7 +181,7 @@ export const LiveChatPanel = ({
 							<div
 								className={`max-w-[75%] p-3 text-sm shadow-sm ${
 									isClient
-										? "bg-teal-600 text-white rounded-2xl rounded-tl-sm"
+										? "bg-pink-600 text-white rounded-2xl rounded-tl-sm"
 										: isAsesor
 											? "bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-100 dark:border-blue-800 rounded-2xl rounded-tr-sm"
 											: "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-800 rounded-2xl rounded-tr-sm"
@@ -208,7 +216,7 @@ export const LiveChatPanel = ({
 			<div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shrink-0">
 				{isQueue ? (
 					<button
-						className="w-full py-3.5 bg-teal-600 cursor-pointer hover:bg-teal-700 text-white rounded-xl font-bold shadow-md shadow-teal-500/30 transition-all flex justify-center items-center gap-2"
+						className="w-full py-3.5 bg-pink-600 cursor-pointer hover:bg-pink-700 text-white rounded-xl font-bold shadow-md shadow-pink-500/30 transition-all flex justify-center items-center gap-2"
 						onClick={() => {
 							onTakeChat(chatId);
 							onCloseChat();
@@ -227,7 +235,7 @@ export const LiveChatPanel = ({
 							className="w-full bg-transparent resize-none outline-none text-sm p-2 text-gray-900 dark:text-white main-scrollbar max-h-32 min-h-10"
 						/>
 						<button
-							className="p-3 bg-teal-600 hover:bg-teal-700 rounded-xl cursor-pointer text-white transition-colors shrink-0 mb-0.5"
+							className="p-3 bg-pink-600 hover:bg-pink-700 rounded-xl cursor-pointer text-white transition-colors shrink-0 mb-0.5"
 							onClick={handleSend}
 							disabled={!inputText.trim()}
 						>

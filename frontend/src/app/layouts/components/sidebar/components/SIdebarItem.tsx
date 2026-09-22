@@ -31,7 +31,7 @@ export const SidebarItem = ({
 				${isCompact ? "justify-center" : ""}
 				${
 					isActive
-						? "bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 font-semibold shadow-sm"
+						? "bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 font-semibold shadow-sm"
 						: "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
 				}
       `}

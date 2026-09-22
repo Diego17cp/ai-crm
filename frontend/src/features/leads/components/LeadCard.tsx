@@ -65,14 +65,19 @@ const getNationality = (lead: Lead) => {
 	return "No especificada";
 };
 
-export const LeadCard = ({ lead, onEdit, onDelete, onChangeStatus }: LeadCardProps) => {
+export const LeadCard = ({
+	lead,
+	onEdit,
+	onDelete,
+	onChangeStatus,
+}: LeadCardProps) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
 	const menuRef = useClickOutside(() => setIsMenuOpen(false));
 
 	const { persona } = lead;
-	const { isAdmin } = useAuthStore()
+	const { isAdmin } = useAuthStore();
 
 	const fullName = getFullName(persona.nombres, persona.apellidos);
 	const initials = getInitials(persona.nombres, persona.apellidos);
@@ -227,7 +232,7 @@ export const LeadCard = ({ lead, onEdit, onDelete, onChangeStatus }: LeadCardPro
 								>
 									<FiCheckCircle
 										size={14}
-										className="text-teal-500"
+										className="text-pink-500"
 									/>
 									Calificar Lead
 								</button>
@@ -242,7 +247,7 @@ export const LeadCard = ({ lead, onEdit, onDelete, onChangeStatus }: LeadCardPro
 								>
 									<FiTrendingUp
 										size={14}
-										className="text-teal-500"
+										className="text-pink-500"
 									/>
 									Iniciar Negociación
 								</button>

@@ -5,16 +5,16 @@ interface Props {
 	icon: IconType;
 	label: string;
 	value: string | number;
-	accent?: "teal" | "blue" | "purple" | "amber" | "emerald" | "rose";
+	accent?: "pink" | "blue" | "purple" | "amber" | "emerald" | "rose";
 	delay?: number;
 	subtext?: string;
 }
 
 const ACCENT_STYLES = {
-	teal: {
-		bg: "bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400",
-		glow: "bg-teal-500",
-		border: "hover:border-teal-300 dark:hover:border-teal-700/50",
+	pink: {
+		bg: "bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400",
+		glow: "bg-pink-500",
+		border: "hover:border-pink-300 dark:hover:border-pink-700/50",
 	},
 	blue: {
 		bg: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
@@ -47,11 +47,11 @@ export const MetricCard = ({
 	icon: Icon,
 	label,
 	value,
-	accent = "teal",
+	accent = "pink",
 	delay = 0,
 	subtext,
 }: Props) => {
-	const style = ACCENT_STYLES[accent] ?? ACCENT_STYLES.teal;
+	const style = ACCENT_STYLES[accent] ?? ACCENT_STYLES.pink;
 
 	return (
 		<motion.div

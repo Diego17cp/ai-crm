@@ -149,7 +149,7 @@ export const PayQuotaModal = ({ isOpen, onClose, cuotaId }: Props) => {
 											</div>
 										) : (
 											<div className="flex items-center gap-3 p-4 w-full relative pr-12">
-												<div className="shrink-0 w-9 h-9 bg-linear-to-tr from-teal-500/10 to-teal-500/5 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center border border-teal-500/10 text-lg shadow-xs">
+												<div className="shrink-0 w-9 h-9 bg-linear-to-tr from-pink-500/10 to-pink-500/5 text-pink-600 dark:text-pink-400 rounded-lg flex items-center justify-center border border-pink-500/10 text-lg shadow-xs">
 													<FiFile />
 												</div>
 												<div className="flex-1 min-w-0">

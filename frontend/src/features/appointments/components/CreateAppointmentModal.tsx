@@ -64,7 +64,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 		handleNextStep,
 		handleSubmit,
 		isSubmitting,
-		leadFieldsState
+		leadFieldsState,
 	} = useCreateAppointment(isOpen, onClose);
 
 	const { projects } = useAppointments();
@@ -173,7 +173,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiCalendar size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -363,7 +363,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 																		"T",
 																	)[0]
 															}
-															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
+															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 transition-all scheme-light dark:scheme-dark"
 														/>
 													</div>
 													<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -385,7 +385,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 															disabled={
 																isSubmitting
 															}
-															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
+															className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 transition-all scheme-light dark:scheme-dark"
 														/>
 													</div>
 												</div>
@@ -402,7 +402,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 														}
 														disabled={isSubmitting}
 														placeholder="Escribe el motivo de la cita o notas previas..."
-														className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none h-24"
+														className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all resize-none h-24"
 													/>
 												</div>
 											</div>
@@ -550,7 +550,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 												<button
 													type="submit"
 													disabled={isSubmitting}
-													className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors"
+													className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors"
 												>
 													Siguiente <FiChevronRight />
 												</button>
@@ -558,7 +558,7 @@ export const CreateAppointmentModal = ({ isOpen, onClose }: Props) => {
 												<button
 													type="submit"
 													disabled={isSubmitting}
-													className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+													className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 												>
 													{isSubmitting ? (
 														<>

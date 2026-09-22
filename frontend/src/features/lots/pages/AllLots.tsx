@@ -85,7 +85,7 @@ export const AllLots = () => {
 					className="flex flex-col gap-1"
 				>
 					<h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-						<GrMapLocation className="text-teal-600 dark:text-teal-500" />{" "}
+						<GrMapLocation className="text-pink-600 dark:text-pink-500" />{" "}
 						Directorio de Lotes
 					</h1>
 					<p className="text-sm text-gray-500 dark:text-gray-400">
@@ -97,7 +97,7 @@ export const AllLots = () => {
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						onClick={() => openModal("create_lot")}
-						className="flex items-center cursor-pointer gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-teal-500/30 transition-all focus:ring-2 focus:ring-teal-500 focus:outline-none shrink-0"
+						className="flex items-center cursor-pointer gap-2 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-pink-500/30 transition-all focus:ring-2 focus:ring-pink-500 focus:outline-none shrink-0"
 					>
 						<FiPlus size={18} />
 						<span>Nuevo Lote</span>
@@ -106,7 +106,7 @@ export const AllLots = () => {
 						onClick={() => refetch()}
 						disabled={isFetching}
 						title="Recargar datos"
-						className="p-3.5 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-teal-600 dark:hover:text-teal-500 transition-all disabled:opacity-50 ml-auto"
+						className="p-3.5 cursor-pointer shrink-0 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-pink-600 dark:hover:text-pink-500 transition-all disabled:opacity-50 ml-auto"
 					>
 						<FiRefreshCw
 							className={isFetching ? "animate-spin" : ""}
@@ -132,7 +132,7 @@ export const AllLots = () => {
 							placeholder="Buscar por código (Ej: L-01), cliente..."
 							value={searchTerm}
 							onChange={(e) => handleSearch(e.target.value)}
-							className="w-full pl-11 pr-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-teal-500/20 rounded-xl text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all outline-none"
+							className="w-full pl-11 pr-10 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-pink-500/20 rounded-xl text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all outline-none"
 						/>
 						{searchTerm ? (
 							<button
@@ -268,7 +268,6 @@ export const AllLots = () => {
 						</label>
 						<input
 							type="number"
-							
 							value={filters.area || ""}
 							onChange={(e) =>
 								updateFilter(
@@ -279,7 +278,7 @@ export const AllLots = () => {
 								)
 							}
 							placeholder="Ej: 120"
-							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -298,7 +297,7 @@ export const AllLots = () => {
 								)
 							}
 							placeholder="Ej: 100"
-							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 						/>
 					</div>
 					<div className="flex flex-col gap-2">
@@ -317,7 +316,7 @@ export const AllLots = () => {
 								)
 							}
 							placeholder="Ej: 100000"
-							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+							className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 						/>
 					</div>
 				</div>

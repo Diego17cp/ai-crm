@@ -17,7 +17,7 @@ export const BotMessage = ({ content, attachments }: BotMessageProps) => {
 			className="flex w-full mb-6 max-w-3xl"
 		>
 			<div className="shrink-0 mr-4 mt-1">
-				<div className="size-10 rounded-full bg-teal-600 dark:bg-teal-700 flex items-center justify-center text-white">
+				<div className="size-10 rounded-full bg-pink-600 dark:bg-pink-700 flex items-center justify-center text-white">
 					<VscRobot size={30} />
 				</div>
 			</div>

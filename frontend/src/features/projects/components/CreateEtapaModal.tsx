@@ -96,7 +96,7 @@ export const CreateEtapaModal = ({ isOpen, onClose, project }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiLayers size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -166,7 +166,7 @@ export const CreateEtapaModal = ({ isOpen, onClose, project }: Props) => {
 										}}
 										placeholder="Ej: ETAPA 1, Los Pinos, etc."
 										disabled={isSubmitting}
-										className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
+										className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
 									/>
 								</div>
 								{/* <div className="flex flex-col gap-1.5">
@@ -178,7 +178,7 @@ export const CreateEtapaModal = ({ isOpen, onClose, project }: Props) => {
                                         value={estado}
                                         onChange={(e) => setEstado(e.target.value)}
                                         disabled={isSubmitting}
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60 appearance-none cursor-pointer"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60 appearance-none cursor-pointer"
                                     >
                                         <option value="ACTIVO">Activo (Visible)</option>
                                         <option value="INACTIVO">Inactivo (Oculto)</option>
@@ -196,7 +196,7 @@ export const CreateEtapaModal = ({ isOpen, onClose, project }: Props) => {
 									<button
 										type="submit"
 										disabled={isSubmitting}
-										className="flex-1 cursor-pointer py-3 px-4 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+										className="flex-1 cursor-pointer py-3 px-4 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
 									>
 										{isSubmitting ? (
 											<>

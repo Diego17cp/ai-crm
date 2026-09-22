@@ -49,7 +49,7 @@ export const AttachmentPreviewModal = ({
 						>
 							<div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3 min-w-0">
-									<div className="size-9 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+									<div className="size-9 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0">
 										<FiFileText size={18} />
 									</div>
 									<div className="min-w-0">
@@ -82,7 +82,7 @@ export const AttachmentPreviewModal = ({
 									download={attachment.filename}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+									className="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
 								>
 									<FiDownload size={16} />
 									Descargar documento

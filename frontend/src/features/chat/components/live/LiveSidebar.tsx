@@ -39,13 +39,13 @@ export const LiveSidebar = ({
 							}
 							className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium z-10 rounded-lg transition-colors ${
 								activeTab === tab
-									? "text-teal-700 dark:text-teal-400"
+									? "text-pink-700 dark:text-pink-400"
 									: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
 							}`}
 						>
 							{tab === "queue" ? "En Espera" : "Mis Chats"}
 							<span
-								className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab ? "bg-teal-100 dark:bg-teal-800/60" : "bg-gray-200 dark:bg-gray-700"}`}
+								className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab ? "bg-pink-100 dark:bg-pink-800/60" : "bg-gray-200 dark:bg-gray-700"}`}
 							>
 								{tab === "queue"
 									? queueQueue.length
@@ -94,13 +94,16 @@ export const LiveSidebar = ({
 					</div>
 				) : (
 					data.map((chat) => {
-						const isUnread = unreadChatIds.has(chat.id)
+						const isUnread = unreadChatIds.has(chat.id);
 						return (
 							<div
 								key={chat.id}
 								onClick={() => {
 									setSelectedChatId(chat.id);
-									if (isUnread && selectedChatId !== chat.id) {
+									if (
+										isUnread &&
+										selectedChatId !== chat.id
+									) {
 										useLiveChatStore
 											.getState()
 											.markAsRead(chat.id);
@@ -108,12 +111,14 @@ export const LiveSidebar = ({
 								}}
 								className={`p-3 rounded-2xl cursor-pointer border transition-all ${
 									selectedChatId === chat.id
-										? "bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800/50"
+										? "bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-800/50"
 										: "bg-white border-transparent hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/50"
 								}`}
 							>
 								<div className="flex justify-between items-start mb-1">
-									<h4 className={`text-sm flex items-center gap-2 ${isUnread && selectedChatId !== chat.id ? "font-bold " : "text-gray-900 dark:text-white"}`}>
+									<h4
+										className={`text-sm flex items-center gap-2 ${isUnread && selectedChatId !== chat.id ? "font-bold " : "text-gray-900 dark:text-white"}`}
+									>
 										{chat.canal === "WHATSAPP" ? (
 											<FaWhatsapp className="text-green-500" />
 										) : (

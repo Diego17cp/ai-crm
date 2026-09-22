@@ -140,7 +140,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiFolderPlus size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -203,7 +203,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 												}}
 												disabled={isSubmitting}
 												placeholder="Ej: Residencial Los Pinos"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5">
@@ -220,7 +220,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: RLP"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60 uppercase"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60 uppercase"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5 z-50 md:col-span-2">
@@ -250,8 +250,8 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 													isClearable
 													classes={{
 														label: "dark:text-gray-300! text-gray-700!",
-														input: "bg-gray-50! dark:bg-gray-800/50! border-gray-200! dark:border-gray-700! focus:border-teal-500! focus:ring-teal-500/20! text-gray-900! dark:text-white! focus:outline-none! focus:ring-2! rounded-xl! disabled:opacity-60!",
-														option: "hover:bg-teal-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-teal-500/40!",
+														input: "bg-gray-50! dark:bg-gray-800/50! border-gray-200! dark:border-gray-700! focus:border-pink-500! focus:ring-pink-500/20! text-gray-900! dark:text-white! focus:outline-none! focus:ring-2! rounded-xl! disabled:opacity-60!",
+														option: "hover:bg-pink-500/10! dark:bg-gray-800! hover:text-gray-900! dark:hover:text-white! dark:hover:bg-pink-500/40!",
 														dropdown:
 															"dark:bg-gray-800! dark:border-gray-700! main-scrollbar!",
 														clearButton:
@@ -289,7 +289,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 													}}
 													disabled={isSubmitting}
 													placeholder="Ej: 10"
-													className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
+													className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
 												/>
 												<span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
 													%
@@ -308,7 +308,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 												}
 												disabled={isSubmitting}
 												placeholder="Ej: Av. Principal 123, Frente al parque"
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60"
 											/>
 										</div>
 										<div className="flex flex-col gap-1.5 md:col-span-2">
@@ -325,7 +325,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 												disabled={isSubmitting}
 												placeholder="Detalles adicionales del proyecto..."
 												rows={3}
-												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-teal-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all disabled:opacity-60 resize-none"
+												className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 focus:border-pink-500 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 transition-all disabled:opacity-60 resize-none"
 											/>
 										</div>
 									</div>
@@ -343,7 +343,7 @@ export const CreateProjectModal = ({ isOpen, onClose }: Props) => {
 										<button
 											type="submit"
 											disabled={isSubmitting}
-											className="px-8 cursor-pointer py-3 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+											className="px-8 cursor-pointer py-3 bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
 										>
 											{isSubmitting ? (
 												<>

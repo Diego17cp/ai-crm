@@ -124,7 +124,9 @@ export const CollectionListItem = ({
 						<span className="inline-flex mt-1 items-center gap-1 px-2.5 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-lg dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/50 w-fit">
 							<FiAlertCircle size={14} />
 							{cobro.numero_de_notificaciones} notificaci
-							{cobro.numero_de_notificaciones > 1 ? "ones" : "ón"}{" "}
+							{cobro.numero_de_notificaciones > 1
+								? "ones"
+								: "ón"}{" "}
 							enviada
 							{cobro.numero_de_notificaciones > 1 ? "s" : ""}
 						</span>
@@ -188,7 +190,7 @@ export const CollectionListItem = ({
 					</div>
 					<button
 						onClick={() => onPayClick(cobro.id, cobro.id_venta)}
-						className="px-4 py-2 text-sm cursor-pointer font-medium text-white bg-teal-700 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-500 rounded-lg transition-colors shadow-sm"
+						className="px-4 py-2 text-sm cursor-pointer font-medium text-white bg-pink-700 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-500 rounded-lg transition-colors shadow-sm"
 					>
 						Registrar Pago
 					</button>

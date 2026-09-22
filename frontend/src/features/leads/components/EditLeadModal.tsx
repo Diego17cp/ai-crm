@@ -22,7 +22,7 @@ interface Props {
 }
 
 const selectClasses = classes.select;
-const searchableSelectClasses = classes.searchableSelect
+const searchableSelectClasses = classes.searchableSelect;
 
 const sexoOptions = options.sexo;
 const booleanOptions = options.boolean;
@@ -63,8 +63,8 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		handleSubmit,
 		isSubmitting,
 		error,
-		numeroDoc
-	} = useEditLead(isOpen, lead, onClose)
+		numeroDoc,
+	} = useEditLead(isOpen, lead, onClose);
 
 	const { ubigeosQuery } = useUbigeos();
 	const { docTypesQuery } = useDocTypes();
@@ -84,7 +84,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 		})) || [];
 
 	const docTypeOptions =
-		docTypesQuery.data?.map(d => ({
+		docTypesQuery.data?.map((d) => ({
 			value: String(d.id),
 			label: `${d.id} - ${d.nombre}`,
 		})) || [];
@@ -116,7 +116,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 						>
 							<div className="flex justify-between items-center px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 shrink-0">
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-xl">
+									<div className="p-2 bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400 rounded-xl">
 										<FiUser size={20} />
 									</div>
 									<div className="flex flex-col">
@@ -182,7 +182,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Juan Carlos"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -199,7 +199,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Pérez Gomez"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -213,7 +213,9 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													label=""
 													value={idTipoDoc}
 													onChange={(e) =>
-														setIdTipoDoc(e.target.value)
+														setIdTipoDoc(
+															e.target.value,
+														)
 													}
 													options={docTypeOptions}
 													disabled={isSubmitting}
@@ -240,7 +242,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													maxLength={11}
 													placeholder="Ej: 12345678"
 													disabled={isSubmitting}
-													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 											<div className="flex flex-col gap-1.5 focus-within:z-10">
@@ -256,7 +258,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 														)
 													}
 													disabled={isSubmitting}
-													className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-teal-500/20 transition-all scheme-light dark:scheme-dark"
+													className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-gray-300 outline-none focus:ring-2 focus:ring-pink-500/20 transition-all scheme-light dark:scheme-dark"
 												/>
 											</div>
 										</div>
@@ -270,7 +272,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 												type="button"
 												onClick={handleAddPhone}
 												disabled={isSubmitting}
-												className="text-xs flex items-center gap-1.5 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 px-3 py-1.5 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-500/20 transition-colors font-medium cursor-pointer"
+												className="text-xs flex items-center gap-1.5 bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 px-3 py-1.5 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-500/20 transition-colors font-medium cursor-pointer"
 											>
 												<FiPlus /> Añadir Teléfono
 											</button>
@@ -288,7 +290,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: cliente@correo.com"
-													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 											<div className="flex flex-col gap-2 mt-2">
@@ -336,7 +338,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 																minLength={9}
 																maxLength={11}
 																placeholder="Número telefónico"
-																className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all flex-1"
+																className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all flex-1"
 															/>
 															<div className="w-36 shrink-0">
 																<select
@@ -357,7 +359,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 																	disabled={
 																		isSubmitting
 																	}
-																	className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-teal-500/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 h-full border-r-8 border-transparent"
+																	className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border-none outline-none focus:ring-2 focus:ring-pink-500/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 h-full border-r-8 border-transparent"
 																>
 																	{phoneTypeOptions.map(
 																		(t) => (
@@ -425,7 +427,9 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 														value={idUbigeo}
 														onChange={setIdUbigeo}
 														placeholder="Buscar distrito/provincia..."
-														classes={searchableSelectClasses}
+														classes={
+															searchableSelectClasses
+														}
 														isClearable
 													/>
 												)}
@@ -444,7 +448,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Av. Principal 123"
-													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 											<div className="z-40">
@@ -456,8 +460,13 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													options={booleanOptions}
 													value={esPeruano}
 													onChange={(e) => {
-														setEsPeruano(e.target.value);
-														if (e.target.value === "true")
+														setEsPeruano(
+															e.target.value,
+														);
+														if (
+															e.target.value ===
+															"true"
+														)
 															setNacionalidad("");
 													}}
 													placeholder="Seleccionar"
@@ -494,7 +503,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 														}
 														disabled={isSubmitting}
 														placeholder="Ej: Argentina, Colombia..."
-														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+														className="w-full p-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 													/>
 												</div>
 											)}
@@ -514,7 +523,9 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													options={estadoCivilOptions}
 													value={estadoCivil}
 													onChange={(e) =>
-														setEstadoCivil(e.target.value)
+														setEstadoCivil(
+															e.target.value,
+														)
 													}
 													placeholder="Seleccionar..."
 													classes={selectClasses}
@@ -534,7 +545,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 													}
 													disabled={isSubmitting}
 													placeholder="Ej: Ingeniero, Comerciante..."
-													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-teal-500/20 transition-all"
+													className="w-full px-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-pink-500/20 transition-all"
 												/>
 											</div>
 										</div>
@@ -553,7 +564,7 @@ export const EditLeadModal = ({ isOpen, onClose, lead }: Props) => {
 										<button
 											type="submit"
 											disabled={isSubmitting}
-											className="px-8 py-3 cursor-pointer bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl shadow-md shadow-teal-500/20 flex gap-2 items-center transition-colors disabled:opacity-50"
+											className="px-8 py-3 cursor-pointer bg-pink-600 hover:bg-pink-700 active:bg-pink-800 text-white font-semibold rounded-xl shadow-md shadow-pink-500/20 flex gap-2 items-center transition-colors disabled:opacity-50"
 										>
 											{isSubmitting ? (
 												<>

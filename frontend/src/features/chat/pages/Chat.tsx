@@ -68,14 +68,14 @@ export const Chat = () => {
 								: `Asistente Comercial ${NOMBRE_EMPRESA}`}
 						</h1>
 						<p
-							className={`text-sm font-medium flex items-center gap-1.5 ${isLiveMode ? "text-blue-500 dark:text-blue-400" : "text-teal-500 dark:text-teal-400"}`}
+							className={`text-sm font-medium flex items-center gap-1.5 ${isLiveMode ? "text-blue-500 dark:text-blue-400" : "text-pink-500 dark:text-pink-400"}`}
 						>
 							<span className="relative flex h-2 w-2">
 								<span
-									className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? "bg-blue-400" : "bg-teal-400"}`}
+									className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? "bg-blue-400" : "bg-pink-400"}`}
 								></span>
 								<span
-									className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? "bg-blue-500" : "bg-teal-500"}`}
+									className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? "bg-blue-500" : "bg-pink-500"}`}
 								></span>
 							</span>
 							{isLiveMode
@@ -137,7 +137,7 @@ export const Chat = () => {
 							className="flex w-full mb-6"
 						>
 							<div className="shrink-0 mr-4 mt-1">
-								<div className="size-10 rounded-full bg-teal-600 dark:bg-teal-500 flex items-center justify-center text-white shadow-sm">
+								<div className="size-10 rounded-full bg-pink-600 dark:bg-pink-500 flex items-center justify-center text-white shadow-sm">
 									<BiLoaderAlt
 										className="animate-spin"
 										size={20}
@@ -223,7 +223,7 @@ export const Chat = () => {
 				<div className="max-w-4xl mx-auto">
 					<form
 						onSubmit={handleSubmit}
-						className="flex items-end gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-3xl p-2 focus-within:ring-2 focus-within:ring-teal-500 transition-shadow"
+						className="flex items-end gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-3xl p-2 focus-within:ring-2 focus-within:ring-pink-500 transition-shadow"
 					>
 						<input
 							type="text"
@@ -235,7 +235,7 @@ export const Chat = () => {
 						<button
 							type="submit"
 							disabled={!inputValue.trim() || isLoading}
-							className="shrink-0 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-500/50 dark:disabled:bg-teal-900 disabled:cursor-not-allowed text-white rounded-full size-12 flex items-center justify-center transition-colors shadow-sm"
+							className="shrink-0 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-500/50 dark:disabled:bg-pink-900 disabled:cursor-not-allowed text-white rounded-full size-12 flex items-center justify-center transition-colors shadow-sm"
 							aria-label="Enviar mensaje"
 						>
 							<FiSend size={20} className="" />

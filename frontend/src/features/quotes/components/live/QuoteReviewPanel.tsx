@@ -117,13 +117,13 @@ export const QuoteReviewPanel = ({
 					<div
 						className={`rounded-xl p-4 flex gap-3 ${
 							quote?.estado === "EMITIDA"
-								? "bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800/50"
+								? "bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800/50"
 								: "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50"
 						}`}
 					>
 						{quote?.estado === "EMITIDA" ? (
 							<FiCheckCircle
-								className="text-teal-500 shrink-0 mt-0.5"
+								className="text-pink-500 shrink-0 mt-0.5"
 								size={18}
 							/>
 						) : (
@@ -134,7 +134,7 @@ export const QuoteReviewPanel = ({
 						)}
 						<div>
 							<p
-								className={`text-sm font-semibold ${quote?.estado === "EMITIDA" ? "text-teal-800 dark:text-teal-300" : "text-red-800 dark:text-red-300"}`}
+								className={`text-sm font-semibold ${quote?.estado === "EMITIDA" ? "text-pink-800 dark:text-pink-300" : "text-red-800 dark:text-red-300"}`}
 							>
 								{quote?.estado === "EMITIDA"
 									? "Cotización aprobada"
@@ -192,7 +192,7 @@ export const QuoteReviewPanel = ({
 						</div>
 						<div>
 							<dt className="text-gray-400">Precio final</dt>
-							<dd className="font-bold text-teal-600 dark:text-teal-400">
+							<dd className="font-bold text-pink-600 dark:text-pink-400">
 								S/ {Number(quote?.precio_final).toFixed(2)}
 							</dd>
 						</div>
@@ -264,7 +264,7 @@ export const QuoteReviewPanel = ({
 							transition={{ duration: 0.2 }}
 						>
 							<button
-								className="w-full cursor-pointer py-3.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold shadow-md shadow-teal-500/30 transition-all"
+								className="w-full cursor-pointer py-3.5 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold shadow-md shadow-pink-500/30 transition-all"
 								onClick={() => onTakeReview(quoteId)}
 							>
 								Tomar esta revisión
@@ -322,7 +322,7 @@ export const QuoteReviewPanel = ({
 							</button>
 							<button
 								onClick={() => onApprove(quoteId)}
-								className="flex-1 cursor-pointer transition-all duration-200 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold flex items-center justify-center gap-2 shadow-md shadow-teal-500/30"
+								className="flex-1 cursor-pointer transition-all duration-200 py-3 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold flex items-center justify-center gap-2 shadow-md shadow-pink-500/30"
 							>
 								<FiCheckCircle /> Aprobar y enviar
 							</button>

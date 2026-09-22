@@ -27,7 +27,7 @@ const ESTADO_CONFIG: Record<string, { label: string; colorClass: string }> = {
 	EMITIDA: {
 		label: "Emitida",
 		colorClass:
-			"bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-800/50",
+			"bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800/50",
 	},
 	ACEPTADA: {
 		label: "Aceptada",
@@ -218,7 +218,7 @@ export const QuoteDetailModal = ({
 													<dt className="text-gray-400">
 														Precio final
 													</dt>
-													<dd className="font-bold text-teal-600 dark:text-teal-400">
+													<dd className="font-bold text-pink-600 dark:text-pink-400">
 														S/{" "}
 														{quote.precio_final.toFixed(
 															2,

@@ -32,7 +32,7 @@ export const NotFound = () => {
 							damping: 15,
 							delay: 0.1,
 						}}
-						className="text-3xl sm:text-4xl font-extrabold bg-linear-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent transform"
+						className="text-3xl sm:text-4xl font-extrabold bg-linear-to-r from-pink-600 to-cyan-600 dark:from-pink-400 dark:to-cyan-400 bg-clip-text text-transparent transform"
 					>
 						¡Ups!
 					</motion.span>
@@ -54,7 +54,7 @@ export const NotFound = () => {
 				<motion.button
 					whileTap={{ scale: 0.97 }}
 					onClick={() => navigate(isAdminRoute ? "/admin" : "/")}
-					className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all bg-teal-600 rounded-xl hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 active:scale-[0.98] shadow-sm group"
+					className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white transition-all bg-pink-600 rounded-xl hover:bg-pink-700 dark:bg-pink-500 dark:hover:bg-pink-600 active:scale-[0.98] shadow-sm group"
 				>
 					<FiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform duration-300" />
 					Volver al panel inicial

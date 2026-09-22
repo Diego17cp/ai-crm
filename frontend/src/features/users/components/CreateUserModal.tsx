@@ -20,12 +20,8 @@ interface Props {
 export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 	const { roles } = useRoles();
 
-	const {
-		mutation,
-		formData,
-		setFormData,
-		handleSubmit,
-	} = useCreateUser(onClose);
+	const { mutation, formData, setFormData, handleSubmit } =
+		useCreateUser(onClose);
 
 	return (
 		<AnimatePresence>
@@ -46,7 +42,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 					>
 						<div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
 							<div className="flex items-center gap-3">
-								<div className="p-2 bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-500 rounded-lg">
+								<div className="p-2 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-500 rounded-lg">
 									<FiUserPlus size={20} />
 								</div>
 								<div>
@@ -89,7 +85,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 													nombres: e.target.value,
 												})
 											}
-											className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+											className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors"
 											placeholder="Ej. Juan Carlos"
 										/>
 									</div>
@@ -110,7 +106,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 													apellidos: e.target.value,
 												})
 											}
-											className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+											className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors"
 											placeholder="Ej. Pérez Gómez"
 										/>
 									</div>
@@ -135,7 +131,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 														dni: e.target.value,
 													})
 												}
-												className="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+												className="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors"
 												placeholder="8 dígitos"
 											/>
 										</div>
@@ -188,7 +184,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 														email: e.target.value,
 													})
 												}
-												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors"
 												placeholder="correo@empresa.com"
 											/>
 										</div>
@@ -211,7 +207,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 															e.target.value,
 													})
 												}
-												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors"
+												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors"
 												placeholder="Opcional"
 											/>
 										</div>
@@ -236,7 +232,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 															e.target.value,
 													})
 												}
-												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-teal-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500 transition-colors font-mono"
+												className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-transparent focus:border-pink-500 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-pink-500 transition-colors font-mono"
 												placeholder="Establece una contraseña inicial"
 											/>
 										</div>
@@ -257,7 +253,7 @@ export const CreateUserModal = ({ isOpen, onClose }: Props) => {
 										mutation.isPending ||
 										formData.id_rol === 0
 									}
-									className="flex cursor-pointer items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 active:bg-teal-800 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-teal-500/30"
+									className="flex cursor-pointer items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 active:bg-pink-800 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-pink-500/30"
 								>
 									{mutation.isPending
 										? "Guardando..."

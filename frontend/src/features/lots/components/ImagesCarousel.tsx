@@ -49,7 +49,7 @@ export const ImagesCarousel = ({
 								key={index}
 								className={`h-1 rounded-full transition-all duration-300 ${
 									index === currentImageIdx
-										? "w-4 bg-teal-500"
+										? "w-4 bg-pink-500"
 										: "w-1 bg-white/50 backdrop-blur-md"
 								}`}
 							/>

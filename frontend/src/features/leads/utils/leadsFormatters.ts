@@ -39,7 +39,7 @@ export const getStateColor = (state: EstadoLead) => {
 		case "NEGOCIACION":
 			return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400";
 		case "GANADO":
-			return "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400";
+			return "bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-400";
 		case "PERDIDO":
 			return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400";
 		default:
@@ -62,10 +62,10 @@ export const getDotStateColor = (state: EstadoLead) => {
 		case "NEGOCIACION":
 			return "bg-yellow-500";
 		case "GANADO":
-			return "bg-teal-500";
+			return "bg-pink-500";
 		case "PERDIDO":
 			return "bg-red-500";
 		default:
 			return "bg-gray-500";
 	}
-}
+};

@@ -8,11 +8,7 @@ interface Props {
 	removeImage: (id: string, preview: string) => void;
 }
 
-export const ImagePreview = ({
-	img,
-	markAsMain,
-	removeImage,
-}: Props) => {
+export const ImagePreview = ({ img, markAsMain, removeImage }: Props) => {
 	return (
 		<motion.div
 			key={img.id}
@@ -28,7 +24,7 @@ export const ImagePreview = ({
 				opacity: 0,
 				scale: 0.9,
 			}}
-			className={`relative group rounded-xl overflow-hidden border-2 aspect-square ${img.isPrincipal ? "border-amber-400 shadow-md shadow-amber-400/20" : "border-gray-200 dark:border-gray-700 hover:border-teal-400/50"}`}
+			className={`relative group rounded-xl overflow-hidden border-2 aspect-square ${img.isPrincipal ? "border-amber-400 shadow-md shadow-amber-400/20" : "border-gray-200 dark:border-gray-700 hover:border-pink-400/50"}`}
 		>
 			<img
 				src={img.preview}

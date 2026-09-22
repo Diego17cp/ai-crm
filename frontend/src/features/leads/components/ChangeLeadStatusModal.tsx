@@ -74,10 +74,10 @@ export const ChangeLeadStatusModal = ({
 
 		try {
 			updateStatusMutation.mutate(undefined, {
-        onSuccess: () => {
-          onClose()
-        }
-      })
+				onSuccess: () => {
+					onClose();
+				},
+			});
 		} catch (err) {
 			const message =
 				(err as ApiError)?.response?.data?.message ||
@@ -90,14 +90,14 @@ export const ChangeLeadStatusModal = ({
 		CALIFICADO: {
 			title: "Calificar Lead",
 			icon: <FiCheckCircle size={20} />,
-			bgIcon: "bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400",
+			bgIcon: "bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400",
 			btnText: "Confirmar Calificación",
 			description: `Vas a promover a ${[lead.persona.nombres, lead.persona.apellidos].filter(Boolean).join(" ")} al estado Calificado.`,
 		},
 		NEGOCIACION: {
 			title: "Iniciar Negociación",
 			icon: <FiTrendingUp size={20} />,
-			bgIcon: "bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400",
+			bgIcon: "bg-pink-100 dark:bg-pink-900/40 text-pink-600 dark:text-pink-400",
 			btnText: "Mover a Negociación",
 			description: `El lead ${[lead.persona.nombres, lead.persona.apellidos].filter(Boolean).join(" ")} iniciará el proceso de cotización formal.`,
 		},
@@ -171,8 +171,8 @@ export const ChangeLeadStatusModal = ({
 										</div>
 									)}
 									{isCalificado && (
-										<div className="p-4 rounded-xl bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/40 space-y-2">
-											<div className="flex items-center gap-1.5 text-base font-semibold text-teal-800 dark:text-teal-400">
+										<div className="p-4 rounded-xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100 dark:border-pink-900/40 space-y-2">
+											<div className="flex items-center gap-1.5 text-base font-semibold text-pink-800 dark:text-pink-400">
 												<FiHelpCircle size={14} />
 												<span>
 													Criterios sugeridos de
@@ -244,7 +244,7 @@ export const ChangeLeadStatusModal = ({
 										className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-xs transition-all cursor-pointer ${
 											isPerdido
 												? "bg-red-600 hover:bg-red-700 active:scale-98"
-												: "bg-teal-600 hover:bg-teal-700 active:scale-98"
+												: "bg-pink-600 hover:bg-pink-700 active:scale-98"
 										} disabled:opacity-50 disabled:pointer-events-none`}
 									>
 										{isSubmitting && (

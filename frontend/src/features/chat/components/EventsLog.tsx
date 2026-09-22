@@ -28,13 +28,15 @@ export const EventsLog = ({ eventos }: { eventos: EventChat[] }) => {
 		<div className="space-y-3">
 			{eventos.map((ev) => (
 				<div key={ev.id} className="flex gap-3 items-start">
-					<div className="size-2 rounded-full bg-teal-500 mt-1.5 shrink-0" />
+					<div className="size-2 rounded-full bg-pink-500 mt-1.5 shrink-0" />
 					<div className="flex-1 border-b border-gray-100 dark:border-gray-800 pb-3">
 						<div className="flex justify-between items-center">
 							<p className="text-sm font-medium text-gray-800 dark:text-gray-200">
 								{EVENTO_LABELS[ev.tipo] ?? ev.tipo}
 							</p>
-							<span className="text-xs text-gray-400">{formatChatDate(ev.created_at)}</span>
+							<span className="text-xs text-gray-400">
+								{formatChatDate(ev.created_at)}
+							</span>
 						</div>
 						{ev.usuario && (
 							<p className="text-xs text-gray-500 mt-0.5">

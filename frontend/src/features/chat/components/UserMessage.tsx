@@ -12,7 +12,7 @@ export const UserMessage = ({ content }: UserMessageProps) => {
 			animate={{ opacity: 1, y: 0 }}
 			className="flex justify-end w-full mb-6"
 		>
-			<div className="bg-teal-600 dark:bg-teal-700 text-white rounded-2xl rounded-tr-none px-5 py-3 shadow-md max-w-2xl">
+			<div className="bg-pink-600 dark:bg-pink-700 text-white rounded-2xl rounded-tr-none px-5 py-3 shadow-md max-w-2xl">
 				<p className="whitespace-pre-wrap text-sm md:text-base">
 					{content}
 				</p>
